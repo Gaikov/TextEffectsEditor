@@ -30,7 +30,7 @@ src/
 ├── App.tsx               # root layout, font loading
 ├── App.module.css        # layout grid
 ├── fonts.ts              # font list + loadSystemFonts()
-├── overrides.css         # Blueprint popover/menu dark fixes
+├── overrides.css         # Scoped Blueprint control tweaks
 ├── global.d.ts           # type declarations
 ├── store/
 │   └── fontStore.ts      # MobX store (makeAutoObservable)
@@ -58,4 +58,4 @@ src/
 ### Styling
 - Dark theme via `bp6-dark` class on `<body>`
 - Panel backgrounds: `#252a31`, canvas area: `#1c2127`, borders: `#383e47`
-- Popover/menu dark background enforced in `overrides.css`
+- Use Blueprint's default dark theme; keep `overrides.css` scoped to local component tweaks.

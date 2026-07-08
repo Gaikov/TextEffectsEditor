@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
-import FontCanvas from './components/FontCanvas';
+import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
 import { getCuratedFonts, loadSystemFonts } from './fonts';
 import styles from './App.module.css';
 
 export default function App() {
+  const canvasRef = useRef<FontCanvasHandle>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -27,9 +28,12 @@ export default function App() {
 
   return (
     <div className={styles.root}>
-      <CanvasSizeInputs />
+      <CanvasSizeInputs
+        onCenterView={() => canvasRef.current?.centerView()}
+        onResetZoom={() => canvasRef.current?.resetZoom()}
+      />
       <div className={styles.body}>
-        <FontCanvas />
+        <FontCanvas ref={canvasRef} />
         <FontProperties fontList={fontList} fontsLoaded={fontsLoaded} />
       </div>
     </div>

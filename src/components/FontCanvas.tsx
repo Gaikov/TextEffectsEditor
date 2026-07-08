@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { autorun } from 'mobx';
 import { fontStore } from '../store/fontStore';
 import styles from './FontCanvas.module.css';
@@ -35,7 +42,12 @@ function draw(canvas: HTMLCanvasElement) {
   }
 }
 
-export default function FontCanvas() {
+export interface FontCanvasHandle {
+  centerView: () => void;
+  resetZoom: () => void;
+}
+
+export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef({ zoom: 1, ox: 0, oy: 0 });
@@ -49,6 +61,29 @@ export default function FontCanvas() {
     canvas.style.transform = `translate(${v.ox}px, ${v.oy}px) scale(${v.zoom})`;
   }, []);
 
+  const centerView = useCallback(
+    (zoom = viewRef.current.zoom) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const v = viewRef.current;
+      v.zoom = zoom;
+      v.ox = Math.max(0, (container.clientWidth - fontStore.canvasWidth * zoom) / 2);
+      v.oy = Math.max(0, (container.clientHeight - fontStore.canvasHeight * zoom) / 2);
+      applyTransform();
+    },
+    [applyTransform],
+  );
+
+  const resetZoom = useCallback(() => {
+    centerView(1);
+  }, [centerView]);
+
+  useImperativeHandle(ref, () => ({
+    centerView: () => centerView(),
+    resetZoom,
+  }));
+
   // pixel redraw on content change
   useEffect(() => {
     return autorun(() => {
@@ -60,16 +95,12 @@ export default function FontCanvas() {
 
   // center canvas on mount / canvas resize
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const v = viewRef.current;
-    const cw = fontStore.canvasWidth * v.zoom;
-    const ch = fontStore.canvasHeight * v.zoom;
-    v.ox = Math.max(0, (container.clientWidth - cw) / 2);
-    v.oy = Math.max(0, (container.clientHeight - ch) / 2);
-    applyTransform();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fontStore.canvasWidth, fontStore.canvasHeight]);
+    return autorun(() => {
+      fontStore.canvasWidth;
+      fontStore.canvasHeight;
+      centerView();
+    });
+  }, [centerView]);
 
   // wheel → zoom (non-passive, native)
   useEffect(() => {
@@ -145,4 +176,4 @@ export default function FontCanvas() {
       />
     </div>
   );
-}
+});
