@@ -15,32 +15,12 @@ class FontStore {
     makeAutoObservable(this);
   }
 
-  setText = (v: string) => {
-    this.text = v;
-  };
-
-  setFontFamily = (v: string) => {
-    this.fontFamily = v;
-  };
-
-  setFontSize = (v: number) => {
-    this.fontSize = v;
-  };
-
-  setFontColor = (v: string) => {
-    this.fontColor = v;
-  };
-
   setCanvasWidth = (v: number) => {
     this.canvasWidth = Math.max(1, v);
   };
 
   setCanvasHeight = (v: number) => {
     this.canvasHeight = Math.max(1, v);
-  };
-
-  setBoldWeight = (v: number) => {
-    this.boldWeight = v;
   };
 
   toggleItalic = () => {

@@ -18,6 +18,8 @@ npm run build
 
 Creates a minified production build in `dist/`.
 
+Both scripts run `tsc` first. TypeScript emits checked JS into `.cache/tsc/`, and esbuild bundles that emitted JS into `dist/`.
+
 The repo also contains `pnpm-lock.yaml` and `pnpm-workspace.yaml`; avoid mixing package managers unless intentionally updating dependency metadata.
 
 ## Coding Style & Naming Conventions

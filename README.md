@@ -19,6 +19,8 @@ npm run dev    # dev server on localhost:3001 (watch + livereload)
 npm run build  # production build → dist/
 ```
 
+Both scripts run `tsc` first. TypeScript emits JS into `.cache/tsc/`, then esbuild bundles that output into `dist/`.
+
 ## Structure
 
 ```

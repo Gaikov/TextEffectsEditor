@@ -37,7 +37,9 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
         <InputGroup
           small
           value={fontStore.text}
-          onChange={(e) => fontStore.setText(e.target.value)}
+          onChange={(e) => {
+            fontStore.text = e.target.value;
+          }}
           placeholder="Enter text..."
         />
       </div>
@@ -72,7 +74,9 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
               multiline
             />
           )}
-          onItemSelect={(item) => fontStore.setFontFamily(item.name)}
+          onItemSelect={(item) => {
+            fontStore.fontFamily = item.name;
+          }}
           selectedItem={{ name: fontStore.fontFamily }}
           popoverProps={{ matchTargetWidth: false, minimal: false }}
           noResults={<MenuItem disabled text="No results." />}
@@ -93,9 +97,10 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
         <HTMLSelect
           fill
           minimal
-          small
           value={fontStore.boldWeight}
-          onChange={(e) => fontStore.setBoldWeight(Number(e.target.value))}
+          onChange={(e) => {
+            fontStore.boldWeight = Number(e.target.value);
+          }}
           options={[100, 200, 300, 400, 500, 600, 700, 800, 900].map((w) => ({
             value: w,
             label: String(w),
@@ -108,7 +113,9 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
         <NumericInput
           small
           value={fontStore.fontSize}
-          onValueChange={fontStore.setFontSize}
+          onValueChange={(value) => {
+            fontStore.fontSize = value;
+          }}
           min={1}
           max={2048}
           clampValueOnBlur
@@ -126,7 +133,9 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
                 <input
                   type="color"
                   value={fontStore.fontColor}
-                  onChange={(e) => fontStore.setFontColor(e.target.value)}
+                  onChange={(e) => {
+                    fontStore.fontColor = e.target.value;
+                  }}
                 />
               </div>
             }
@@ -145,7 +154,9 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
           <InputGroup
             small
             value={fontStore.fontColor}
-            onChange={(e) => fontStore.setFontColor(e.target.value)}
+            onChange={(e) => {
+              fontStore.fontColor = e.target.value;
+            }}
             placeholder="#10161A"
             fill
           />

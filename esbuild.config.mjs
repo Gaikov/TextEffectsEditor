@@ -3,9 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import http from 'http';
+import { spawn, spawnSync } from 'child_process';
 
 const OUTDIR = 'dist';
-const PORT = 3001;
+const TSC_OUTDIR = '.cache/tsc';
+const TSC_ENTRY = path.join(TSC_OUTDIR, 'index.js');
+const PORT = Number(process.env.PORT ?? 3001);
 const isDev = process.argv.includes('--dev');
 
 const SSE_CLIENTS = new Set();
@@ -17,6 +20,40 @@ function notifyReload() {
   }
 }
 
+function sourcePathForTscOutput(filePath) {
+  const absolutePath = path.resolve(filePath);
+  const absoluteTscOutdir = path.resolve(TSC_OUTDIR);
+
+  if (
+    absolutePath === absoluteTscOutdir ||
+    !absolutePath.startsWith(`${absoluteTscOutdir}${path.sep}`)
+  ) {
+    return filePath;
+  }
+
+  return path.join('src', path.relative(absoluteTscOutdir, absolutePath));
+}
+
+function cssFromTscOutputPlugin() {
+  return {
+    name: 'css-from-tsc-output',
+    setup(build) {
+      build.onResolve({ filter: /\.css$/ }, (args) => {
+        if (args.path.endsWith('.module.css') || !args.path.startsWith('.')) {
+          return;
+        }
+
+        const resolvedPath = path.resolve(args.resolveDir, args.path);
+        const sourcePath = sourcePathForTscOutput(resolvedPath);
+
+        if (sourcePath !== resolvedPath && fs.existsSync(sourcePath)) {
+          return { path: path.resolve(sourcePath) };
+        }
+      });
+    },
+  };
+}
+
 function cssModulesPlugin() {
   return {
     name: 'css-modules',
@@ -25,10 +62,15 @@ function cssModulesPlugin() {
         if (isDev) notifyReload();
       });
 
-      build.onResolve({ filter: /\.module\.css$/ }, (args) => ({
-        path: path.join(args.resolveDir, args.path),
-        namespace: 'css-module',
-      }));
+      build.onResolve({ filter: /\.module\.css$/ }, (args) => {
+        const resolvedPath = path.resolve(args.resolveDir, args.path);
+        const sourcePath = sourcePathForTscOutput(resolvedPath);
+
+        return {
+          path: fs.existsSync(sourcePath) ? sourcePath : resolvedPath,
+          namespace: 'css-module',
+        };
+      });
 
       build.onLoad({ filter: /.*/, namespace: 'css-module' }, (args) => {
         const source = fs.readFileSync(args.path, 'utf8');
@@ -75,15 +117,39 @@ function cssModulesPlugin() {
   };
 }
 
+function runTsc() {
+  const result = spawnSync('npx', ['tsc', '--project', 'tsconfig.json'], {
+    stdio: 'inherit',
+  });
+
+  if (result.status !== 0) {
+    process.exit(result.status ?? 1);
+  }
+}
+
+function startTscWatch() {
+  const tsc = spawn(
+    'npx',
+    ['tsc', '--project', 'tsconfig.json', '--watch', '--preserveWatchOutput'],
+    { stdio: 'inherit' }
+  );
+
+  tsc.on('exit', (code) => {
+    process.exit(code ?? 1);
+  });
+
+  return tsc;
+}
+
 const buildConfig = {
-  entryPoints: ['src/index.tsx'],
+  entryPoints: [TSC_ENTRY],
   bundle: true,
   outdir: OUTDIR,
   platform: 'browser',
   target: ['es2022', 'chrome100', 'firefox100', 'safari16'],
   format: 'iife',
   sourcemap: isDev,
-  plugins: [cssModulesPlugin()],
+  plugins: [cssModulesPlugin(), cssFromTscOutputPlugin()],
   loader: {
     '.woff': 'file',
     '.woff2': 'file',
@@ -151,10 +217,15 @@ function notFound(res) {
   res.end('404 Not Found');
 }
 
+fs.rmSync(OUTDIR, { recursive: true, force: true });
+fs.rmSync(TSC_OUTDIR, { recursive: true, force: true });
 fs.mkdirSync(OUTDIR, { recursive: true });
+runTsc();
 fs.copyFileSync('src/index.html', path.join(OUTDIR, 'index.html'));
 
 if (isDev) {
+  startTscWatch();
+
   const ctx = await esbuild.context(buildConfig);
   await ctx.watch();
 
