@@ -30,6 +30,9 @@ export default function App() {
     <div className={styles.root}>
       <CanvasSizeInputs
         onCenterView={() => canvasRef.current?.centerView()}
+        onExport={() => {
+          void canvasRef.current?.exportPng();
+        }}
         onResetZoom={() => canvasRef.current?.resetZoom()}
       />
       <div className={styles.body}>

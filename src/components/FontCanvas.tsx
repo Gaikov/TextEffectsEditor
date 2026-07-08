@@ -14,6 +14,18 @@ const CHECKER_SIZE = 16;
 const CHECKER_A = '#F0F0F0';
 const CHECKER_B = '#FFFFFF';
 
+function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  if (fontStore.text.length === 0) return;
+
+  const italic = fontStore.italic ? 'italic ' : '';
+  const weight = fontStore.boldWeight !== 400 ? `${fontStore.boldWeight} ` : '';
+  ctx.font = `${italic}${weight}${fontStore.fontSize}px "${fontStore.fontFamily}"`;
+  ctx.fillStyle = fontStore.fontColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(fontStore.text, w / 2, h / 2);
+}
+
 function draw(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d')!;
   const w = fontStore.canvasWidth;
@@ -31,19 +43,22 @@ function draw(canvas: HTMLCanvasElement) {
     }
   }
 
-  if (fontStore.text.length > 0) {
-    const italic = fontStore.italic ? 'italic ' : '';
-    const weight = fontStore.boldWeight !== 400 ? `${fontStore.boldWeight} ` : '';
-    ctx.font = `${italic}${weight}${fontStore.fontSize}px "${fontStore.fontFamily}"`;
-    ctx.fillStyle = fontStore.fontColor;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(fontStore.text, w / 2, h / 2);
-  }
+  drawText(ctx, w, h);
+}
+
+function createExportCanvas() {
+  const canvas = document.createElement('canvas');
+  const w = fontStore.canvasWidth;
+  const h = fontStore.canvasHeight;
+  canvas.width = w;
+  canvas.height = h;
+  drawText(canvas.getContext('2d')!, w, h);
+  return canvas;
 }
 
 export interface FontCanvasHandle {
   centerView: () => void;
+  exportPng: () => Promise<void>;
   resetZoom: () => void;
 }
 
@@ -79,10 +94,60 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     centerView(1);
   }, [centerView]);
 
+  const exportPng = useCallback(async () => {
+    let writable: FileSystemWritableFileStream | undefined;
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'font-effects.png',
+          types: [
+            {
+              description: 'PNG image',
+              accept: { 'image/png': ['.png'] },
+            },
+          ],
+        });
+        writable = await handle.createWritable();
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    const canvas = createExportCanvas();
+    const blob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (value) {
+          resolve(value);
+        } else {
+          reject(new Error('Unable to export canvas as PNG.'));
+        }
+      }, 'image/png');
+    });
+
+    if (writable) {
+      await writable.write(blob);
+      await writable.close();
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'font-effects.png';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, []);
+
   useImperativeHandle(ref, () => ({
     centerView: () => centerView(),
+    exportPng,
     resetZoom,
-  }));
+  }), [centerView, exportPng, resetZoom]);
 
   // pixel redraw on content change
   useEffect(() => {

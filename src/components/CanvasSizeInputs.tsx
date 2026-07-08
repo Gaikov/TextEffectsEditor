@@ -33,17 +33,23 @@ const ACTIONS_STYLE: React.CSSProperties = {
   gap: 4,
 };
 
+const EXPORT_ACTION_STYLE: React.CSSProperties = {
+  marginLeft: 'auto',
+};
+
 const ICON_BUTTON_STYLE: React.CSSProperties = {
   minWidth: 30,
 };
 
 interface Props {
   onCenterView: () => void;
+  onExport: () => void;
   onResetZoom: () => void;
 }
 
 export default observer(function CanvasSizeInputs({
   onCenterView,
+  onExport,
   onResetZoom,
 }: Props) {
   return (
@@ -96,6 +102,15 @@ export default observer(function CanvasSizeInputs({
           />
         </Tooltip>
       </div>
+      <Tooltip content="Export PNG" compact>
+        <Button
+          small
+          icon="export"
+          aria-label="Export PNG"
+          style={{ ...ICON_BUTTON_STYLE, ...EXPORT_ACTION_STYLE }}
+          onClick={onExport}
+        />
+      </Tooltip>
     </div>
   );
 });
