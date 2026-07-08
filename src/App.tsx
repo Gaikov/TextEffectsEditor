@@ -1,31 +1,37 @@
-import { observer } from 'mobx-react-lite';
-import { Button, Dialog, DialogBody, DialogFooter } from '@blueprintjs/core';
-import { appStore } from './store';
+import { useEffect, useState } from 'react';
+import CanvasSizeInputs from './components/CanvasSizeInputs';
+import FontCanvas from './components/FontCanvas';
+import FontProperties from './components/FontProperties';
+import { getCuratedFonts, loadSystemFonts } from './fonts';
 import styles from './App.module.css';
 
-export default observer(function App() {
+export default function App() {
+  const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const systemFonts = await loadSystemFonts();
+        if (!cancelled) {
+          setFontList(systemFonts);
+          setFontsLoaded(true);
+        }
+      } catch {
+        if (!cancelled) setFontsLoaded(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
-    <div className={styles.container}>
-      <Button intent="primary" large onClick={appStore.open}>
-        Открыть
-      </Button>
-      <Dialog
-        isOpen={appStore.isOpen}
-        onClose={appStore.close}
-        title="Привет&thinsp;!"
-        icon="info-sign"
-      >
-        <DialogBody>
-          <p>Это всплывающее окно Blueprint Dialog.</p>
-        </DialogBody>
-        <DialogFooter
-          actions={
-            <Button intent="primary" onClick={appStore.close}>
-              Закрыть
-            </Button>
-          }
-        />
-      </Dialog>
+    <div className={styles.root}>
+      <CanvasSizeInputs />
+      <div className={styles.body}>
+        <FontCanvas />
+        <FontProperties fontList={fontList} fontsLoaded={fontsLoaded} />
+      </div>
     </div>
   );
-});
+}

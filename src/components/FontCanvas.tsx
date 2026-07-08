@@ -1,0 +1,148 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { autorun } from 'mobx';
+import { fontStore } from '../store/fontStore';
+import styles from './FontCanvas.module.css';
+
+const CHECKER_SIZE = 16;
+const CHECKER_A = '#F0F0F0';
+const CHECKER_B = '#FFFFFF';
+
+function draw(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext('2d')!;
+  const w = fontStore.canvasWidth;
+  const h = fontStore.canvasHeight;
+
+  canvas.width = w;
+  canvas.height = h;
+
+  for (let y = 0; y < h; y += CHECKER_SIZE) {
+    for (let x = 0; x < w; x += CHECKER_SIZE) {
+      const even =
+        ((x / CHECKER_SIZE) | 0) % 2 === ((y / CHECKER_SIZE) | 0) % 2;
+      ctx.fillStyle = even ? CHECKER_A : CHECKER_B;
+      ctx.fillRect(x, y, CHECKER_SIZE, CHECKER_SIZE);
+    }
+  }
+
+  if (fontStore.text.length > 0) {
+    const italic = fontStore.italic ? 'italic ' : '';
+    const weight = fontStore.boldWeight !== 400 ? `${fontStore.boldWeight} ` : '';
+    ctx.font = `${italic}${weight}${fontStore.fontSize}px "${fontStore.fontFamily}"`;
+    ctx.fillStyle = fontStore.fontColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(fontStore.text, w / 2, h / 2);
+  }
+}
+
+export default function FontCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef({ zoom: 1, ox: 0, oy: 0 });
+  const [dragging, setDragging] = useState(false);
+  const anchorRef = useRef({ mx: 0, my: 0, ox: 0, oy: 0 });
+
+  const applyTransform = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const v = viewRef.current;
+    canvas.style.transform = `translate(${v.ox}px, ${v.oy}px) scale(${v.zoom})`;
+  }, []);
+
+  // pixel redraw on content change
+  useEffect(() => {
+    return autorun(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      draw(canvas);
+    });
+  }, []);
+
+  // center canvas on mount / canvas resize
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const v = viewRef.current;
+    const cw = fontStore.canvasWidth * v.zoom;
+    const ch = fontStore.canvasHeight * v.zoom;
+    v.ox = Math.max(0, (container.clientWidth - cw) / 2);
+    v.oy = Math.max(0, (container.clientHeight - ch) / 2);
+    applyTransform();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fontStore.canvasWidth, fontStore.canvasHeight]);
+
+  // wheel → zoom (non-passive, native)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const v = viewRef.current;
+      const prev = v.zoom;
+      const step = e.deltaY < 0 ? 0.1 : -0.1;
+      const next = Math.max(0.1, Math.min(10, prev + step));
+      if (next === prev) return;
+
+      const rect = el.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      v.ox = mx - (mx - v.ox) * (next / prev);
+      v.oy = my - (my - v.oy) * (next / prev);
+      v.zoom = next;
+      applyTransform();
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [applyTransform]);
+
+  // drag → pan
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setDragging(true);
+    const v = viewRef.current;
+    anchorRef.current = { mx: e.clientX, my: e.clientY, ox: v.ox, oy: v.oy };
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!dragging) return;
+      const a = anchorRef.current;
+      const v = viewRef.current;
+      v.ox = a.ox + (e.clientX - a.mx);
+      v.oy = a.oy + (e.clientY - a.my);
+      applyTransform();
+    },
+    [dragging, applyTransform],
+  );
+
+  const handleMouseUp = useCallback(() => {
+    setDragging(false);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className={`${styles.container} ${dragging ? styles.grabbing : ''}`}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          transformOrigin: '0 0',
+          display: 'block',
+        }}
+      />
+    </div>
+  );
+}

@@ -1,12 +1,12 @@
 # FontEffects
 
-React + MobX + Blueprint demo app.
+React + MobX + Blueprint font effect editor.
 
 ## Stack
 
 | Layer | Library |
 |---|---|
-| UI | React 18, Blueprint.js 5 |
+| UI | React 18, Blueprint.js 6 |
 | State | MobX + mobx-react-lite |
 | Bundler | esbuild |
 | Language | TypeScript |
@@ -23,24 +23,37 @@ npm run build  # production build → dist/
 
 ```
 src/
-├── index.html        # entry HTML
-├── index.tsx         # React mount + Blueprint CSS imports
-├── App.tsx           # app component (observer)
-├── App.module.css    # CSS Modules styles
-├── store.ts          # MobX store (AppStore)
-└── global.d.ts       # type declarations
+├── index.html            # entry HTML (bp6-dark on <body>)
+├── index.tsx             # React mount + Blueprint CSS imports
+├── App.tsx               # root layout, font loading
+├── App.module.css        # layout grid
+├── fonts.ts              # font list + loadSystemFonts()
+├── overrides.css         # Blueprint popover/menu dark fixes
+├── global.d.ts           # type declarations
+├── store/
+│   └── fontStore.ts      # MobX store (makeAutoObservable)
+└── components/
+    ├── CanvasSizeInputs.tsx   # W × H inputs (top bar)
+    ├── FontCanvas.tsx         # canvas + pan/zoom (CSS transform)
+    ├── FontCanvas.module.css
+    └── FontProperties.tsx     # right panel: text, font, size, color
 ```
 
-## MobX Store
+## Patterns
 
-```ts
-class AppStore {
-  isOpen = false;      // observable
-  open = () => { ... } // action
-  close = () => { ... } // action
-}
-```
+### UI Controls
+- All interactive controls use **Blueprint components only**
+- All inputs use `small` prop for uniform compact sizing
+- `InputGroup`, `NumericInput`, `Suggest` — all `small`
+- Native elements only where no Blueprint equivalent exists (`<canvas>`, `<input type="color">`)
 
-- `makeAutoObservable(this)` — automatic observable/action/computed inference
-- Components wrapped with `observer()` auto-track accessed fields
-- Direct mutation: `appStore.isOpen = true` (no `setState`, no `dispatch`)
+### State
+- `makeAutoObservable(this)` — automatic observable/action inference
+- Components wrapped in `observer()` auto-track accessed fields
+- Direct mutation: `store.field = value` (no `setState`, no `dispatch`)
+- Canvas rendering via MobX `autorun` — redraws on observable change without React re-render
+
+### Styling
+- Dark theme via `bp6-dark` class on `<body>`
+- Panel backgrounds: `#252a31`, canvas area: `#1c2127`, borders: `#383e47`
+- Popover/menu dark background enforced in `overrides.css`

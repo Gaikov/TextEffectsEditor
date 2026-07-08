@@ -1,0 +1,27 @@
+.panel {
+  width: 240px;
+  padding: 8px 10px;
+  border-left: 1px solid #383e47;
+  background: #252a31;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.propertyRow {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.propertyLabel {
+  color: #f6f7f9;
+  font: inherit;
+  line-height: 24px;
+  white-space: nowrap;
+}

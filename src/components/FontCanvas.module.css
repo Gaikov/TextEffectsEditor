@@ -1,0 +1,11 @@
+.container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  background: #1c2127;
+  cursor: grab;
+}
+
+.grabbing {
+  cursor: grabbing;
+}

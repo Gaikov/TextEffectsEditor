@@ -1,7 +1,12 @@
-.container {
+.root {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f5f8fa;
+  flex-direction: column;
+  height: 100vh;
+  background: #1c2127;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }

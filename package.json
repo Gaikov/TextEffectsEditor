@@ -7,8 +7,9 @@
     "build": "node esbuild.config.mjs"
   },
   "dependencies": {
-    "@blueprintjs/core": "^5.15.0",
-    "@blueprintjs/icons": "^5.10.0",
+    "@blueprintjs/core": "^6.17.1",
+    "@blueprintjs/icons": "^6.13.0",
+    "@blueprintjs/select": "^6.3.2",
     "mobx": "^6.16.1",
     "mobx-react-lite": "^4.1.1",
     "normalize.css": "^8.0.1",
