@@ -14,16 +14,21 @@ const CHECKER_SIZE = 16;
 const CHECKER_A = '#F0F0F0';
 const CHECKER_B = '#FFFFFF';
 
-function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  if (fontStore.text.length === 0) return;
-
+function configureTextContext(ctx: CanvasRenderingContext2D) {
   const italic = fontStore.italic ? 'italic ' : '';
   const weight = fontStore.boldWeight !== 400 ? `${fontStore.boldWeight} ` : '';
   ctx.font = `${italic}${weight}${fontStore.fontSize}px "${fontStore.fontFamily}"`;
-  ctx.fillStyle = fontStore.fontColor;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(fontStore.text, w / 2, h / 2);
+}
+
+function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  if (fontStore.text.length === 0) return;
+
+  configureTextContext(ctx);
+  for (const effect of fontStore.effects) {
+    effect.draw(fontStore.text, ctx, { x: w / 2, y: h / 2 });
+  }
 }
 
 function draw(canvas: HTMLCanvasElement) {

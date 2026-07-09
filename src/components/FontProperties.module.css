@@ -1,7 +1,6 @@
 .panel {
-  width: 240px;
+  flex: 0 0 auto;
   padding: 8px 10px;
-  border-left: 1px solid #383e47;
   background: #252a31;
   display: flex;
   flex-direction: column;
@@ -20,6 +19,62 @@
 }
 
 .propertyLabel {
+  color: #f6f7f9;
+  font: inherit;
+  line-height: 24px;
+  white-space: nowrap;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.sectionTitle {
+  color: #f6f7f9;
+  font: inherit;
+  line-height: 24px;
+}
+
+.effectCard {
+  border: 1px solid #383e47;
+  border-radius: 4px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.effectHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.effectTitle {
+  color: #f6f7f9;
+  font: inherit;
+  line-height: 24px;
+}
+
+.effectActions {
+  display: flex;
+  gap: 2px;
+}
+
+.effectRow {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+}
+
+.effectLabel {
   color: #f6f7f9;
   font: inherit;
   line-height: 24px;

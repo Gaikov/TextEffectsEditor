@@ -1,37 +1,60 @@
+import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
   Checkbox,
-  ControlGroup,
   HTMLSelect,
   InputGroup,
   Icon,
+  Menu,
   NumericInput,
   Popover,
   MenuItem,
   Spinner,
 } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
+import { fontEffectDefinitions } from '../effects';
 import { fontStore } from '../store/fontStore';
+import { getEffectEditor } from './effects/effectEditorRegistry';
 import styles from './FontProperties.module.css';
 
-const getFontName = (item: { name: string }) => item.name;
+interface FontItem {
+  name: string;
+}
+
+const getFontName = (item: FontItem) => item.name;
 
 const CHECKBOX_STYLE: React.CSSProperties = {
   margin: 0,
 };
 
+const ICON_BUTTON_STYLE: React.CSSProperties = {
+  minWidth: 24,
+};
+
 interface Props {
   fontList: string[];
   fontsLoaded: boolean;
+  width: number;
 }
 
-export default observer(function FontProperties({ fontList, fontsLoaded }: Props) {
+export default observer(function FontProperties({
+  fontList,
+  fontsLoaded,
+  width,
+}: Props) {
   const intent = fontStore.fontValid ? undefined : 'danger';
-  const fontItems = fontList.map((name) => ({ name }));
+  const fontItems = useMemo(() => fontList.map((name) => ({ name })), [fontList]);
+  const selectedFontItem =
+    fontItems.find((item) => item.name === fontStore.fontFamily) ?? {
+      name: fontStore.fontFamily,
+    };
 
   return (
-    <div className={`${styles.panel} font-properties-panel`}>
+    <div
+      className={`${styles.panel} font-properties-panel`}
+      style={{ width }}
+    >
       <div className={styles.propertyRow}>
         <span className={styles.propertyLabel}>Text</span>
         <InputGroup
@@ -48,9 +71,12 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
         <span className={styles.propertyLabel}>Font</span>
         <Suggest
           key={fontList.length}
+          activeItem={selectedFontItem}
           items={fontItems}
+          itemsEqual="name"
           inputValueRenderer={getFontName}
           closeOnSelect={false}
+          resetOnQuery={false}
           inputProps={{
             small: true,
             intent,
@@ -70,6 +96,8 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
               key={item.name}
               text={item.name}
               active={modifiers.active}
+              selected={item.name === fontStore.fontFamily}
+              icon={item.name === fontStore.fontFamily ? 'tick' : 'blank'}
               onClick={handleClick}
               multiline
             />
@@ -77,7 +105,7 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
           onItemSelect={(item) => {
             fontStore.fontFamily = item.name;
           }}
-          selectedItem={{ name: fontStore.fontFamily }}
+          selectedItem={selectedFontItem}
           popoverProps={{ matchTargetWidth: false, minimal: false }}
           noResults={<MenuItem disabled text="No results." />}
         />
@@ -124,44 +152,43 @@ export default observer(function FontProperties({ fontList, fontsLoaded }: Props
         />
       </div>
 
-      <div className={styles.propertyRow}>
-        <span className={styles.propertyLabel}>Color</span>
-        <ControlGroup fill>
-          <Popover
-            content={
-              <div style={{ padding: 8 }}>
-                <input
-                  type="color"
-                  value={fontStore.fontColor}
-                  onChange={(e) => {
-                    fontStore.fontColor = e.target.value;
-                  }}
+      <div className={styles.sectionHeader}>
+        <span className={styles.sectionTitle}>Effects</span>
+        <Popover
+          content={
+            <Menu>
+              {fontEffectDefinitions.map((definition) => (
+                <MenuItem
+                  key={definition.type}
+                  icon={definition.icon}
+                  text={definition.label}
+                  onClick={() => fontStore.addEffect(definition.type)}
                 />
-              </div>
-            }
-          >
-            <Button
-              minimal
-              small
-              style={{
-                width: 30,
-                minWidth: 30,
-                background: fontStore.fontColor,
-                borderRadius: '3px 0 0 3px',
-              }}
-            />
-          </Popover>
-          <InputGroup
+              ))}
+            </Menu>
+          }
+          placement="bottom-end"
+        >
+          <Button
             small
-            value={fontStore.fontColor}
-            onChange={(e) => {
-              fontStore.fontColor = e.target.value;
-            }}
-            placeholder="#10161A"
-            fill
+            icon="plus"
+            aria-label="Add effect"
+            style={ICON_BUTTON_STYLE}
           />
-        </ControlGroup>
+        </Popover>
       </div>
+
+      {fontStore.effects.map((effect, index) => {
+        const EffectEditor = getEffectEditor(effect);
+        return (
+          <EffectEditor
+            key={effect.id}
+            effect={effect}
+            index={index}
+            count={fontStore.effects.length}
+          />
+        );
+      })}
     </div>
   );
 });
