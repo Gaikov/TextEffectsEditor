@@ -1,5 +1,13 @@
 import { observer } from 'mobx-react-lite';
-import { Button, NumericInput, Tooltip } from '@blueprintjs/core';
+import {
+  Button,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  NumericInput,
+  Popover,
+  Tooltip,
+} from '@blueprintjs/core';
 import { fontStore } from '../store/fontStore';
 
 const BAR_STYLE: React.CSSProperties = {
@@ -33,24 +41,30 @@ const ACTIONS_STYLE: React.CSSProperties = {
   gap: 4,
 };
 
-const EXPORT_ACTION_STYLE: React.CSSProperties = {
+const FILE_ACTION_STYLE: React.CSSProperties = {
   marginLeft: 'auto',
 };
 
-const ICON_BUTTON_STYLE: React.CSSProperties = {
-  minWidth: 30,
+const BUTTON_STYLE: React.CSSProperties = {
+  minWidth: 0,
 };
 
 interface Props {
   onCenterView: () => void;
   onExport: () => void;
+  onExportJson: () => void;
+  onImportJson: () => void;
   onResetZoom: () => void;
+  onSaveSettings: () => void;
 }
 
 export default observer(function CanvasSizeInputs({
   onCenterView,
   onExport,
+  onExportJson,
+  onImportJson,
   onResetZoom,
+  onSaveSettings,
 }: Props) {
   return (
     <div style={BAR_STYLE}>
@@ -87,8 +101,9 @@ export default observer(function CanvasSizeInputs({
           <Button
             small
             icon="locate"
+            text="Center"
             aria-label="Center View"
-            style={ICON_BUTTON_STYLE}
+            style={BUTTON_STYLE}
             onClick={onCenterView}
           />
         </Tooltip>
@@ -96,21 +111,50 @@ export default observer(function CanvasSizeInputs({
           <Button
             small
             icon="zoom-to-fit"
+            text="Reset"
             aria-label="Reset Zoom"
-            style={ICON_BUTTON_STYLE}
+            style={BUTTON_STYLE}
             onClick={onResetZoom}
           />
         </Tooltip>
       </div>
-      <Tooltip content="Export PNG" compact>
+      <Popover
+        content={
+          <Menu>
+            <MenuItem
+              icon="floppy-disk"
+              text="Save Settings"
+              onClick={onSaveSettings}
+            />
+            <MenuDivider />
+            <MenuItem
+              icon="document-open"
+              text="Import JSON"
+              onClick={onImportJson}
+            />
+            <MenuItem
+              icon="document-share"
+              text="Export JSON"
+              onClick={onExportJson}
+            />
+            <MenuItem
+              icon="media"
+              text="Export PNG"
+              onClick={onExport}
+            />
+          </Menu>
+        }
+        placement="bottom-end"
+      >
         <Button
           small
-          icon="export"
-          aria-label="Export PNG"
-          style={{ ...ICON_BUTTON_STYLE, ...EXPORT_ACTION_STYLE }}
-          onClick={onExport}
+          icon="folder-open"
+          text="File"
+          aria-label="Open file actions"
+          rightIcon="caret-down"
+          style={{ ...BUTTON_STYLE, ...FILE_ACTION_STYLE }}
         />
-      </Tooltip>
+      </Popover>
     </div>
   );
 });

@@ -19,6 +19,7 @@ interface FontData {
 
 interface Window {
   queryLocalFonts?: () => Promise<FontData[]>;
+  showOpenFilePicker?: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[]>;
   showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
 }
 
@@ -32,6 +33,12 @@ interface SaveFilePickerOptions {
   types?: FilePickerAcceptType[];
 }
 
+interface OpenFilePickerOptions {
+  excludeAcceptAllOption?: boolean;
+  multiple?: boolean;
+  types?: FilePickerAcceptType[];
+}
+
 interface FileSystemWritableFileStream extends WritableStream {
   write: (data: Blob | BufferSource | string) => Promise<void>;
   close: () => Promise<void>;
@@ -39,4 +46,5 @@ interface FileSystemWritableFileStream extends WritableStream {
 
 interface FileSystemFileHandle {
   createWritable: () => Promise<FileSystemWritableFileStream>;
+  getFile: () => Promise<File>;
 }

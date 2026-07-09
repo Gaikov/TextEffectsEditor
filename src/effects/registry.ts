@@ -1,13 +1,24 @@
 import type { IconName } from '@blueprintjs/core';
-import { ColorFillText } from './ColorFillText';
+import {
+  ColorFillText,
+  deserializeColorFillText,
+  serializeColorFillText,
+} from './ColorFillText';
+import { isRecord, type SerializedFontEffect } from './effectSnapshot';
 import type { FontEffectType, IFontEffect } from './IFontEffect';
-import { StrokeText } from './StrokeText';
+import {
+  StrokeText,
+  deserializeStrokeText,
+  serializeStrokeText,
+} from './StrokeText';
 
 export interface FontEffectDefinition {
   type: FontEffectType;
   label: string;
   icon: IconName;
   create: () => IFontEffect;
+  serialize: (effect: IFontEffect) => SerializedFontEffect | null;
+  deserialize: (value: unknown) => IFontEffect | null;
 }
 
 export const fontEffectDefinitions: FontEffectDefinition[] = [
@@ -16,12 +27,18 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     label: 'Fill',
     icon: 'color-fill',
     create: () => new ColorFillText(),
+    serialize: (effect) =>
+      effect instanceof ColorFillText ? serializeColorFillText(effect) : null,
+    deserialize: deserializeColorFillText,
   },
   {
     type: 'stroke',
     label: 'Stroke',
     icon: 'style',
     create: () => new StrokeText(),
+    serialize: (effect) =>
+      effect instanceof StrokeText ? serializeStrokeText(effect) : null,
+    deserialize: deserializeStrokeText,
   },
 ];
 
@@ -40,4 +57,15 @@ export function createFontEffect(type: FontEffectType) {
 
 export function getFontEffectDefinition(type: FontEffectType) {
   return fontEffectDefinitionByType.get(type);
+}
+
+export function serializeFontEffect(effect: IFontEffect) {
+  return fontEffectDefinitionByType.get(effect.type)?.serialize(effect) ?? null;
+}
+
+export function deserializeFontEffect(value: unknown) {
+  if (!isRecord(value) || typeof value.type !== 'string') return null;
+
+  const definition = fontEffectDefinitionByType.get(value.type as FontEffectType);
+  return definition?.deserialize(value) ?? null;
 }

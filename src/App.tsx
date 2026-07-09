@@ -3,12 +3,24 @@ import CanvasSizeInputs from './components/CanvasSizeInputs';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
 import { getCuratedFonts, loadSystemFonts } from './fonts';
+import { fontStore } from './store/fontStore';
+import {
+  loadSettingsFromLocalStorage,
+  saveSettingsToLocalStorage,
+} from './store/settingsPersistence';
 import styles from './App.module.css';
 
 const PANEL_WIDTH_KEY = 'fontEffects.propertiesPanelWidth';
 const DEFAULT_PANEL_WIDTH = 240;
 const MIN_PANEL_WIDTH = 240;
 const MAX_PANEL_WIDTH = 520;
+const SETTINGS_FILE_NAME = 'font-effects.json';
+const SETTINGS_FILE_TYPES = [
+  {
+    description: 'FontEffects JSON',
+    accept: { 'application/json': ['.json'] },
+  },
+];
 
 function clampPanelWidth(value: number) {
   return Math.max(MIN_PANEL_WIDTH, Math.min(MAX_PANEL_WIDTH, value));
@@ -24,12 +36,87 @@ function loadPanelWidth() {
     : DEFAULT_PANEL_WIDTH;
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError';
+}
+
 export default function App() {
+  useState(() => {
+    loadSettingsFromLocalStorage();
+    return undefined;
+  });
+
   const canvasRef = useRef<FontCanvasHandle>(null);
+  const jsonImportInputRef = useRef<HTMLInputElement>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
+
+  const loadSettingsJsonText = async (text: string) => {
+    try {
+      fontStore.loadJSON(JSON.parse(text));
+    } catch (error) {
+      console.warn('Unable to import FontEffects JSON settings.', error);
+    }
+  };
+
+  const exportSettingsJson = async () => {
+    const blob = new Blob(
+      [JSON.stringify(fontStore.toJSON(), null, 2)],
+      { type: 'application/json' },
+    );
+    let writable: FileSystemWritableFileStream | undefined;
+
+    if (window.showSaveFilePicker) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: SETTINGS_FILE_NAME,
+          types: SETTINGS_FILE_TYPES,
+        });
+        writable = await handle.createWritable();
+      } catch (error) {
+        if (isAbortError(error)) return;
+        console.warn('Unable to open JSON export file picker.', error);
+      }
+    }
+
+    if (writable) {
+      await writable.write(blob);
+      await writable.close();
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = SETTINGS_FILE_NAME;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const importSettingsJson = async () => {
+    if (window.showOpenFilePicker) {
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          multiple: false,
+          types: SETTINGS_FILE_TYPES,
+        });
+        if (!handle) return;
+
+        const file = await handle.getFile();
+        await loadSettingsJsonText(await file.text());
+      } catch (error) {
+        if (isAbortError(error)) return;
+        console.warn('Unable to import FontEffects JSON settings.', error);
+      }
+      return;
+    }
+
+    jsonImportInputRef.current?.click();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +166,27 @@ export default function App() {
         onExport={() => {
           void canvasRef.current?.exportPng();
         }}
+        onExportJson={() => {
+          void exportSettingsJson();
+        }}
+        onImportJson={() => {
+          void importSettingsJson();
+        }}
         onResetZoom={() => canvasRef.current?.resetZoom()}
+        onSaveSettings={saveSettingsToLocalStorage}
+      />
+      <input
+        ref={jsonImportInputRef}
+        type="file"
+        accept="application/json,.json"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file) return;
+
+          void file.text().then(loadSettingsJsonText);
+        }}
       />
       <div className={styles.body}>
         <FontCanvas ref={canvasRef} />
