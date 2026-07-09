@@ -5,6 +5,7 @@ import {
   readNumber,
   readOpacity,
   readString,
+  readVisible,
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
@@ -16,6 +17,7 @@ import type {
 export class ShadowText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'shadow';
+  visible = true;
   color = '#000000';
   opacity = 1;
   xOffset = 0;
@@ -63,6 +65,7 @@ export class ShadowText implements IFontEffect {
 
 export interface SerializedShadowText extends SerializedFontEffect {
   type: 'shadow';
+  visible: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -75,6 +78,7 @@ export interface SerializedShadowText extends SerializedFontEffect {
 export function serializeShadowText(effect: ShadowText): SerializedShadowText {
   return {
     type: 'shadow',
+    visible: effect.visible,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -89,6 +93,7 @@ export function deserializeShadowText(value: unknown) {
   if (!isRecord(value)) return null;
 
   const effect = new ShadowText();
+  effect.visible = readVisible(value.visible, effect.visible);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

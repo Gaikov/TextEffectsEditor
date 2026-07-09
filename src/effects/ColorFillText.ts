@@ -5,6 +5,7 @@ import {
   readNumber,
   readOpacity,
   readString,
+  readVisible,
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
@@ -16,6 +17,7 @@ import type {
 export class ColorFillText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'fill';
+  visible = true;
   color = '#10161A';
   opacity = 1;
   xOffset = 0;
@@ -48,6 +50,7 @@ export class ColorFillText implements IFontEffect {
 
 export interface SerializedColorFillText extends SerializedFontEffect {
   type: 'fill';
+  visible: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -59,6 +62,7 @@ export function serializeColorFillText(
 ): SerializedColorFillText {
   return {
     type: 'fill',
+    visible: effect.visible,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -70,6 +74,7 @@ export function deserializeColorFillText(value: unknown) {
   if (!isRecord(value)) return null;
 
   const effect = new ColorFillText();
+  effect.visible = readVisible(value.visible, effect.visible);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

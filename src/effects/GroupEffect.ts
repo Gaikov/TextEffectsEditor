@@ -1,6 +1,13 @@
 import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
-import { isRecord, readOpacity, type SerializedFontEffect } from './effectSnapshot';
+import {
+  isRecord,
+  readBoolean,
+  readOpacity,
+  readString,
+  readVisible,
+  type SerializedFontEffect,
+} from './effectSnapshot';
 import type {
   FontEffectRenderContext,
   FontEffectType,
@@ -10,6 +17,9 @@ import type {
 export class GroupEffect implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'group';
+  visible = true;
+  name = 'Group';
+  collapsed = false;
   opacity = 1;
   children: IFontEffect[] = [];
 
@@ -58,6 +68,9 @@ export class GroupEffect implements IFontEffect {
 
 export interface SerializedGroupEffect extends SerializedFontEffect {
   type: 'group';
+  visible: boolean;
+  name: string;
+  collapsed: boolean;
   opacity: number;
   children: SerializedFontEffect[];
 }
@@ -68,6 +81,9 @@ export function serializeGroupEffect(
 ): SerializedGroupEffect {
   return {
     type: 'group',
+    visible: effect.visible,
+    name: effect.name,
+    collapsed: effect.collapsed,
     opacity: effect.opacity,
     children: effect.children
       .map(serializeChild)
@@ -86,5 +102,8 @@ export function applySerializedGroupFields(
   value: unknown,
 ) {
   if (!isRecord(value)) return;
+  effect.visible = readVisible(value.visible, effect.visible);
+  effect.name = readString(value.name, effect.name);
+  effect.collapsed = readBoolean(value.collapsed, effect.collapsed);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
 }

@@ -20,6 +20,7 @@ export function EffectEditorFrame({
   title,
   dragHandleAttributes,
   dragHandleListeners,
+  headerActions,
   children,
 }: {
   effect: IFontEffect;
@@ -29,6 +30,7 @@ export function EffectEditorFrame({
   title: string;
   dragHandleAttributes?: DraggableAttributes;
   dragHandleListeners?: DraggableSyntheticListeners;
+  headerActions?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -50,6 +52,19 @@ export function EffectEditorFrame({
           <span className={styles.effectTitle}>{title}</span>
         </div>
         <div className={styles.effectActions}>
+          {headerActions}
+          <Button
+            small
+            minimal
+            icon={effect.visible ? 'eye-open' : 'eye-off'}
+            aria-label={effect.visible ? 'Hide effect' : 'Show effect'}
+            intent={effect.visible ? undefined : 'warning'}
+            style={ICON_BUTTON_STYLE}
+            onClick={() => {
+              effect.visible = !effect.visible;
+              fontStore.touchEffects();
+            }}
+          />
           <Button
             small
             minimal

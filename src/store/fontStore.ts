@@ -151,7 +151,7 @@ class FontStore {
     return true;
   };
 
-  private touchEffects = () => {
+  touchEffects = () => {
     this.effectsVersion += 1;
   };
 

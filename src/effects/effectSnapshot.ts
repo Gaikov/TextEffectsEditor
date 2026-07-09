@@ -43,6 +43,10 @@ export function readBoolean(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback;
 }
 
+export function readVisible(value: unknown, fallback = true) {
+  return readBoolean(value, fallback);
+}
+
 export function readLineDash(value: unknown, fallback: number[]) {
   if (!Array.isArray(value)) return fallback;
 

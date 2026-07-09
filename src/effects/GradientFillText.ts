@@ -6,6 +6,7 @@ import {
   readOpacity,
   readString,
   readStringArray,
+  readVisible,
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
@@ -47,6 +48,7 @@ function getTextBounds(
 export class GradientFillText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'gradientFill';
+  visible = true;
   opacity = 1;
   xOffset = 0;
   yOffset = 0;
@@ -90,6 +92,7 @@ export class GradientFillText implements IFontEffect {
 
 export interface SerializedGradientFillText extends SerializedFontEffect {
   type: 'gradientFill';
+  visible: boolean;
   opacity: number;
   xOffset: number;
   yOffset: number;
@@ -102,6 +105,7 @@ export function serializeGradientFillText(
 ): SerializedGradientFillText {
   return {
     type: 'gradientFill',
+    visible: effect.visible,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
     yOffset: effect.yOffset,
@@ -114,6 +118,7 @@ export function deserializeGradientFillText(value: unknown) {
   if (!isRecord(value)) return null;
 
   const effect = new GradientFillText();
+  effect.visible = readVisible(value.visible, effect.visible);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);
   effect.yOffset = readNumber(value.yOffset, effect.yOffset);

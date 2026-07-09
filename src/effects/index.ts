@@ -1,4 +1,5 @@
 export { ColorFillText } from './ColorFillText';
+export { GlowEffect } from './GlowEffect';
 export { GradientFillText } from './GradientFillText';
 export { GroupEffect } from './GroupEffect';
 export { ShadowText } from './ShadowText';

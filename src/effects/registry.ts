@@ -11,6 +11,11 @@ import {
   serializeGradientFillText,
 } from './GradientFillText';
 import {
+  GlowEffect,
+  deserializeGlowEffect,
+  serializeGlowEffect,
+} from './GlowEffect';
+import {
   GroupEffect,
   applySerializedGroupFields,
   readGroupChildren,
@@ -75,6 +80,15 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof ShadowText ? serializeShadowText(effect) : null,
     deserialize: deserializeShadowText,
+  },
+  {
+    type: 'glow',
+    label: 'Glow',
+    icon: 'highlight',
+    create: () => new GlowEffect(),
+    serialize: (effect) =>
+      effect instanceof GlowEffect ? serializeGlowEffect(effect) : null,
+    deserialize: deserializeGlowEffect,
   },
   {
     type: 'gradientFill',

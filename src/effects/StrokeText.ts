@@ -8,6 +8,7 @@ import {
   readNumber,
   readOpacity,
   readString,
+  readVisible,
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
@@ -19,6 +20,7 @@ import type {
 export class StrokeText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'stroke';
+  visible = true;
   color = '#10161A';
   opacity = 1;
   xOffset = 0;
@@ -63,6 +65,7 @@ export class StrokeText implements IFontEffect {
 
 export interface SerializedStrokeText extends SerializedFontEffect {
   type: 'stroke';
+  visible: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -78,6 +81,7 @@ export interface SerializedStrokeText extends SerializedFontEffect {
 export function serializeStrokeText(effect: StrokeText): SerializedStrokeText {
   return {
     type: 'stroke',
+    visible: effect.visible,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -95,6 +99,7 @@ export function deserializeStrokeText(value: unknown) {
   if (!isRecord(value)) return null;
 
   const effect = new StrokeText();
+  effect.visible = readVisible(value.visible, effect.visible);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

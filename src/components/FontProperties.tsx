@@ -326,7 +326,6 @@ export default observer(function FontProperties({
         activeData.effect.id,
         overData.parentId,
         overData.index,
-        false,
       );
       return;
     }

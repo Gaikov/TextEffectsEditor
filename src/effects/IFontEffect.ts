@@ -5,6 +5,7 @@ export type FontEffectType =
   | 'fill'
   | 'stroke'
   | 'shadow'
+  | 'glow'
   | 'gradientFill';
 
 export interface FontEffectRenderContext {
@@ -24,6 +25,7 @@ export interface FontEffectRenderContext {
 export interface IFontEffect {
   id: string;
   type: FontEffectType;
+  visible: boolean;
   opacity: number;
   draw: (renderContext: FontEffectRenderContext) => void;
 }

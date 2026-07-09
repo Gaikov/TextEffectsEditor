@@ -6,6 +6,7 @@ import type {
 import type {
   ColorFillText,
   FontEffectType,
+  GlowEffect,
   GradientFillText,
   GroupEffect,
   IFontEffect,
@@ -13,6 +14,7 @@ import type {
   StrokeText,
 } from '../../effects';
 import { ColorFillTextEditor } from './ColorFillTextEditor';
+import { GlowEffectEditor } from './GlowEffectEditor';
 import { GradientFillTextEditor } from './GradientFillTextEditor';
 import { GroupEffectEditor } from './GroupEffectEditor';
 import { ShadowTextEditor } from './ShadowTextEditor';
@@ -42,6 +44,7 @@ export const effectEditorRegistry: Record<
   fill: ColorFillTextEditor as ComponentType<EffectEditorProps<ColorFillText>>,
   stroke: StrokeTextEditor as ComponentType<EffectEditorProps<StrokeText>>,
   shadow: ShadowTextEditor as ComponentType<EffectEditorProps<ShadowText>>,
+  glow: GlowEffectEditor as ComponentType<EffectEditorProps<GlowEffect>>,
   gradientFill: GradientFillTextEditor as ComponentType<
     EffectEditorProps<GradientFillText>
   >,

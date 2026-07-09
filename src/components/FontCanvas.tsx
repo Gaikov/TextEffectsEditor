@@ -60,6 +60,7 @@ function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
     };
 
     for (const effect of effects) {
+      if (!effect.visible) continue;
       effect.draw(renderContext);
     }
   };
