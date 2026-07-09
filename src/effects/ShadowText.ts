@@ -8,7 +8,6 @@ import {
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
-  FontEffectKind,
   FontEffectRenderContext,
   FontEffectType,
   IFontEffect,
@@ -17,7 +16,6 @@ import type {
 export class ShadowText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'shadow';
-  kind: FontEffectKind = 'post';
   color = '#000000';
   opacity = 1;
   xOffset = 0;
@@ -30,8 +28,36 @@ export class ShadowText implements IFontEffect {
     makeAutoObservable(this, { draw: false });
   }
 
-  draw({ endShadowGroup }: FontEffectRenderContext) {
-    endShadowGroup(this);
+  draw({ context, createBufferCanvas, width, height }: FontEffectRenderContext) {
+    const sourceCanvas = createBufferCanvas();
+    const sourceContext = sourceCanvas.getContext('2d');
+    if (!sourceContext) return;
+
+    sourceContext.drawImage(context.canvas, 0, 0);
+
+    const shadowCanvas = createBufferCanvas();
+    const shadowContext = shadowCanvas.getContext('2d');
+    if (!shadowContext) return;
+
+    shadowContext.filter =
+      this.shadowBlur > 0 ? `blur(${this.shadowBlur}px)` : 'none';
+    shadowContext.drawImage(
+      sourceCanvas,
+      this.xOffset + this.shadowOffsetX,
+      this.yOffset + this.shadowOffsetY,
+    );
+    shadowContext.filter = 'none';
+    shadowContext.globalCompositeOperation = 'source-in';
+    shadowContext.fillStyle = this.color;
+    shadowContext.fillRect(0, 0, width, height);
+
+    context.save();
+    context.clearRect(0, 0, width, height);
+    context.globalAlpha = this.opacity;
+    context.drawImage(shadowCanvas, 0, 0);
+    context.globalAlpha = 1;
+    context.drawImage(sourceCanvas, 0, 0);
+    context.restore();
   }
 }
 

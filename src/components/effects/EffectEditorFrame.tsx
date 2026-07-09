@@ -1,5 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Button } from '@blueprintjs/core';
+import type {
+  DraggableAttributes,
+  DraggableSyntheticListeners,
+} from '@dnd-kit/core';
 import type { IFontEffect } from '../../effects';
 import { fontStore } from '../../store/fontStore';
 import styles from '../FontProperties.module.css';
@@ -12,19 +16,39 @@ export function EffectEditorFrame({
   effect,
   index,
   count,
+  depth,
   title,
+  dragHandleAttributes,
+  dragHandleListeners,
   children,
 }: {
   effect: IFontEffect;
   index: number;
   count: number;
+  depth: number;
   title: string;
+  dragHandleAttributes?: DraggableAttributes;
+  dragHandleListeners?: DraggableSyntheticListeners;
   children?: ReactNode;
 }) {
   return (
-    <div className={styles.effectCard}>
+    <div
+      className={styles.effectCard}
+      style={{ marginLeft: depth > 0 ? 10 : 0 }}
+    >
       <div className={styles.effectHeader}>
-        <span className={styles.effectTitle}>{title}</span>
+        <div className={styles.effectHeaderTitle}>
+          <Button
+            small
+            minimal
+            icon="drag-handle-vertical"
+            aria-label="Drag effect"
+            className={styles.dragHandle}
+            {...dragHandleAttributes}
+            {...dragHandleListeners}
+          />
+          <span className={styles.effectTitle}>{title}</span>
+        </div>
         <div className={styles.effectActions}>
           <Button
             small

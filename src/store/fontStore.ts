@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import {
   createFontEffect,
   deserializeFontEffect,
+  GroupEffect,
   serializeFontEffect,
   type SerializedFontEffect,
   type FontEffectType,
@@ -62,6 +63,7 @@ class FontStore {
   boldWeight = 400;
   italic = false;
   effects: IFontEffect[] = [createFontEffect('fill')];
+  effectsVersion = 0;
 
   constructor() {
     makeAutoObservable(this);
@@ -81,23 +83,190 @@ class FontStore {
 
   addEffect = (type: FontEffectType) => {
     this.effects.push(createFontEffect(type));
+    this.touchEffects();
+  };
+
+  addEffectToGroup = (type: FontEffectType, groupId?: string) => {
+    const effect = createFontEffect(type);
+    if (!groupId) {
+      this.effects.push(effect);
+      this.touchEffects();
+      return;
+    }
+
+    const group = this.findGroup(groupId);
+    if (!group) return;
+
+    group.addEffect(effect);
+    this.touchEffects();
   };
 
   removeEffect = (id: string) => {
-    this.effects = this.effects.filter((effect) => effect.id !== id);
+    this.effects = this.removeEffectFromList(this.effects, id);
+    this.touchEffects();
   };
 
   moveEffect = (id: string, direction: FontEffectMoveDirection) => {
-    const index = this.effects.findIndex((effect) => effect.id === id);
-    if (index === -1) return;
+    if (this.moveEffectInList(this.effects, id, direction)) {
+      this.touchEffects();
+    }
+  };
+
+  moveEffectToParent = (
+    effectId: string,
+    targetParentId: string | null,
+    targetIndex: number,
+    adjustForSourceRemoval = true,
+  ) => {
+    const location = this.findEffectLocation(this.effects, effectId, null);
+    if (!location) return false;
+    if (effectId === targetParentId) return false;
+    if (
+      targetParentId !== null &&
+      location.effect instanceof GroupEffect &&
+      this.effectContainsId(location.effect, targetParentId)
+    ) {
+      return false;
+    }
+
+    let nextTargetIndex = targetIndex;
+    if (
+      adjustForSourceRemoval &&
+      location.parentId === targetParentId &&
+      location.index < nextTargetIndex
+    ) {
+      nextTargetIndex -= 1;
+    }
+
+    const [effect] = location.effects.splice(location.index, 1);
+    const targetEffects = this.getEffectsForParent(targetParentId);
+    if (!targetEffects) {
+      location.effects.splice(location.index, 0, effect);
+      return false;
+    }
+
+    const clampedIndex = clamp(nextTargetIndex, 0, targetEffects.length);
+    targetEffects.splice(clampedIndex, 0, effect);
+    this.touchEffects();
+    return true;
+  };
+
+  private touchEffects = () => {
+    this.effectsVersion += 1;
+  };
+
+  private findGroup = (id: string): GroupEffect | undefined => {
+    return this.findGroupInList(this.effects, id);
+  };
+
+  private findGroupInList = (
+    effects: IFontEffect[],
+    id: string,
+  ): GroupEffect | undefined => {
+    for (const effect of effects) {
+      if (effect instanceof GroupEffect) {
+        if (effect.id === id) return effect;
+        const childGroup = this.findGroupInList(effect.children, id);
+        if (childGroup) return childGroup;
+      }
+    }
+
+    return undefined;
+  };
+
+  private getEffectsForParent = (
+    parentId: string | null,
+  ): IFontEffect[] | undefined => {
+    if (parentId === null) return this.effects;
+    return this.findGroup(parentId)?.children;
+  };
+
+  private findEffectLocation = (
+    effects: IFontEffect[],
+    id: string,
+    parentId: string | null,
+  ):
+    | {
+        effect: IFontEffect;
+        effects: IFontEffect[];
+        index: number;
+        parentId: string | null;
+      }
+    | undefined => {
+    const index = effects.findIndex((effect) => effect.id === id);
+    if (index !== -1) {
+      return { effect: effects[index], effects, index, parentId };
+    }
+
+    for (const effect of effects) {
+      if (effect instanceof GroupEffect) {
+        const location = this.findEffectLocation(
+          effect.children,
+          id,
+          effect.id,
+        );
+        if (location) return location;
+      }
+    }
+
+    return undefined;
+  };
+
+  private effectContainsId = (effect: IFontEffect, id: string): boolean => {
+    if (!(effect instanceof GroupEffect)) return false;
+    return effect.children.some(
+      (child) => child.id === id || this.effectContainsId(child, id),
+    );
+  };
+
+  private removeEffectFromList = (
+    effects: IFontEffect[],
+    id: string,
+  ): IFontEffect[] => {
+    return effects
+      .filter((effect) => effect.id !== id)
+      .map((effect) => {
+        if (effect instanceof GroupEffect) {
+          effect.children = this.removeEffectFromList(effect.children, id);
+        }
+        return effect;
+      });
+  };
+
+  private moveEffectInList = (
+    effects: IFontEffect[],
+    id: string,
+    direction: FontEffectMoveDirection,
+  ): boolean => {
+    const index = effects.findIndex((effect) => effect.id === id);
+    if (index === -1) {
+      for (const effect of effects) {
+        if (
+          effect instanceof GroupEffect &&
+          this.moveEffectInList(effect.children, id, direction)
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    }
 
     const nextIndex = direction === 'up' ? index - 1 : index + 1;
-    if (nextIndex < 0 || nextIndex >= this.effects.length) return;
+    if (nextIndex >= 0 && nextIndex < effects.length) {
+      const nextEffects = [...effects];
+      const [effect] = nextEffects.splice(index, 1);
+      nextEffects.splice(nextIndex, 0, effect);
 
-    const nextEffects = [...this.effects];
-    const [effect] = nextEffects.splice(index, 1);
-    nextEffects.splice(nextIndex, 0, effect);
-    this.effects = nextEffects;
+      if (effects === this.effects) {
+        this.effects = nextEffects;
+      } else {
+        effects.splice(0, effects.length, ...nextEffects);
+      }
+      return true;
+    }
+
+    return false;
   };
 
   get fontValid(): boolean {
@@ -149,6 +318,7 @@ class FontStore {
           .filter((effect): effect is IFontEffect => effect !== null)
       : [];
     this.effects = effects.length > 0 ? effects : [createFontEffect('fill')];
+    this.touchEffects();
 
     return true;
   };

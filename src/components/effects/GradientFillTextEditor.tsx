@@ -19,13 +19,19 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
   effect,
   index,
   count,
+  depth,
+  dragHandleAttributes,
+  dragHandleListeners,
 }: EffectEditorProps<GradientFillText>) {
   return (
     <EffectEditorFrame
       effect={effect}
       index={index}
       count={count}
+      depth={depth}
       title="Gradient Fill"
+      dragHandleAttributes={dragHandleAttributes}
+      dragHandleListeners={dragHandleListeners}
     >
       {effect.colors.map((color, colorIndex) => (
         <EffectRow

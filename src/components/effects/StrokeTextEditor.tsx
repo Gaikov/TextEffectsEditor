@@ -15,13 +15,19 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
   effect,
   index,
   count,
+  depth,
+  dragHandleAttributes,
+  dragHandleListeners,
 }: EffectEditorProps<StrokeText>) {
   return (
     <EffectEditorFrame
       effect={effect}
       index={index}
       count={count}
+      depth={depth}
       title="Stroke"
+      dragHandleAttributes={dragHandleAttributes}
+      dragHandleListeners={dragHandleListeners}
     >
       <EffectRow label="Color">
         <EffectColorInput

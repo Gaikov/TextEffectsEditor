@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import { autorun } from 'mobx';
-import type { EndShadowRenderEffect, FontEffectRenderContext } from '../effects';
+import type { FontEffectRenderContext, IFontEffect } from '../effects';
 import { fontStore } from '../store/fontStore';
 import styles from './FontCanvas.module.css';
 
@@ -30,43 +30,12 @@ function createBufferCanvas(w: number, h: number) {
   return canvas;
 }
 
-function createShadowCanvas(
-  sourceCanvas: HTMLCanvasElement,
-  effect: EndShadowRenderEffect,
-  w: number,
-  h: number,
-) {
-  const shadowCanvas = createBufferCanvas(w, h);
-  const shadowContext = shadowCanvas.getContext('2d');
-  if (!shadowContext) return null;
-
-  shadowContext.filter =
-    effect.shadowBlur > 0 ? `blur(${effect.shadowBlur}px)` : 'none';
-  shadowContext.drawImage(
-    sourceCanvas,
-    effect.xOffset + effect.shadowOffsetX,
-    effect.yOffset + effect.shadowOffsetY,
-  );
-  shadowContext.filter = 'none';
-  shadowContext.globalCompositeOperation = 'source-in';
-  shadowContext.fillStyle = effect.color;
-  shadowContext.fillRect(0, 0, w, h);
-
-  const composedCanvas = createBufferCanvas(w, h);
-  const composedContext = composedCanvas.getContext('2d');
-  if (!composedContext) return null;
-
-  composedContext.globalAlpha = effect.opacity;
-  composedContext.drawImage(shadowCanvas, 0, 0);
-  return composedCanvas;
-}
-
 function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  fontStore.effectsVersion;
   if (fontStore.text.length === 0) return;
 
   const mainCanvas = createBufferCanvas(w, h);
   const mainContext = mainCanvas.getContext('2d')!;
-  const shadowGroups: FontEffectRenderContext['shadowGroups'] = [];
   configureTextContext(mainContext);
 
   const createConfiguredBuffer = () => {
@@ -75,56 +44,27 @@ function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
     return canvas;
   };
 
-  const renderContext: FontEffectRenderContext = {
-    text: fontStore.text,
-    position: { x: w / 2, y: h / 2 },
-    width: w,
-    height: h,
-    mainCanvas,
-    mainContext,
-    shadowGroups,
-    createBufferCanvas: createConfiguredBuffer,
-    configureTextContext,
-    startShadowGroup: () => {
-      const canvas = createConfiguredBuffer();
-      shadowGroups.push({
-        canvas,
-        context: canvas.getContext('2d')!,
-      });
-    },
-    endShadowGroup: (effect) => {
-      if (shadowGroups.length === 0) return;
+  const renderEffects = (
+    effects: IFontEffect[],
+    context: CanvasRenderingContext2D,
+  ) => {
+    const renderContext: FontEffectRenderContext = {
+      text: fontStore.text,
+      position: { x: w / 2, y: h / 2 },
+      width: w,
+      height: h,
+      context,
+      createBufferCanvas: createConfiguredBuffer,
+      configureTextContext,
+      renderEffects,
+    };
 
-      const group = shadowGroups.pop()!;
-      const targetContext =
-        shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
-      const shadowCanvas = createShadowCanvas(
-        group.canvas,
-        effect,
-        w,
-        h,
-      );
-      if (!shadowCanvas) return;
-
-      targetContext.drawImage(shadowCanvas, 0, 0);
-      targetContext.drawImage(group.canvas, 0, 0);
-    },
-    getCurrentTargetContext: () => {
-      return shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
-    },
+    for (const effect of effects) {
+      effect.draw(renderContext);
+    }
   };
 
-  for (const effect of fontStore.effects) {
-    effect.draw(renderContext);
-  }
-
-  while (shadowGroups.length > 0) {
-    const group = shadowGroups.pop()!;
-    const targetContext =
-      shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
-    targetContext.drawImage(group.canvas, 0, 0);
-  }
-
+  renderEffects(fontStore.effects, mainContext);
   ctx.drawImage(mainCanvas, 0, 0);
 }
 
@@ -251,7 +191,6 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     resetZoom,
   }), [centerView, exportPng, resetZoom]);
 
-  // pixel redraw on content change
   useEffect(() => {
     return autorun(() => {
       const canvas = canvasRef.current;
@@ -260,7 +199,6 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     });
   }, []);
 
-  // center canvas on mount / canvas resize
   useEffect(() => {
     return autorun(() => {
       fontStore.canvasWidth;
@@ -269,7 +207,6 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     });
   }, [centerView]);
 
-  // wheel → zoom (non-passive, native)
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -298,7 +235,6 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     return () => el.removeEventListener('wheel', onWheel);
   }, [applyTransform]);
 
-  // drag → pan
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
     setDragging(true);

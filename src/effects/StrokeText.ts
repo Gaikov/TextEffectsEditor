@@ -11,7 +11,6 @@ import {
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
-  FontEffectKind,
   FontEffectRenderContext,
   FontEffectType,
   IFontEffect,
@@ -20,7 +19,6 @@ import type {
 export class StrokeText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'stroke';
-  kind: FontEffectKind = 'content';
   color = '#10161A';
   opacity = 1;
   xOffset = 0;
@@ -58,12 +56,8 @@ export class StrokeText implements IFontEffect {
     context.restore();
   }
 
-  draw({
-    getCurrentTargetContext,
-    position,
-    text,
-  }: FontEffectRenderContext) {
-    this.drawTo(getCurrentTargetContext(), position, text);
+  draw({ context, position, text }: FontEffectRenderContext) {
+    this.drawTo(context, position, text);
   }
 }
 

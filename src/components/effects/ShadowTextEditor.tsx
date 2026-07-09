@@ -13,13 +13,19 @@ export const ShadowTextEditor = observer(function ShadowTextEditor({
   effect,
   index,
   count,
+  depth,
+  dragHandleAttributes,
+  dragHandleListeners,
 }: EffectEditorProps<ShadowText>) {
   return (
     <EffectEditorFrame
       effect={effect}
       index={index}
       count={count}
-      title="End Shadow"
+      depth={depth}
+      title="Shadow"
+      dragHandleAttributes={dragHandleAttributes}
+      dragHandleListeners={dragHandleListeners}
     >
       <EffectRow label="Color">
         <EffectColorInput

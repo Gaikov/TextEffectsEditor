@@ -1,7 +1,7 @@
 export { ColorFillText } from './ColorFillText';
 export { GradientFillText } from './GradientFillText';
+export { GroupEffect } from './GroupEffect';
 export { ShadowText } from './ShadowText';
-export { StartShadowEffect } from './StartShadowEffect';
 export { StrokeText } from './StrokeText';
 export { createEffectId } from './effectId';
 export {
@@ -14,8 +14,6 @@ export {
 } from './registry';
 export type { SerializedFontEffect } from './effectSnapshot';
 export type {
-  EndShadowRenderEffect,
-  FontEffectKind,
   FontEffectRenderContext,
   FontEffectType,
   IFontEffect,

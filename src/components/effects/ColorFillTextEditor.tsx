@@ -13,13 +13,19 @@ export const ColorFillTextEditor = observer(function ColorFillTextEditor({
   effect,
   index,
   count,
+  depth,
+  dragHandleAttributes,
+  dragHandleListeners,
 }: EffectEditorProps<ColorFillText>) {
   return (
     <EffectEditorFrame
       effect={effect}
       index={index}
       count={count}
+      depth={depth}
       title="Fill"
+      dragHandleAttributes={dragHandleAttributes}
+      dragHandleListeners={dragHandleListeners}
     >
       <EffectRow label="Color">
         <EffectColorInput

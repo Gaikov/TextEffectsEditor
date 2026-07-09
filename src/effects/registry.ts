@@ -10,17 +10,18 @@ import {
   deserializeGradientFillText,
   serializeGradientFillText,
 } from './GradientFillText';
+import {
+  GroupEffect,
+  applySerializedGroupFields,
+  readGroupChildren,
+  serializeGroupEffect,
+} from './GroupEffect';
 import type { FontEffectType, IFontEffect } from './IFontEffect';
 import {
   ShadowText,
   deserializeShadowText,
   serializeShadowText,
 } from './ShadowText';
-import {
-  StartShadowEffect,
-  deserializeStartShadowEffect,
-  serializeStartShadowEffect,
-} from './StartShadowEffect';
 import {
   StrokeText,
   deserializeStrokeText,
@@ -37,6 +38,17 @@ export interface FontEffectDefinition {
 }
 
 export const fontEffectDefinitions: FontEffectDefinition[] = [
+  {
+    type: 'group',
+    label: 'Group',
+    icon: 'layers',
+    create: () => new GroupEffect(),
+    serialize: (effect) =>
+      effect instanceof GroupEffect
+        ? serializeGroupEffect(effect, serializeFontEffect)
+        : null,
+    deserialize: deserializeGroupEffect,
+  },
   {
     type: 'fill',
     label: 'Fill',
@@ -57,23 +69,12 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
   },
   {
     type: 'shadow',
-    label: 'End Shadow',
+    label: 'Shadow',
     icon: 'moon',
     create: () => new ShadowText(),
     serialize: (effect) =>
       effect instanceof ShadowText ? serializeShadowText(effect) : null,
     deserialize: deserializeShadowText,
-  },
-  {
-    type: 'startShadow',
-    label: 'Start Shadow',
-    icon: 'selection',
-    create: () => new StartShadowEffect(),
-    serialize: (effect) =>
-      effect instanceof StartShadowEffect
-        ? serializeStartShadowEffect()
-        : null,
-    deserialize: deserializeStartShadowEffect,
   },
   {
     type: 'gradientFill',
@@ -114,4 +115,16 @@ export function deserializeFontEffect(value: unknown) {
 
   const definition = fontEffectDefinitionByType.get(value.type as FontEffectType);
   return definition?.deserialize(value) ?? null;
+}
+
+function deserializeGroupEffect(value: unknown) {
+  if (!isRecord(value)) return null;
+
+  const effect = new GroupEffect(
+    readGroupChildren(value)
+      .map(deserializeFontEffect)
+      .filter((child): child is IFontEffect => child !== null),
+  );
+  applySerializedGroupFields(effect, value);
+  return effect;
 }

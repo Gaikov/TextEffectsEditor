@@ -9,7 +9,6 @@ import {
   type SerializedFontEffect,
 } from './effectSnapshot';
 import type {
-  FontEffectKind,
   FontEffectRenderContext,
   FontEffectType,
   IFontEffect,
@@ -48,7 +47,6 @@ function getTextBounds(
 export class GradientFillText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'gradientFill';
-  kind: FontEffectKind = 'content';
   opacity = 1;
   xOffset = 0;
   yOffset = 0;
@@ -85,12 +83,8 @@ export class GradientFillText implements IFontEffect {
     context.restore();
   }
 
-  draw({
-    getCurrentTargetContext,
-    position,
-    text,
-  }: FontEffectRenderContext) {
-    this.drawTo(getCurrentTargetContext(), position, text);
+  draw({ context, position, text }: FontEffectRenderContext) {
+    this.drawTo(context, position, text);
   }
 }
 
