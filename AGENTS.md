@@ -28,7 +28,7 @@ Write TypeScript with `strict` mode in mind. Use React function components, `obs
 
 Use CSS Modules for local styles and camelCase class names. Prefer Blueprint controls, matching the existing compact `small` style. In property panels, keep labels and values on one line with the same Blueprint font family, normal weight, and a slightly larger shared size; use tight vertical gaps and checkbox controls for boolean properties such as italic. Keep JSON indented with two spaces and follow surrounding TypeScript/CSS style.
 
-For font effects, keep each `IFontEffect` implementation in its own `src/effects/` file and its editor in `src/components/effects/`. Register new effects in the effect registry and editor registry; do not add `instanceof` editor branching to `FontProperties.tsx`.
+For font effects, keep each `IFontEffect` implementation in its own `src/effects/` file and its editor in `src/components/effects/`. Every visual effect must expose `opacity`, apply it with `globalAlpha` inside `draw()`, serialize/deserialize it, and register both model and editor through the effect registries. Content effects draw into `getCurrentTargetContext()`: either the main canvas or the innermost active shadow group. `StartShadowEffect` pushes a group, and `End Shadow` pops it, draws its shadow into the parent target, then draws group content above that shadow. Do not add `instanceof` editor branching to `FontProperties.tsx` or canvas rendering.
 
 ## Testing Guidelines
 

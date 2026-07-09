@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import type { ColorFillText } from '../../effects';
+import type { ShadowText } from '../../effects';
 import {
   EffectColorInput,
   EffectNumberInput,
@@ -9,17 +9,17 @@ import {
 import { EffectEditorFrame } from './EffectEditorFrame';
 import type { EffectEditorProps } from './effectEditorRegistry';
 
-export const ColorFillTextEditor = observer(function ColorFillTextEditor({
+export const ShadowTextEditor = observer(function ShadowTextEditor({
   effect,
   index,
   count,
-}: EffectEditorProps<ColorFillText>) {
+}: EffectEditorProps<ShadowText>) {
   return (
     <EffectEditorFrame
       effect={effect}
       index={index}
       count={count}
-      title="Fill"
+      title="End Shadow"
     >
       <EffectRow label="Color">
         <EffectColorInput
@@ -48,6 +48,31 @@ export const ColorFillTextEditor = observer(function ColorFillTextEditor({
           value={effect.yOffset}
           onChange={(value) => {
             effect.yOffset = value;
+          }}
+        />
+      </EffectRow>
+      <EffectRow label="Blur">
+        <EffectNumberInput
+          value={effect.shadowBlur}
+          min={0}
+          onChange={(value) => {
+            effect.shadowBlur = value;
+          }}
+        />
+      </EffectRow>
+      <EffectRow label="Shadow X">
+        <EffectNumberInput
+          value={effect.shadowOffsetX}
+          onChange={(value) => {
+            effect.shadowOffsetX = value;
+          }}
+        />
+      </EffectRow>
+      <EffectRow label="Shadow Y">
+        <EffectNumberInput
+          value={effect.shadowOffsetY}
+          onChange={(value) => {
+            effect.shadowOffsetY = value;
           }}
         />
       </EffectRow>

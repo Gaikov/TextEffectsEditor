@@ -19,7 +19,7 @@ export function EffectEditorFrame({
   index: number;
   count: number;
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div className={styles.effectCard}>

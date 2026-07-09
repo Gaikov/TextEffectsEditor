@@ -1,5 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-import type { TextPosition } from '../store/fontStore';
 import { createEffectId } from './effectId';
 import {
   isRecord,
@@ -7,15 +6,23 @@ import {
   readLineDash,
   readLineJoin,
   readNumber,
+  readOpacity,
   readString,
   type SerializedFontEffect,
 } from './effectSnapshot';
-import type { FontEffectType, IFontEffect } from './IFontEffect';
+import type {
+  FontEffectKind,
+  FontEffectRenderContext,
+  FontEffectType,
+  IFontEffect,
+} from './IFontEffect';
 
 export class StrokeText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'stroke';
+  kind: FontEffectKind = 'content';
   color = '#10161A';
+  opacity = 1;
   xOffset = 0;
   yOffset = 0;
   lineWidth = 2;
@@ -29,8 +36,13 @@ export class StrokeText implements IFontEffect {
     makeAutoObservable(this, { draw: false });
   }
 
-  draw(text: string, context: CanvasRenderingContext2D, position: TextPosition) {
+  private drawTo(
+    context: CanvasRenderingContext2D,
+    position: FontEffectRenderContext['position'],
+    text: string,
+  ) {
     context.save();
+    context.globalAlpha = this.opacity;
     context.strokeStyle = this.color;
     context.lineWidth = this.lineWidth;
     context.lineCap = this.lineCap;
@@ -45,11 +57,20 @@ export class StrokeText implements IFontEffect {
     );
     context.restore();
   }
+
+  draw({
+    getCurrentTargetContext,
+    position,
+    text,
+  }: FontEffectRenderContext) {
+    this.drawTo(getCurrentTargetContext(), position, text);
+  }
 }
 
 export interface SerializedStrokeText extends SerializedFontEffect {
   type: 'stroke';
   color: string;
+  opacity: number;
   xOffset: number;
   yOffset: number;
   lineWidth: number;
@@ -64,6 +85,7 @@ export function serializeStrokeText(effect: StrokeText): SerializedStrokeText {
   return {
     type: 'stroke',
     color: effect.color,
+    opacity: effect.opacity,
     xOffset: effect.xOffset,
     yOffset: effect.yOffset,
     lineWidth: effect.lineWidth,
@@ -80,6 +102,7 @@ export function deserializeStrokeText(value: unknown) {
 
   const effect = new StrokeText();
   effect.color = readString(value.color, effect.color);
+  effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);
   effect.yOffset = readNumber(value.yOffset, effect.yOffset);
   effect.lineWidth = readNumber(value.lineWidth, effect.lineWidth, 0);

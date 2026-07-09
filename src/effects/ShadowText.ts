@@ -14,71 +14,61 @@ import type {
   IFontEffect,
 } from './IFontEffect';
 
-export class ColorFillText implements IFontEffect {
+export class ShadowText implements IFontEffect {
   id = createEffectId();
-  type: FontEffectType = 'fill';
-  kind: FontEffectKind = 'content';
-  color = '#10161A';
+  type: FontEffectType = 'shadow';
+  kind: FontEffectKind = 'post';
+  color = '#000000';
   opacity = 1;
   xOffset = 0;
   yOffset = 0;
+  shadowBlur = 8;
+  shadowOffsetX = 4;
+  shadowOffsetY = 4;
 
   constructor() {
     makeAutoObservable(this, { draw: false });
   }
 
-  private drawTo(
-    context: CanvasRenderingContext2D,
-    position: FontEffectRenderContext['position'],
-    text: string,
-  ) {
-    context.save();
-    context.globalAlpha = this.opacity;
-    context.fillStyle = this.color;
-    context.fillText(
-      text,
-      position.x + this.xOffset,
-      position.y + this.yOffset,
-    );
-    context.restore();
-  }
-
-  draw({
-    getCurrentTargetContext,
-    position,
-    text,
-  }: FontEffectRenderContext) {
-    this.drawTo(getCurrentTargetContext(), position, text);
+  draw({ endShadowGroup }: FontEffectRenderContext) {
+    endShadowGroup(this);
   }
 }
 
-export interface SerializedColorFillText extends SerializedFontEffect {
-  type: 'fill';
+export interface SerializedShadowText extends SerializedFontEffect {
+  type: 'shadow';
   color: string;
   opacity: number;
   xOffset: number;
   yOffset: number;
+  shadowBlur: number;
+  shadowOffsetX: number;
+  shadowOffsetY: number;
 }
 
-export function serializeColorFillText(
-  effect: ColorFillText,
-): SerializedColorFillText {
+export function serializeShadowText(effect: ShadowText): SerializedShadowText {
   return {
-    type: 'fill',
+    type: 'shadow',
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
     yOffset: effect.yOffset,
+    shadowBlur: effect.shadowBlur,
+    shadowOffsetX: effect.shadowOffsetX,
+    shadowOffsetY: effect.shadowOffsetY,
   };
 }
 
-export function deserializeColorFillText(value: unknown) {
+export function deserializeShadowText(value: unknown) {
   if (!isRecord(value)) return null;
 
-  const effect = new ColorFillText();
+  const effect = new ShadowText();
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);
   effect.yOffset = readNumber(value.yOffset, effect.yOffset);
+  effect.shadowBlur = readNumber(value.shadowBlur, effect.shadowBlur, 0);
+  effect.shadowOffsetX = readNumber(value.shadowOffsetX, effect.shadowOffsetX);
+  effect.shadowOffsetY = readNumber(value.shadowOffsetY, effect.shadowOffsetY);
   return effect;
 }

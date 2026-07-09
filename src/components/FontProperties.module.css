@@ -80,3 +80,10 @@
   line-height: 24px;
   white-space: nowrap;
 }
+
+.effectInlineActions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px;
+}

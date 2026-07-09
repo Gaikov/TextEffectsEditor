@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { autorun } from 'mobx';
+import type { EndShadowRenderEffect, FontEffectRenderContext } from '../effects';
 import { fontStore } from '../store/fontStore';
 import styles from './FontCanvas.module.css';
 
@@ -22,13 +23,109 @@ function configureTextContext(ctx: CanvasRenderingContext2D) {
   ctx.textBaseline = 'middle';
 }
 
+function createBufferCanvas(w: number, h: number) {
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  return canvas;
+}
+
+function createShadowCanvas(
+  sourceCanvas: HTMLCanvasElement,
+  effect: EndShadowRenderEffect,
+  w: number,
+  h: number,
+) {
+  const shadowCanvas = createBufferCanvas(w, h);
+  const shadowContext = shadowCanvas.getContext('2d');
+  if (!shadowContext) return null;
+
+  shadowContext.filter =
+    effect.shadowBlur > 0 ? `blur(${effect.shadowBlur}px)` : 'none';
+  shadowContext.drawImage(
+    sourceCanvas,
+    effect.xOffset + effect.shadowOffsetX,
+    effect.yOffset + effect.shadowOffsetY,
+  );
+  shadowContext.filter = 'none';
+  shadowContext.globalCompositeOperation = 'source-in';
+  shadowContext.fillStyle = effect.color;
+  shadowContext.fillRect(0, 0, w, h);
+
+  const composedCanvas = createBufferCanvas(w, h);
+  const composedContext = composedCanvas.getContext('2d');
+  if (!composedContext) return null;
+
+  composedContext.globalAlpha = effect.opacity;
+  composedContext.drawImage(shadowCanvas, 0, 0);
+  return composedCanvas;
+}
+
 function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
   if (fontStore.text.length === 0) return;
 
-  configureTextContext(ctx);
+  const mainCanvas = createBufferCanvas(w, h);
+  const mainContext = mainCanvas.getContext('2d')!;
+  const shadowGroups: FontEffectRenderContext['shadowGroups'] = [];
+  configureTextContext(mainContext);
+
+  const createConfiguredBuffer = () => {
+    const canvas = createBufferCanvas(w, h);
+    configureTextContext(canvas.getContext('2d')!);
+    return canvas;
+  };
+
+  const renderContext: FontEffectRenderContext = {
+    text: fontStore.text,
+    position: { x: w / 2, y: h / 2 },
+    width: w,
+    height: h,
+    mainCanvas,
+    mainContext,
+    shadowGroups,
+    createBufferCanvas: createConfiguredBuffer,
+    configureTextContext,
+    startShadowGroup: () => {
+      const canvas = createConfiguredBuffer();
+      shadowGroups.push({
+        canvas,
+        context: canvas.getContext('2d')!,
+      });
+    },
+    endShadowGroup: (effect) => {
+      if (shadowGroups.length === 0) return;
+
+      const group = shadowGroups.pop()!;
+      const targetContext =
+        shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
+      const shadowCanvas = createShadowCanvas(
+        group.canvas,
+        effect,
+        w,
+        h,
+      );
+      if (!shadowCanvas) return;
+
+      targetContext.drawImage(shadowCanvas, 0, 0);
+      targetContext.drawImage(group.canvas, 0, 0);
+    },
+    getCurrentTargetContext: () => {
+      return shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
+    },
+  };
+
   for (const effect of fontStore.effects) {
-    effect.draw(fontStore.text, ctx, { x: w / 2, y: h / 2 });
+    effect.draw(renderContext);
   }
+
+  while (shadowGroups.length > 0) {
+    const group = shadowGroups.pop()!;
+    const targetContext =
+      shadowGroups[shadowGroups.length - 1]?.context ?? mainContext;
+    targetContext.drawImage(group.canvas, 0, 0);
+  }
+
+  ctx.drawImage(mainCanvas, 0, 0);
 }
 
 function draw(canvas: HTMLCanvasElement) {

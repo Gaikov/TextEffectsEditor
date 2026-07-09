@@ -55,10 +55,16 @@ export function EffectNumberInput({
   value,
   onChange,
   min,
+  max,
+  stepSize,
+  minorStepSize,
 }: {
   value: number;
   onChange: (value: number) => void;
   min?: number;
+  max?: number;
+  stepSize?: number;
+  minorStepSize?: number;
 }) {
   return (
     <NumericInput
@@ -66,9 +72,39 @@ export function EffectNumberInput({
       value={value}
       onValueChange={onChange}
       min={min}
+      max={max}
+      stepSize={stepSize}
+      minorStepSize={minorStepSize}
       fill
       buttonPosition="none"
     />
+  );
+}
+
+export function EffectOpacityRow({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <EffectRow label="Opacity">
+      <input
+        className="bp6-input bp6-small"
+        type="number"
+        min={0}
+        max={1}
+        step={0.01}
+        value={String(value)}
+        onChange={(e) => {
+          const nextValue = Number(e.target.value);
+          if (Number.isFinite(nextValue)) {
+            onChange(Math.max(0, Math.min(1, nextValue)));
+          }
+        }}
+      />
+    </EffectRow>
   );
 }
 

@@ -5,7 +5,22 @@ import {
   serializeColorFillText,
 } from './ColorFillText';
 import { isRecord, type SerializedFontEffect } from './effectSnapshot';
+import {
+  GradientFillText,
+  deserializeGradientFillText,
+  serializeGradientFillText,
+} from './GradientFillText';
 import type { FontEffectType, IFontEffect } from './IFontEffect';
+import {
+  ShadowText,
+  deserializeShadowText,
+  serializeShadowText,
+} from './ShadowText';
+import {
+  StartShadowEffect,
+  deserializeStartShadowEffect,
+  serializeStartShadowEffect,
+} from './StartShadowEffect';
 import {
   StrokeText,
   deserializeStrokeText,
@@ -39,6 +54,37 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof StrokeText ? serializeStrokeText(effect) : null,
     deserialize: deserializeStrokeText,
+  },
+  {
+    type: 'shadow',
+    label: 'End Shadow',
+    icon: 'moon',
+    create: () => new ShadowText(),
+    serialize: (effect) =>
+      effect instanceof ShadowText ? serializeShadowText(effect) : null,
+    deserialize: deserializeShadowText,
+  },
+  {
+    type: 'startShadow',
+    label: 'Start Shadow',
+    icon: 'selection',
+    create: () => new StartShadowEffect(),
+    serialize: (effect) =>
+      effect instanceof StartShadowEffect
+        ? serializeStartShadowEffect()
+        : null,
+    deserialize: deserializeStartShadowEffect,
+  },
+  {
+    type: 'gradientFill',
+    label: 'Gradient Fill',
+    icon: 'tint',
+    create: () => new GradientFillText(),
+    serialize: (effect) =>
+      effect instanceof GradientFillText
+        ? serializeGradientFillText(effect)
+        : null,
+    deserialize: deserializeGradientFillText,
   },
 ];
 

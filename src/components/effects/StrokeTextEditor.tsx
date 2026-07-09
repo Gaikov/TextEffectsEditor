@@ -4,6 +4,7 @@ import type { StrokeText } from '../../effects';
 import {
   EffectColorInput,
   EffectNumberInput,
+  EffectOpacityRow,
   EffectRow,
   parseLineDash,
 } from './EffectEditorFields';
@@ -30,6 +31,12 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           }}
         />
       </EffectRow>
+      <EffectOpacityRow
+        value={effect.opacity}
+        onChange={(value) => {
+          effect.opacity = value;
+        }}
+      />
       <EffectRow label="X offset">
         <EffectNumberInput
           value={effect.xOffset}
