@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "text": "NEON QUEST",
+  "fontFamily": "Arial Black",
+  "fontSize": 132,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 800,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Neon Title",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#00E5FF",
+            "#7C4DFF",
+            "#FF2DAA",
+            "#FFD166"
+          ],
+          "direction": "horizontal"
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#07111F",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 18,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.72,
+          "xOffset": 0,
+          "yOffset": -2,
+          "lineWidth": 3,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#00D7FF",
+          "opacity": 0.9,
+          "blur": 18,
+          "spread": 3
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FF2DAA",
+          "opacity": 0.55,
+          "blur": 42,
+          "spread": 4
+        },
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#02040A",
+          "opacity": 0.72,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 18,
+          "shadowOffsetX": 14,
+          "shadowOffsetY": 18
+        }
+      ]
+    }
+  ]
+}

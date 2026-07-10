@@ -14,6 +14,7 @@ The app uses a canvas preview with a tree of effects. Effects can be grouped, re
 - Import/export JSON presets.
 - Export the current result as a PNG file.
 - Pan, zoom, center view, reset zoom, and resizable properties panel.
+- Two-row top bar with a hover menu and compact canvas toolbar.
 
 ## Getting Started
 
@@ -41,6 +42,7 @@ The build output is written to `dist/`.
 5. Toggle the eye icon to temporarily hide an effect.
 6. Use `File -> Save Settings` to store the current setup in this browser.
 7. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
+8. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
 
@@ -136,6 +138,23 @@ Use Glow after a fill, stroke, or gradient layer to create neon, magic, or selec
 - `Export PNG`: saves the current canvas result as a transparent PNG.
 
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
+
+## Menus And Shortcuts
+
+The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, or `View` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+
+| Command | Shortcut |
+|---|---|
+| Save Settings | `Ctrl/Cmd+S` |
+| Import JSON | `Ctrl/Cmd+O` |
+| Export JSON | `Ctrl/Cmd+Shift+E` |
+| Export PNG | `Ctrl/Cmd+E` |
+| Undo | `Ctrl/Cmd+Z` |
+| Redo | `Ctrl/Cmd+Shift+Z` or `Ctrl/Cmd+Y` |
+| Center View | `Ctrl/Cmd+Shift+0` |
+| Reset Zoom | `Ctrl/Cmd+0` |
+
+Undo and redo live in the `Edit` menu and on keyboard shortcuts. They are ignored while typing in editable fields so native text editing behavior stays intact.
 
 ## Development Notes
 

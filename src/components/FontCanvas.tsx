@@ -126,8 +126,8 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
 
       const v = viewRef.current;
       v.zoom = zoom;
-      v.ox = Math.max(0, (container.clientWidth - fontStore.canvasWidth * zoom) / 2);
-      v.oy = Math.max(0, (container.clientHeight - fontStore.canvasHeight * zoom) / 2);
+      v.ox = (container.clientWidth - fontStore.canvasWidth * zoom) / 2;
+      v.oy = (container.clientHeight - fontStore.canvasHeight * zoom) / 2;
       applyTransform();
     },
     [applyTransform],

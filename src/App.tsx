@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
@@ -63,15 +63,15 @@ export default function App() {
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
 
-  const loadSettingsJsonText = async (text: string) => {
+  const loadSettingsJsonText = useCallback(async (text: string) => {
     try {
       fontStore.loadJSON(JSON.parse(text));
     } catch (error) {
       console.warn('Unable to import FontEffects JSON settings.', error);
     }
-  };
+  }, []);
 
-  const exportSettingsJson = async () => {
+  const exportSettingsJson = useCallback(async () => {
     const blob = new Blob(
       [JSON.stringify(fontStore.toJSON(), null, 2)],
       { type: 'application/json' },
@@ -105,9 +105,9 @@ export default function App() {
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-  };
+  }, []);
 
-  const importSettingsJson = async () => {
+  const importSettingsJson = useCallback(async () => {
     if (window.showOpenFilePicker) {
       try {
         const [handle] = await window.showOpenFilePicker({
@@ -126,7 +126,19 @@ export default function App() {
     }
 
     jsonImportInputRef.current?.click();
-  };
+  }, [loadSettingsJsonText]);
+
+  const exportPng = useCallback(() => {
+    void canvasRef.current?.exportPng();
+  }, []);
+
+  const centerView = useCallback(() => {
+    canvasRef.current?.centerView();
+  }, []);
+
+  const resetZoom = useCallback(() => {
+    canvasRef.current?.resetZoom();
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -152,9 +164,47 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const modifierPressed = e.metaKey || e.ctrlKey;
       if (!modifierPressed) return;
-      if (isEditableShortcutTarget(e.target)) return;
 
       const key = e.key.toLowerCase();
+      const editableTarget = isEditableShortcutTarget(e.target);
+      if (key === 's') {
+        e.preventDefault();
+        saveSettingsToLocalStorage();
+        return;
+      }
+
+      if (key === 'o') {
+        e.preventDefault();
+        void importSettingsJson();
+        return;
+      }
+
+      if (key === 'e' && e.shiftKey) {
+        e.preventDefault();
+        void exportSettingsJson();
+        return;
+      }
+
+      if (key === 'e') {
+        e.preventDefault();
+        exportPng();
+        return;
+      }
+
+      if (key === '0' && e.shiftKey) {
+        e.preventDefault();
+        centerView();
+        return;
+      }
+
+      if (key === '0') {
+        e.preventDefault();
+        resetZoom();
+        return;
+      }
+
+      if (editableTarget) return;
+
       if (key === 'z' && e.shiftKey) {
         e.preventDefault();
         undoService.redo();
@@ -175,7 +225,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [centerView, exportPng, exportSettingsJson, importSettingsJson, resetZoom]);
 
   useEffect(() => {
     if (!resizingPropertiesPanel) return;
@@ -201,17 +251,15 @@ export default function App() {
   return (
     <div className={styles.root}>
       <CanvasSizeInputs
-        onCenterView={() => canvasRef.current?.centerView()}
-        onExport={() => {
-          void canvasRef.current?.exportPng();
-        }}
+        onCenterView={centerView}
+        onExport={exportPng}
         onExportJson={() => {
           void exportSettingsJson();
         }}
         onImportJson={() => {
           void importSettingsJson();
         }}
-        onResetZoom={() => canvasRef.current?.resetZoom()}
+        onResetZoom={resetZoom}
         onSaveSettings={saveSettingsToLocalStorage}
       />
       <input
