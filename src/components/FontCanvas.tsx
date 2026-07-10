@@ -76,8 +76,8 @@ function createExportBlob() {
 
 export interface FontCanvasHandle {
   centerView: () => void;
-  copyPngToClipboard: () => Promise<void>;
-  exportPng: () => Promise<void>;
+  copyPngToClipboard: () => Promise<boolean>;
+  exportPng: () => Promise<boolean>;
   resetZoom: () => void;
 }
 
@@ -123,7 +123,7 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
   const copyPngToClipboard = useCallback(async () => {
     if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
       console.warn('PNG clipboard write is not supported in this browser.');
-      return;
+      return false;
     }
 
     try {
@@ -131,8 +131,10 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
+      return true;
     } catch (error) {
       console.warn('Unable to copy PNG to clipboard.', error);
+      return false;
     }
   }, []);
 
@@ -153,7 +155,7 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
         writable = await handle.createWritable();
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
+          return false;
         }
       }
     }
@@ -163,7 +165,7 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
     if (writable) {
       await writable.write(blob);
       await writable.close();
-      return;
+      return true;
     }
 
     const url = URL.createObjectURL(blob);
@@ -174,6 +176,7 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+    return true;
   }, []);
 
   useImperativeHandle(ref, () => ({

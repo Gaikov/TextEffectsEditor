@@ -4,6 +4,8 @@ Text Effects Editor is a browser-based editor for designing styled text and expo
 
 The app uses a canvas preview with a tree of effects. Effects can be grouped, reordered, disabled, and saved as JSON presets.
 
+![Text Effects Editor screenshot](docs/app-screenshot.png)
+
 ## Features
 
 - Live text preview on a transparent checkerboard canvas.
@@ -148,6 +150,7 @@ Use Glow after a fill, stroke, or gradient layer to create neon, magic, or selec
 - `Add To Gallery`: asks for an optional name and saves the current root effect stack to local storage.
 - `Gallery`: opens saved effect stacks with dynamic previews and case-insensitive name search; applying an item replaces the current root effects and can be undone.
 
+File actions show non-blocking toast feedback after successful operations or recoverable errors.
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
 Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
 

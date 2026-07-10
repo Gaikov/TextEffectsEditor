@@ -16,6 +16,7 @@ import {
   loadSettingsFromLocalStorage,
   saveSettingsToLocalStorage,
 } from './store/settingsPersistence';
+import { showFailureToast, showSuccessToast } from './toasts/appToaster';
 import { undoService } from './undo';
 import type { CheckerboardTheme } from './viewPreferences';
 import styles from './App.module.css';
@@ -32,6 +33,7 @@ const SETTINGS_FILE_TYPES = [
     accept: { 'application/json': ['.json'] },
   },
 ];
+type CommandResult = boolean | null;
 
 function clampPanelWidth(value: number) {
   return Math.max(MIN_PANEL_WIDTH, Math.min(MAX_PANEL_WIDTH, value));
@@ -85,15 +87,16 @@ export default function App() {
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
 
-  const loadSettingsJsonText = useCallback(async (text: string) => {
+  const loadSettingsJsonText = useCallback((text: string) => {
     try {
-      fontStore.loadJSON(JSON.parse(text));
+      return fontStore.loadJSON(JSON.parse(text));
     } catch (error) {
       console.warn('Unable to import FontEffects JSON settings.', error);
+      return false;
     }
   }, []);
 
-  const exportSettingsJson = useCallback(async () => {
+  const exportSettingsJson = useCallback(async (): Promise<CommandResult> => {
     const blob = new Blob(
       [JSON.stringify(fontStore.toJSON(), null, 2)],
       { type: 'application/json' },
@@ -108,59 +111,110 @@ export default function App() {
         });
         writable = await handle.createWritable();
       } catch (error) {
-        if (isAbortError(error)) return;
+        if (isAbortError(error)) return null;
         console.warn('Unable to open JSON export file picker.', error);
       }
     }
 
-    if (writable) {
-      await writable.write(blob);
-      await writable.close();
-      return;
-    }
+    try {
+      if (writable) {
+        await writable.write(blob);
+        await writable.close();
+        return true;
+      }
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = SETTINGS_FILE_NAME;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = SETTINGS_FILE_NAME;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.warn('Unable to export FontEffects JSON settings.', error);
+      return false;
+    }
   }, []);
 
-  const importSettingsJson = useCallback(async () => {
+  const importSettingsJson = useCallback(async (): Promise<CommandResult> => {
     if (window.showOpenFilePicker) {
       try {
         const [handle] = await window.showOpenFilePicker({
           multiple: false,
           types: SETTINGS_FILE_TYPES,
         });
-        if (!handle) return;
+        if (!handle) return null;
 
         const file = await handle.getFile();
-        await loadSettingsJsonText(await file.text());
+        return loadSettingsJsonText(await file.text());
       } catch (error) {
-        if (isAbortError(error)) return;
+        if (isAbortError(error)) return null;
         console.warn('Unable to import FontEffects JSON settings.', error);
+        return false;
       }
-      return;
     }
 
     jsonImportInputRef.current?.click();
+    return null;
   }, [loadSettingsJsonText]);
 
-  const exportPng = useCallback(() => {
-    void canvasRef.current?.exportPng();
+  const saveSettings = useCallback(() => {
+    if (saveSettingsToLocalStorage()) {
+      showSuccessToast('Settings saved');
+    } else {
+      showFailureToast('Unable to save settings');
+    }
   }, []);
 
-  const copyPngToClipboard = useCallback(() => {
-    void canvasRef.current?.copyPngToClipboard();
+  const newDocument = useCallback(() => {
+    fontStore.newDocument();
+    showSuccessToast('New document created');
+  }, []);
+
+  const exportJsonWithFeedback = useCallback(async () => {
+    const result = await exportSettingsJson();
+    if (result === true) {
+      showSuccessToast('JSON exported');
+    } else if (result === false) {
+      showFailureToast('Unable to export JSON');
+    }
+  }, [exportSettingsJson]);
+
+  const importJsonWithFeedback = useCallback(async () => {
+    const result = await importSettingsJson();
+    if (result === true) {
+      showSuccessToast('JSON imported');
+    } else if (result === false) {
+      showFailureToast('Unable to import JSON');
+    }
+  }, [importSettingsJson]);
+
+  const exportPng = useCallback(async () => {
+    const result = await canvasRef.current?.exportPng();
+    if (result === true) {
+      showSuccessToast('PNG exported');
+    } else if (result === false) {
+      showFailureToast('Unable to export PNG');
+    }
+  }, []);
+
+  const copyPngToClipboard = useCallback(async () => {
+    const result = await canvasRef.current?.copyPngToClipboard();
+    if (result === true) {
+      showSuccessToast('PNG copied to clipboard');
+    } else {
+      showFailureToast('Unable to copy PNG to clipboard');
+    }
   }, []);
 
   const addToGallery = useCallback((name: string) => {
     const effects = fontStore.toJSON().effects;
-    if (effects.length === 0) return;
+    if (effects.length === 0) {
+      showFailureToast('Nothing to add to gallery');
+      return;
+    }
 
     const item = createEffectsGalleryItem(effects, name);
     setGalleryItems((items) => {
@@ -168,20 +222,31 @@ export default function App() {
       saveEffectsGallery(nextItems);
       return nextItems;
     });
+    showSuccessToast('Added to gallery');
   }, []);
 
   const applyGalleryItem = useCallback((item: EffectsGalleryItem) => {
-    fontStore.replaceEffectsFromSerialized(item.effects, 'Apply gallery effect');
-    setGalleryOpen(false);
+    if (fontStore.replaceEffectsFromSerialized(item.effects, 'Apply gallery effect')) {
+      setGalleryOpen(false);
+      showSuccessToast('Gallery item applied');
+    } else {
+      showFailureToast('Unable to apply gallery item');
+    }
   }, []);
 
   const deleteGalleryItem = useCallback((id: string) => {
+    if (!galleryItems.some((item) => item.id === id)) {
+      showFailureToast('Unable to delete gallery item');
+      return;
+    }
+
     setGalleryItems((items) => {
       const nextItems = items.filter((item) => item.id !== id);
       saveEffectsGallery(nextItems);
       return nextItems;
     });
-  }, []);
+    showSuccessToast('Gallery item deleted');
+  }, [galleryItems]);
 
   const centerView = useCallback(() => {
     canvasRef.current?.centerView();
@@ -224,37 +289,37 @@ export default function App() {
       const editableTarget = isEditableShortcutTarget(e.target);
       if (key === 'n') {
         e.preventDefault();
-        fontStore.newDocument();
+        newDocument();
         return;
       }
 
       if (key === 'c' && e.shiftKey) {
         e.preventDefault();
-        copyPngToClipboard();
+        void copyPngToClipboard();
         return;
       }
 
       if (key === 's') {
         e.preventDefault();
-        saveSettingsToLocalStorage();
+        saveSettings();
         return;
       }
 
       if (key === 'o') {
         e.preventDefault();
-        void importSettingsJson();
+        void importJsonWithFeedback();
         return;
       }
 
       if (key === 'e' && e.shiftKey) {
         e.preventDefault();
-        void exportSettingsJson();
+        void exportJsonWithFeedback();
         return;
       }
 
       if (key === 'e') {
         e.preventDefault();
-        exportPng();
+        void exportPng();
         return;
       }
 
@@ -296,9 +361,11 @@ export default function App() {
     centerView,
     copyPngToClipboard,
     exportPng,
-    exportSettingsJson,
-    importSettingsJson,
+    exportJsonWithFeedback,
+    importJsonWithFeedback,
+    newDocument,
     resetZoom,
+    saveSettings,
   ]);
 
   useEffect(() => {
@@ -327,18 +394,22 @@ export default function App() {
       <CanvasSizeInputs
         onAddToGallery={() => setAddToGalleryOpen(true)}
         onCenterView={centerView}
-        onCopyToClipboard={copyPngToClipboard}
-        onExport={exportPng}
+        onCopyToClipboard={() => {
+          void copyPngToClipboard();
+        }}
+        onExport={() => {
+          void exportPng();
+        }}
         onExportJson={() => {
-          void exportSettingsJson();
+          void exportJsonWithFeedback();
         }}
         onImportJson={() => {
-          void importSettingsJson();
+          void importJsonWithFeedback();
         }}
-        onNewDocument={fontStore.newDocument}
+        onNewDocument={newDocument}
         onOpenGallery={() => setGalleryOpen(true)}
         onResetZoom={resetZoom}
-        onSaveSettings={saveSettingsToLocalStorage}
+        onSaveSettings={saveSettings}
         checkerboardTheme={checkerboardTheme}
         onSetCheckerboardTheme={setCheckerboardTheme}
       />
@@ -364,7 +435,16 @@ export default function App() {
           e.target.value = '';
           if (!file) return;
 
-          void file.text().then(loadSettingsJsonText);
+          void file.text().then((text) => {
+            if (loadSettingsJsonText(text)) {
+              showSuccessToast('JSON imported');
+            } else {
+              showFailureToast('Unable to import JSON');
+            }
+          }).catch((error) => {
+            console.warn('Unable to read FontEffects JSON settings.', error);
+            showFailureToast('Unable to import JSON');
+          });
         }}
       />
       <div className={styles.body}>

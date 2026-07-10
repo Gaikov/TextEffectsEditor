@@ -8,8 +8,10 @@ export function saveSettingsToLocalStorage() {
       SETTINGS_STORAGE_KEY,
       JSON.stringify(fontStore.toJSON()),
     );
+    return true;
   } catch (error) {
     console.warn('Unable to save FontEffects settings.', error);
+    return false;
   }
 }
 

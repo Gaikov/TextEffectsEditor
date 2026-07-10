@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "text": "MIDNIGHT",
+  "fontFamily": "Arial Black",
+  "fontSize": 128,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 800,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Cinematic Shadow",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#F7F1DE",
+            "#D6B878",
+            "#7B5A2B"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#1A1410",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 14,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#F2C66D",
+          "opacity": 0.38,
+          "blur": 16,
+          "spread": 2
+        },
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#050506",
+          "opacity": 0.78,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 22,
+          "shadowOffsetX": 18,
+          "shadowOffsetY": 24
+        },
+        {
+          "type": "fill",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.18,
+          "xOffset": -3,
+          "yOffset": -5
+        }
+      ]
+    }
+  ]
+}

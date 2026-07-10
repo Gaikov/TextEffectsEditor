@@ -33,6 +33,8 @@ export function EffectEditorFrame({
   headerActions?: ReactNode;
   children?: ReactNode;
 }) {
+  const hasBody = children !== undefined && children !== null;
+
   return (
     <div
       className={styles.effectCard}
@@ -113,8 +115,18 @@ export function EffectEditorFrame({
           />
         </div>
       </div>
-      {!effect.collapsed && children && (
-        <div className={styles.effectBody}>{children}</div>
+      {hasBody && (
+        <div
+          className={`${styles.effectBodyFrame} ${
+            effect.collapsed
+              ? styles.effectBodyFrameCollapsed
+              : styles.effectBodyFrameExpanded
+          }`}
+        >
+          <div className={styles.effectBodyClip} aria-hidden={effect.collapsed}>
+            <div className={styles.effectBody}>{children}</div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -54,6 +54,31 @@
   gap: 6px;
 }
 
+.effectBodyFrame {
+  display: grid;
+  opacity: 1;
+  transition:
+    grid-template-rows 160ms ease,
+    margin-top 160ms ease,
+    opacity 120ms ease;
+}
+
+.effectBodyFrameExpanded {
+  grid-template-rows: 1fr;
+  margin-top: 0;
+}
+
+.effectBodyFrameCollapsed {
+  grid-template-rows: 0fr;
+  margin-top: -6px;
+  opacity: 0;
+}
+
+.effectBodyClip {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .effectHeader {
   display: flex;
   align-items: center;
@@ -196,4 +221,10 @@
   background: rgb(45 114 210 / 16%);
   border-color: #2d72d2;
   color: #f6f7f9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .effectBodyFrame {
+    transition: none;
+  }
 }
