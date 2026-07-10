@@ -1,7 +1,11 @@
 import { type Dispatch, type SetStateAction, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
+  AnchorButton,
   Button,
+  Dialog,
+  DialogBody,
+  DialogFooter,
   Menu,
   MenuDivider,
   MenuItem,
@@ -76,6 +80,26 @@ const SHORTCUT_STYLE: React.CSSProperties = {
   color: '#A7B6C2',
   fontSize: 12,
 };
+
+const ABOUT_ROW_STYLE: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '96px minmax(0, 1fr)',
+  gap: 10,
+  lineHeight: '24px',
+};
+
+const ABOUT_LABEL_STYLE: React.CSSProperties = {
+  color: '#A7B6C2',
+};
+
+const ABOUT_LINK_STYLE: React.CSSProperties = {
+  color: '#8ABBFF',
+};
+
+const DEVELOPER_SITE_URL = 'https://grom-games.com';
+const DONATION_EMAIL = 'grom.games@gmail.com';
+const PAYPAL_DONATE_URL =
+  'https://www.paypal.com/donate/?business=grom.games%40gmail.com&currency_code=USD';
 
 interface Props {
   checkerboardTheme: CheckerboardTheme;
@@ -158,6 +182,7 @@ export default observer(function CanvasSizeInputs({
   onSetCheckerboardTheme,
 }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <div style={ROOT_STYLE}>
@@ -285,6 +310,20 @@ export default observer(function CanvasSizeInputs({
             </Menu>
           }
         />
+        <MenuBarItem
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          text="Help"
+          content={
+            <Menu>
+              <MenuItem
+                icon="info-sign"
+                text="About"
+                onClick={() => setAboutOpen(true)}
+              />
+            </Menu>
+          }
+        />
       </div>
       <div style={TOOLBAR_STYLE}>
         <div style={FIELD_STYLE}>
@@ -334,6 +373,60 @@ export default observer(function CanvasSizeInputs({
           onClick={onResetZoom}
         />
       </div>
+      <Dialog
+        isOpen={aboutOpen}
+        onClose={() => setAboutOpen(false)}
+        title="About Text Effects Editor"
+      >
+        <DialogBody>
+          <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Developer</span>
+            <span>Roman Gaikov</span>
+          </div>
+          <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Website</span>
+            <a
+              href={DEVELOPER_SITE_URL}
+              rel="noreferrer"
+              style={ABOUT_LINK_STYLE}
+              target="_blank"
+            >
+              grom-games.com
+            </a>
+          </div>
+          <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Donations</span>
+            <a
+              href={PAYPAL_DONATE_URL}
+              rel="noreferrer"
+              style={ABOUT_LINK_STYLE}
+              target="_blank"
+            >
+              PayPal: {DONATION_EMAIL}
+            </a>
+          </div>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <AnchorButton
+                href={DEVELOPER_SITE_URL}
+                rel="noreferrer"
+                target="_blank"
+                text="Website"
+              />
+              <AnchorButton
+                href={PAYPAL_DONATE_URL}
+                intent="primary"
+                rel="noreferrer"
+                target="_blank"
+                text="Donate"
+              />
+              <Button text="Close" onClick={() => setAboutOpen(false)} />
+            </>
+          }
+        />
+      </Dialog>
     </div>
   );
 });

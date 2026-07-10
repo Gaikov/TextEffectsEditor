@@ -6,6 +6,13 @@ The app uses a canvas preview with a tree of effects. Effects can be grouped, re
 
 ![Text Effects Editor screenshot](docs/app-screenshot.png)
 
+## Developer And Support
+
+Text Effects Editor is developed by Roman Gaikov.
+
+- Website: [grom-games.com](https://grom-games.com)
+- Donations: [PayPal: grom.games@gmail.com](https://www.paypal.com/donate/?business=grom.games%40gmail.com&currency_code=USD)
+
 ## Features
 
 - Live text preview on a transparent checkerboard canvas.
