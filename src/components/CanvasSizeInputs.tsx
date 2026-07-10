@@ -11,6 +11,7 @@ import {
 } from '@blueprintjs/core';
 import { fontStore } from '../store/fontStore';
 import { undoService } from '../undo';
+import type { CheckerboardTheme } from '../viewPreferences';
 
 const ROOT_STYLE: React.CSSProperties = {
   background: '#252a31',
@@ -77,12 +78,18 @@ const SHORTCUT_STYLE: React.CSSProperties = {
 };
 
 interface Props {
+  checkerboardTheme: CheckerboardTheme;
+  onAddToGallery: () => void;
   onCenterView: () => void;
+  onCopyToClipboard: () => void;
   onExport: () => void;
   onExportJson: () => void;
   onImportJson: () => void;
+  onNewDocument: () => void;
+  onOpenGallery: () => void;
   onResetZoom: () => void;
   onSaveSettings: () => void;
+  onSetCheckerboardTheme: (theme: CheckerboardTheme) => void;
 }
 
 function Shortcut({ children }: { children: string }) {
@@ -137,12 +144,18 @@ function MenuBarItem({
 }
 
 export default observer(function CanvasSizeInputs({
+  checkerboardTheme,
+  onAddToGallery,
   onCenterView,
+  onCopyToClipboard,
   onExport,
   onExportJson,
   onImportJson,
+  onNewDocument,
+  onOpenGallery,
   onResetZoom,
   onSaveSettings,
+  onSetCheckerboardTheme,
 }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -155,6 +168,13 @@ export default observer(function CanvasSizeInputs({
           text="File"
           content={
             <Menu>
+              <MenuItem
+                icon="document"
+                text="New"
+                labelElement={<Shortcut>Ctrl/Cmd+N</Shortcut>}
+                onClick={onNewDocument}
+              />
+              <MenuDivider />
               <MenuItem
                 icon="floppy-disk"
                 text="Save Settings"
@@ -179,6 +199,24 @@ export default observer(function CanvasSizeInputs({
                 text="Export PNG"
                 labelElement={<Shortcut>Ctrl/Cmd+E</Shortcut>}
                 onClick={onExport}
+              />
+              <MenuDivider />
+              <MenuItem
+                icon="clipboard"
+                text="Copy to Clipboard"
+                labelElement={<Shortcut>Ctrl/Cmd+Shift+C</Shortcut>}
+                onClick={onCopyToClipboard}
+              />
+              <MenuDivider />
+              <MenuItem
+                icon="add-to-artifact"
+                text="Add To Gallery"
+                onClick={onAddToGallery}
+              />
+              <MenuItem
+                icon="grid-view"
+                text="Gallery"
+                onClick={onOpenGallery}
               />
             </Menu>
           }
@@ -219,6 +257,19 @@ export default observer(function CanvasSizeInputs({
           text="View"
           content={
             <Menu>
+              <MenuItem text="Checkerboard">
+                <MenuItem
+                  icon={checkerboardTheme === 'light' ? 'tick' : 'blank'}
+                  text="Light"
+                  onClick={() => onSetCheckerboardTheme('light')}
+                />
+                <MenuItem
+                  icon={checkerboardTheme === 'dark' ? 'tick' : 'blank'}
+                  text="Dark"
+                  onClick={() => onSetCheckerboardTheme('dark')}
+                />
+              </MenuItem>
+              <MenuDivider />
               <MenuItem
                 icon="locate"
                 text="Center View"

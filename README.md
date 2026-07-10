@@ -13,8 +13,11 @@ The app uses a canvas preview with a tree of effects. Effects can be grouped, re
 - Save settings to browser local storage.
 - Import/export JSON presets.
 - Export the current result as a PNG file.
+- Copy the current transparent PNG image to the system clipboard.
+- Save reusable effect stacks in a local gallery with dynamic previews.
 - Pan, zoom, center view, reset zoom, and resizable properties panel.
 - Two-row top bar with a hover menu and compact canvas toolbar.
+- Light or dark checkerboard preview background stored as an app preference.
 
 ## Getting Started
 
@@ -40,9 +43,13 @@ The build output is written to `dist/`.
 3. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Shadow`, `Glow`, or `Group`.
 4. Drag effects by the handle to change their order or move them into groups.
 5. Toggle the eye icon to temporarily hide an effect.
-6. Use `File -> Save Settings` to store the current setup in this browser.
-7. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
-8. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+6. Use `File -> New` to reset the current document and clear undo/redo history.
+7. Use `File -> Save Settings` to store the current setup in this browser.
+8. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
+9. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
+10. Use `File -> Add To Gallery` to name and save the current effect stack, and `File -> Gallery` to search, apply, or delete saved stacks.
+11. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
+12. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
 
@@ -132,23 +139,32 @@ Use Glow after a fill, stroke, or gradient layer to create neon, magic, or selec
 
 ## Saving And Export
 
+- `New`: resets text, font settings, canvas size, effects, and undo/redo history.
 - `Save Settings`: writes the current editor state to local storage and restores it on the next app start.
 - `Import JSON`: loads a previously exported preset.
 - `Export JSON`: saves text, canvas settings, font settings, and the full effect tree.
 - `Export PNG`: saves the current canvas result as a transparent PNG.
+- `Copy to Clipboard`: copies the current canvas result as a transparent PNG image.
+- `Add To Gallery`: asks for an optional name and saves the current root effect stack to local storage.
+- `Gallery`: opens saved effect stacks with dynamic previews and case-insensitive name search; applying an item replaces the current root effects and can be undone.
 
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
+Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
 
 ## Menus And Shortcuts
 
 The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, or `View` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
 
+`View -> Checkerboard` switches the preview background between light and dark squares. This is an application preference saved in local storage; it does not affect PNG export or JSON presets.
+
 | Command | Shortcut |
 |---|---|
+| New | `Ctrl/Cmd+N` |
 | Save Settings | `Ctrl/Cmd+S` |
 | Import JSON | `Ctrl/Cmd+O` |
 | Export JSON | `Ctrl/Cmd+Shift+E` |
 | Export PNG | `Ctrl/Cmd+E` |
+| Copy to Clipboard | `Ctrl/Cmd+Shift+C` |
 | Undo | `Ctrl/Cmd+Z` |
 | Redo | `Ctrl/Cmd+Shift+Z` or `Ctrl/Cmd+Y` |
 | Center View | `Ctrl/Cmd+Shift+0` |

@@ -173,6 +173,32 @@ function EffectInsertDropZone({
   );
 }
 
+function EmptyEffectDropTarget({
+  parentId,
+}: {
+  parentId: string | null;
+}) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: getEffectInsertId(parentId, 0),
+    data: {
+      kind: 'effect-insert',
+      parentId,
+      index: 0,
+    } satisfies EffectInsertDropData,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`${styles.emptyDropTarget} ${
+        isOver ? styles.emptyDropTargetOver : ''
+      }`}
+    >
+      Drop effects here
+    </div>
+  );
+}
+
 const SortableEffectEditor = observer(function SortableEffectEditor({
   effect,
   index,
@@ -273,7 +299,7 @@ const EffectList = observer(function EffectList({
         <EffectInsertDropZone parentId={parentId} index={effects.length} />
       )}
       {effects.length === 0 && (
-        <div className={styles.emptyDropTarget}>Drop effects here</div>
+        <EmptyEffectDropTarget parentId={parentId} />
       )}
     </div>
   );

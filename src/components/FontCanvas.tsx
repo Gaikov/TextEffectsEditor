@@ -7,72 +7,34 @@ import {
   useState,
 } from 'react';
 import { autorun } from 'mobx';
-import type { FontEffectRenderContext, IFontEffect } from '../effects';
+import { drawTextEffects } from '../render/renderFontEffects';
 import { fontStore } from '../store/fontStore';
+import type { CheckerboardTheme } from '../viewPreferences';
 import styles from './FontCanvas.module.css';
 
 const CHECKER_SIZE = 16;
-const CHECKER_A = '#F0F0F0';
-const CHECKER_B = '#FFFFFF';
-
-function configureTextContext(ctx: CanvasRenderingContext2D) {
-  const italic = fontStore.italic ? 'italic ' : '';
-  const weight = fontStore.boldWeight !== 400 ? `${fontStore.boldWeight} ` : '';
-  ctx.font = `${italic}${weight}${fontStore.fontSize}px "${fontStore.fontFamily}"`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-}
-
-function createBufferCanvas(w: number, h: number) {
-  const canvas = document.createElement('canvas');
-  canvas.width = w;
-  canvas.height = h;
-  return canvas;
-}
+const CHECKER_COLORS: Record<CheckerboardTheme, [string, string]> = {
+  light: ['#F0F0F0', '#FFFFFF'],
+  dark: ['#2F343C', '#1F242B'],
+};
 
 function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
   fontStore.effectsVersion;
-  if (fontStore.text.length === 0) return;
-
-  const mainCanvas = createBufferCanvas(w, h);
-  const mainContext = mainCanvas.getContext('2d')!;
-  configureTextContext(mainContext);
-
-  const createConfiguredBuffer = () => {
-    const canvas = createBufferCanvas(w, h);
-    configureTextContext(canvas.getContext('2d')!);
-    return canvas;
-  };
-
-  const renderEffects = (
-    effects: IFontEffect[],
-    context: CanvasRenderingContext2D,
-  ) => {
-    const renderContext: FontEffectRenderContext = {
-      text: fontStore.text,
-      position: { x: w / 2, y: h / 2 },
-      width: w,
-      height: h,
-      context,
-      createBufferCanvas: createConfiguredBuffer,
-      configureTextContext,
-      renderEffects,
-    };
-
-    for (const effect of effects) {
-      if (!effect.visible) continue;
-      effect.draw(renderContext);
-    }
-  };
-
-  renderEffects(fontStore.effects, mainContext);
-  ctx.drawImage(mainCanvas, 0, 0);
+  drawTextEffects(ctx, w, h, {
+    boldWeight: fontStore.boldWeight,
+    effects: fontStore.effects,
+    fontFamily: fontStore.fontFamily,
+    fontSize: fontStore.fontSize,
+    italic: fontStore.italic,
+    text: fontStore.text,
+  });
 }
 
-function draw(canvas: HTMLCanvasElement) {
+function draw(canvas: HTMLCanvasElement, checkerboardTheme: CheckerboardTheme) {
   const ctx = canvas.getContext('2d')!;
   const w = fontStore.canvasWidth;
   const h = fontStore.canvasHeight;
+  const [checkerA, checkerB] = CHECKER_COLORS[checkerboardTheme];
 
   canvas.width = w;
   canvas.height = h;
@@ -81,7 +43,7 @@ function draw(canvas: HTMLCanvasElement) {
     for (let x = 0; x < w; x += CHECKER_SIZE) {
       const even =
         ((x / CHECKER_SIZE) | 0) % 2 === ((y / CHECKER_SIZE) | 0) % 2;
-      ctx.fillStyle = even ? CHECKER_A : CHECKER_B;
+      ctx.fillStyle = even ? checkerA : checkerB;
       ctx.fillRect(x, y, CHECKER_SIZE, CHECKER_SIZE);
     }
   }
@@ -99,13 +61,34 @@ function createExportCanvas() {
   return canvas;
 }
 
+function createExportBlob() {
+  const canvas = createExportCanvas();
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((value) => {
+      if (value) {
+        resolve(value);
+      } else {
+        reject(new Error('Unable to render canvas as PNG.'));
+      }
+    }, 'image/png');
+  });
+}
+
 export interface FontCanvasHandle {
   centerView: () => void;
+  copyPngToClipboard: () => Promise<void>;
   exportPng: () => Promise<void>;
   resetZoom: () => void;
 }
 
-export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
+interface FontCanvasProps {
+  checkerboardTheme: CheckerboardTheme;
+}
+
+export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas(
+  { checkerboardTheme },
+  ref,
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef({ zoom: 1, ox: 0, oy: 0 });
@@ -137,6 +120,22 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
     centerView(1);
   }, [centerView]);
 
+  const copyPngToClipboard = useCallback(async () => {
+    if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
+      console.warn('PNG clipboard write is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const blob = await createExportBlob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+    } catch (error) {
+      console.warn('Unable to copy PNG to clipboard.', error);
+    }
+  }, []);
+
   const exportPng = useCallback(async () => {
     let writable: FileSystemWritableFileStream | undefined;
 
@@ -159,16 +158,7 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
       }
     }
 
-    const canvas = createExportCanvas();
-    const blob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((value) => {
-        if (value) {
-          resolve(value);
-        } else {
-          reject(new Error('Unable to export canvas as PNG.'));
-        }
-      }, 'image/png');
-    });
+    const blob = await createExportBlob();
 
     if (writable) {
       await writable.write(blob);
@@ -188,17 +178,18 @@ export default forwardRef<FontCanvasHandle>(function FontCanvas(_, ref) {
 
   useImperativeHandle(ref, () => ({
     centerView: () => centerView(),
+    copyPngToClipboard,
     exportPng,
     resetZoom,
-  }), [centerView, exportPng, resetZoom]);
+  }), [centerView, copyPngToClipboard, exportPng, resetZoom]);
 
   useEffect(() => {
     return autorun(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      draw(canvas);
+      draw(canvas, checkerboardTheme);
     });
-  }, []);
+  }, [checkerboardTheme]);
 
   useEffect(() => {
     return autorun(() => {

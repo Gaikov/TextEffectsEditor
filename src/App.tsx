@@ -1,17 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
+import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
+import EffectsGalleryDialog from './components/gallery/EffectsGalleryDialog';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
 import { getCuratedFonts, loadSystemFonts } from './fonts';
+import {
+  createEffectsGalleryItem,
+  loadEffectsGallery,
+  saveEffectsGallery,
+  type EffectsGalleryItem,
+} from './gallery/effectsGallery';
 import { fontStore } from './store/fontStore';
 import {
   loadSettingsFromLocalStorage,
   saveSettingsToLocalStorage,
 } from './store/settingsPersistence';
 import { undoService } from './undo';
+import type { CheckerboardTheme } from './viewPreferences';
 import styles from './App.module.css';
 
 const PANEL_WIDTH_KEY = 'fontEffects.propertiesPanelWidth';
+const CHECKERBOARD_THEME_KEY = 'fontEffects.checkerboardTheme';
 const DEFAULT_PANEL_WIDTH = 240;
 const MIN_PANEL_WIDTH = 240;
 const MAX_PANEL_WIDTH = 520;
@@ -37,6 +47,11 @@ function loadPanelWidth() {
     : DEFAULT_PANEL_WIDTH;
 }
 
+function loadCheckerboardTheme(): CheckerboardTheme {
+  const storedValue = window.localStorage.getItem(CHECKERBOARD_THEME_KEY);
+  return storedValue === 'dark' ? 'dark' : 'light';
+}
+
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError';
 }
@@ -60,6 +75,13 @@ export default function App() {
   const jsonImportInputRef = useRef<HTMLInputElement>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [galleryItems, setGalleryItems] = useState<EffectsGalleryItem[]>(
+    loadEffectsGallery,
+  );
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [addToGalleryOpen, setAddToGalleryOpen] = useState(false);
+  const [checkerboardTheme, setCheckerboardTheme] =
+    useState<CheckerboardTheme>(loadCheckerboardTheme);
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
 
@@ -132,6 +154,35 @@ export default function App() {
     void canvasRef.current?.exportPng();
   }, []);
 
+  const copyPngToClipboard = useCallback(() => {
+    void canvasRef.current?.copyPngToClipboard();
+  }, []);
+
+  const addToGallery = useCallback((name: string) => {
+    const effects = fontStore.toJSON().effects;
+    if (effects.length === 0) return;
+
+    const item = createEffectsGalleryItem(effects, name);
+    setGalleryItems((items) => {
+      const nextItems = [item, ...items];
+      saveEffectsGallery(nextItems);
+      return nextItems;
+    });
+  }, []);
+
+  const applyGalleryItem = useCallback((item: EffectsGalleryItem) => {
+    fontStore.replaceEffectsFromSerialized(item.effects, 'Apply gallery effect');
+    setGalleryOpen(false);
+  }, []);
+
+  const deleteGalleryItem = useCallback((id: string) => {
+    setGalleryItems((items) => {
+      const nextItems = items.filter((item) => item.id !== id);
+      saveEffectsGallery(nextItems);
+      return nextItems;
+    });
+  }, []);
+
   const centerView = useCallback(() => {
     canvasRef.current?.centerView();
   }, []);
@@ -161,12 +212,28 @@ export default function App() {
   }, [propertiesPanelWidth]);
 
   useEffect(() => {
+    window.localStorage.setItem(CHECKERBOARD_THEME_KEY, checkerboardTheme);
+  }, [checkerboardTheme]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const modifierPressed = e.metaKey || e.ctrlKey;
       if (!modifierPressed) return;
 
       const key = e.key.toLowerCase();
       const editableTarget = isEditableShortcutTarget(e.target);
+      if (key === 'n') {
+        e.preventDefault();
+        fontStore.newDocument();
+        return;
+      }
+
+      if (key === 'c' && e.shiftKey) {
+        e.preventDefault();
+        copyPngToClipboard();
+        return;
+      }
+
       if (key === 's') {
         e.preventDefault();
         saveSettingsToLocalStorage();
@@ -225,7 +292,14 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [centerView, exportPng, exportSettingsJson, importSettingsJson, resetZoom]);
+  }, [
+    centerView,
+    copyPngToClipboard,
+    exportPng,
+    exportSettingsJson,
+    importSettingsJson,
+    resetZoom,
+  ]);
 
   useEffect(() => {
     if (!resizingPropertiesPanel) return;
@@ -251,7 +325,9 @@ export default function App() {
   return (
     <div className={styles.root}>
       <CanvasSizeInputs
+        onAddToGallery={() => setAddToGalleryOpen(true)}
         onCenterView={centerView}
+        onCopyToClipboard={copyPngToClipboard}
         onExport={exportPng}
         onExportJson={() => {
           void exportSettingsJson();
@@ -259,8 +335,24 @@ export default function App() {
         onImportJson={() => {
           void importSettingsJson();
         }}
+        onNewDocument={fontStore.newDocument}
+        onOpenGallery={() => setGalleryOpen(true)}
         onResetZoom={resetZoom}
         onSaveSettings={saveSettingsToLocalStorage}
+        checkerboardTheme={checkerboardTheme}
+        onSetCheckerboardTheme={setCheckerboardTheme}
+      />
+      <AddToGalleryDialog
+        isOpen={addToGalleryOpen}
+        onClose={() => setAddToGalleryOpen(false)}
+        onSave={addToGallery}
+      />
+      <EffectsGalleryDialog
+        isOpen={galleryOpen}
+        items={galleryItems}
+        onApply={applyGalleryItem}
+        onClose={() => setGalleryOpen(false)}
+        onDelete={deleteGalleryItem}
       />
       <input
         ref={jsonImportInputRef}
@@ -276,7 +368,7 @@ export default function App() {
         }}
       />
       <div className={styles.body}>
-        <FontCanvas ref={canvasRef} />
+        <FontCanvas ref={canvasRef} checkerboardTheme={checkerboardTheme} />
         <div
           className={`${styles.propertiesResizeHandle} ${
             resizingPropertiesPanel ? styles.propertiesResizeHandleActive : ''

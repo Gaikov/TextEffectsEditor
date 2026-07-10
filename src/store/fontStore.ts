@@ -47,6 +47,13 @@ const MIN_FONT_SIZE = 1;
 const MAX_FONT_SIZE = 2048;
 const MIN_FONT_WEIGHT = 100;
 const MAX_FONT_WEIGHT = 900;
+const DEFAULT_TEXT = 'Hello World';
+const DEFAULT_FONT_FAMILY = 'Arial';
+const DEFAULT_FONT_SIZE = 72;
+const DEFAULT_CANVAS_WIDTH = 1200;
+const DEFAULT_CANVAS_HEIGHT = 800;
+const DEFAULT_BOLD_WEIGHT = 400;
+const DEFAULT_ITALIC = false;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -61,13 +68,13 @@ function normalizeFontWeight(value: number) {
 }
 
 class FontStore {
-  text = 'Hello World';
-  fontFamily = 'Arial';
-  fontSize = 72;
-  canvasWidth = 1200;
-  canvasHeight = 800;
-  boldWeight = 400;
-  italic = false;
+  text = DEFAULT_TEXT;
+  fontFamily = DEFAULT_FONT_FAMILY;
+  fontSize = DEFAULT_FONT_SIZE;
+  canvasWidth = DEFAULT_CANVAS_WIDTH;
+  canvasHeight = DEFAULT_CANVAS_HEIGHT;
+  boldWeight = DEFAULT_BOLD_WEIGHT;
+  italic = DEFAULT_ITALIC;
   effects: IFontEffect[] = [createFontEffect('fill')];
   effectsVersion = 0;
 
@@ -97,6 +104,32 @@ class FontStore {
 
   addEffect = (type: FontEffectType) => {
     this.addEffectToGroup(type);
+  };
+
+  newDocument = () => {
+    this.text = DEFAULT_TEXT;
+    this.fontFamily = DEFAULT_FONT_FAMILY;
+    this.fontSize = DEFAULT_FONT_SIZE;
+    this.canvasWidth = DEFAULT_CANVAS_WIDTH;
+    this.canvasHeight = DEFAULT_CANVAS_HEIGHT;
+    this.boldWeight = DEFAULT_BOLD_WEIGHT;
+    this.italic = DEFAULT_ITALIC;
+    this.effects.splice(0, this.effects.length, createFontEffect('fill'));
+    this.touchEffects();
+    undoService.clear();
+  };
+
+  replaceEffectsFromSerialized = (
+    serializedEffects: SerializedFontEffect[],
+    label = 'Apply gallery effect',
+  ) => {
+    const effects = serializedEffects
+      .map(deserializeFontEffect)
+      .filter((effect): effect is IFontEffect => effect !== null);
+    if (effects.length === 0) return false;
+
+    this.applyEffectsArrayChange(this.effects, effects, label);
+    return true;
   };
 
   addEffectToGroup = (type: FontEffectType, groupId?: string) => {

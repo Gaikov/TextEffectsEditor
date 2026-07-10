@@ -186,4 +186,14 @@
   border: 1px dashed #5c7080;
   border-radius: 4px;
   padding: 5px 6px;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.emptyDropTargetOver {
+  background: rgb(45 114 210 / 16%);
+  border-color: #2d72d2;
+  color: #f6f7f9;
 }
