@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import type { ColorFillText } from '../../effects';
+import { fontStore } from '../../store/fontStore';
 import {
   EffectColorInput,
   EffectNumberInput,
@@ -7,6 +8,7 @@ import {
   EffectRow,
 } from './EffectEditorFields';
 import { EffectEditorFrame } from './EffectEditorFrame';
+import { commitEffectColor, previewEffectColor } from './effectColorUndo';
 import type { EffectEditorProps } from './effectEditorRegistry';
 
 export const ColorFillTextEditor = observer(function ColorFillTextEditor({
@@ -31,21 +33,27 @@ export const ColorFillTextEditor = observer(function ColorFillTextEditor({
         <EffectColorInput
           color={effect.color}
           onChange={(value) => {
-            effect.color = value;
+            fontStore.setEffectProperty(effect, 'color', value, 'Fill color');
+          }}
+          onPickerCommit={(previousValue, nextValue) => {
+            commitEffectColor(effect, previousValue, nextValue, 'Fill color');
+          }}
+          onPickerPreview={(value) => {
+            previewEffectColor(effect, value);
           }}
         />
       </EffectRow>
       <EffectOpacityRow
         value={effect.opacity}
         onChange={(value) => {
-          effect.opacity = value;
+          fontStore.setEffectProperty(effect, 'opacity', value, 'Fill opacity');
         }}
       />
       <EffectRow label="X offset">
         <EffectNumberInput
           value={effect.xOffset}
           onChange={(value) => {
-            effect.xOffset = value;
+            fontStore.setEffectProperty(effect, 'xOffset', value, 'Fill X offset');
           }}
         />
       </EffectRow>
@@ -53,7 +61,7 @@ export const ColorFillTextEditor = observer(function ColorFillTextEditor({
         <EffectNumberInput
           value={effect.yOffset}
           onChange={(value) => {
-            effect.yOffset = value;
+            fontStore.setEffectProperty(effect, 'yOffset', value, 'Fill Y offset');
           }}
         />
       </EffectRow>

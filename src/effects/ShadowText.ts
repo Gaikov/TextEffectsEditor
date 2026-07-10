@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
 import {
   isRecord,
+  readCollapsed,
   readNumber,
   readOpacity,
   readString,
@@ -18,6 +19,7 @@ export class ShadowText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'shadow';
   visible = true;
+  collapsed = true;
   color = '#000000';
   opacity = 1;
   xOffset = 0;
@@ -66,6 +68,7 @@ export class ShadowText implements IFontEffect {
 export interface SerializedShadowText extends SerializedFontEffect {
   type: 'shadow';
   visible: boolean;
+  collapsed: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -79,6 +82,7 @@ export function serializeShadowText(effect: ShadowText): SerializedShadowText {
   return {
     type: 'shadow',
     visible: effect.visible,
+    collapsed: effect.collapsed,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -94,6 +98,7 @@ export function deserializeShadowText(value: unknown) {
 
   const effect = new ShadowText();
   effect.visible = readVisible(value.visible, effect.visible);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

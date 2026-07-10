@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { Button, ControlGroup, InputGroup, NumericInput, Popover } from '@blueprintjs/core';
 import styles from '../FontProperties.module.css';
 
@@ -12,10 +12,43 @@ export function parseLineDash(value: string) {
 export function EffectColorInput({
   color,
   onChange,
+  onPickerCommit,
+  onPickerPreview,
 }: {
   color: string;
   onChange: (value: string) => void;
+  onPickerCommit?: (previousValue: string, nextValue: string) => void;
+  onPickerPreview?: (value: string) => void;
 }) {
+  const pickerStartColorRef = useRef<string | null>(null);
+  const pickerLatestColorRef = useRef(color);
+
+  const beginPickerChange = () => {
+    if (pickerStartColorRef.current == null) {
+      pickerStartColorRef.current = color;
+      pickerLatestColorRef.current = color;
+    }
+  };
+
+  const previewPickerChange = (value: string) => {
+    beginPickerChange();
+    pickerLatestColorRef.current = value;
+    if (onPickerPreview) {
+      onPickerPreview(value);
+    } else {
+      onChange(value);
+    }
+  };
+
+  const commitPickerChange = () => {
+    const previousValue = pickerStartColorRef.current;
+    if (previousValue == null) return;
+
+    const nextValue = pickerLatestColorRef.current;
+    pickerStartColorRef.current = null;
+    onPickerCommit?.(previousValue, nextValue);
+  };
+
   return (
     <ControlGroup fill>
       <Popover
@@ -24,7 +57,10 @@ export function EffectColorInput({
             <input
               type="color"
               value={color}
-              onChange={(e) => onChange(e.target.value)}
+              onBlur={commitPickerChange}
+              onChange={(e) => previewPickerChange(e.target.value)}
+              onPointerDown={beginPickerChange}
+              onPointerUp={commitPickerChange}
             />
           </div>
         }

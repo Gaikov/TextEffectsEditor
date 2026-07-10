@@ -3,6 +3,7 @@ import { createEffectId } from './effectId';
 import {
   isRecord,
   readClampedNumber,
+  readCollapsed,
   readNumber,
   readOpacity,
   readString,
@@ -26,6 +27,7 @@ export class GlowEffect implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'glow';
   visible = true;
+  collapsed = true;
   color = '#2D72D2';
   opacity = 1;
   blur = 12;
@@ -68,6 +70,7 @@ export class GlowEffect implements IFontEffect {
 export interface SerializedGlowEffect extends SerializedFontEffect {
   type: 'glow';
   visible: boolean;
+  collapsed: boolean;
   color: string;
   opacity: number;
   blur: number;
@@ -78,6 +81,7 @@ export function serializeGlowEffect(effect: GlowEffect): SerializedGlowEffect {
   return {
     type: 'glow',
     visible: effect.visible,
+    collapsed: effect.collapsed,
     color: effect.color,
     opacity: effect.opacity,
     blur: effect.blur,
@@ -90,6 +94,7 @@ export function deserializeGlowEffect(value: unknown) {
 
   const effect = new GlowEffect();
   effect.visible = readVisible(value.visible, effect.visible);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.blur = readNumber(value.blur, effect.blur, 0);

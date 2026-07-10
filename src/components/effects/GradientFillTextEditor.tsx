@@ -1,6 +1,7 @@
 import { Button, HTMLSelect } from '@blueprintjs/core';
 import { observer } from 'mobx-react-lite';
 import type { GradientFillText } from '../../effects';
+import { fontStore } from '../../store/fontStore';
 import {
   EffectColorInput,
   EffectNumberInput,
@@ -8,6 +9,10 @@ import {
   EffectRow,
 } from './EffectEditorFields';
 import { EffectEditorFrame } from './EffectEditorFrame';
+import {
+  commitColorArrayChange,
+  previewColorArrayValue,
+} from './effectColorUndo';
 import type { EffectEditorProps } from './effectEditorRegistry';
 import styles from '../FontProperties.module.css';
 
@@ -42,8 +47,33 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
             <EffectColorInput
               color={color}
               onChange={(value) => {
-                effect.colors = effect.colors.map((item, index) =>
-                  index === colorIndex ? value : item,
+                fontStore.setArrayValue(
+                  effect.colors,
+                  effect.colors.map((item, index) =>
+                    index === colorIndex ? value : item,
+                  ),
+                  'Gradient color',
+                  fontStore.touchEffects,
+                );
+              }}
+              onPickerCommit={(previousValue, nextValue) => {
+                commitColorArrayChange(
+                  effect.colors,
+                  effect.colors.map((item, index) =>
+                    index === colorIndex ? previousValue : item,
+                  ),
+                  effect.colors.map((item, index) =>
+                    index === colorIndex ? nextValue : item,
+                  ),
+                  'Gradient color',
+                );
+              }}
+              onPickerPreview={(value) => {
+                previewColorArrayValue(
+                  effect.colors,
+                  effect.colors.map((item, index) =>
+                    index === colorIndex ? value : item,
+                  ),
                 );
               }}
             />
@@ -55,8 +85,11 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
               aria-label="Delete gradient color"
               disabled={effect.colors.length <= 1}
               onClick={() => {
-                effect.colors = effect.colors.filter(
-                  (_, index) => index !== colorIndex,
+                fontStore.setArrayValue(
+                  effect.colors,
+                  effect.colors.filter((_, index) => index !== colorIndex),
+                  'Delete gradient color',
+                  fontStore.touchEffects,
                 );
               }}
             />
@@ -69,17 +102,24 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
           icon="plus"
           text="Add Color"
           onClick={() => {
-            effect.colors = [
-              ...effect.colors,
-              createInsertedColor(effect.colors),
-            ];
+            fontStore.setArrayValue(
+              effect.colors,
+              [...effect.colors, createInsertedColor(effect.colors)],
+              'Add gradient color',
+              fontStore.touchEffects,
+            );
           }}
         />
       </EffectRow>
       <EffectOpacityRow
         value={effect.opacity}
         onChange={(value) => {
-          effect.opacity = value;
+          fontStore.setEffectProperty(
+            effect,
+            'opacity',
+            value,
+            'Gradient opacity',
+          );
         }}
       />
       <EffectRow label="Direction">
@@ -88,7 +128,12 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
           minimal
           value={effect.direction}
           onChange={(e) => {
-            effect.direction = e.target.value as GradientFillText['direction'];
+            fontStore.setEffectProperty(
+              effect,
+              'direction',
+              e.target.value as GradientFillText['direction'],
+              'Gradient direction',
+            );
           }}
           options={[
             { value: 'horizontal', label: 'Horizontal' },
@@ -100,7 +145,12 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
         <EffectNumberInput
           value={effect.xOffset}
           onChange={(value) => {
-            effect.xOffset = value;
+            fontStore.setEffectProperty(
+              effect,
+              'xOffset',
+              value,
+              'Gradient X offset',
+            );
           }}
         />
       </EffectRow>
@@ -108,7 +158,12 @@ export const GradientFillTextEditor = observer(function GradientFillTextEditor({
         <EffectNumberInput
           value={effect.yOffset}
           onChange={(value) => {
-            effect.yOffset = value;
+            fontStore.setEffectProperty(
+              effect,
+              'yOffset',
+              value,
+              'Gradient Y offset',
+            );
           }}
         />
       </EffectRow>

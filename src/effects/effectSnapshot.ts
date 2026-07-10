@@ -47,6 +47,10 @@ export function readVisible(value: unknown, fallback = true) {
   return readBoolean(value, fallback);
 }
 
+export function readCollapsed(value: unknown, fallback: boolean) {
+  return readBoolean(value, fallback);
+}
+
 export function readLineDash(value: unknown, fallback: number[]) {
   if (!Array.isArray(value)) return fallback;
 

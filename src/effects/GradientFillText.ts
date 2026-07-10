@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
 import {
   isRecord,
+  readCollapsed,
   readNumber,
   readOpacity,
   readString,
@@ -49,6 +50,7 @@ export class GradientFillText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'gradientFill';
   visible = true;
+  collapsed = true;
   opacity = 1;
   xOffset = 0;
   yOffset = 0;
@@ -93,6 +95,7 @@ export class GradientFillText implements IFontEffect {
 export interface SerializedGradientFillText extends SerializedFontEffect {
   type: 'gradientFill';
   visible: boolean;
+  collapsed: boolean;
   opacity: number;
   xOffset: number;
   yOffset: number;
@@ -106,6 +109,7 @@ export function serializeGradientFillText(
   return {
     type: 'gradientFill',
     visible: effect.visible,
+    collapsed: effect.collapsed,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
     yOffset: effect.yOffset,
@@ -119,6 +123,7 @@ export function deserializeGradientFillText(value: unknown) {
 
   const effect = new GradientFillText();
   effect.visible = readVisible(value.visible, effect.visible);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);
   effect.yOffset = readNumber(value.yOffset, effect.yOffset);

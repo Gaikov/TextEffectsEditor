@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
 import {
   isRecord,
+  readCollapsed,
   readLineCap,
   readLineDash,
   readLineJoin,
@@ -21,6 +22,7 @@ export class StrokeText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'stroke';
   visible = true;
+  collapsed = true;
   color = '#10161A';
   opacity = 1;
   xOffset = 0;
@@ -66,6 +68,7 @@ export class StrokeText implements IFontEffect {
 export interface SerializedStrokeText extends SerializedFontEffect {
   type: 'stroke';
   visible: boolean;
+  collapsed: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -82,6 +85,7 @@ export function serializeStrokeText(effect: StrokeText): SerializedStrokeText {
   return {
     type: 'stroke',
     visible: effect.visible,
+    collapsed: effect.collapsed,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -100,6 +104,7 @@ export function deserializeStrokeText(value: unknown) {
 
   const effect = new StrokeText();
   effect.visible = readVisible(value.visible, effect.visible);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

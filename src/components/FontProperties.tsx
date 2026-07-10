@@ -350,7 +350,7 @@ export default observer(function FontProperties({
           small
           value={fontStore.text}
           onChange={(e) => {
-            fontStore.text = e.target.value;
+            fontStore.setRootProperty('text', e.target.value, 'Text');
           }}
           placeholder="Enter text..."
         />
@@ -392,7 +392,7 @@ export default observer(function FontProperties({
             />
           )}
           onItemSelect={(item) => {
-            fontStore.fontFamily = item.name;
+            fontStore.setRootProperty('fontFamily', item.name, 'Font');
           }}
           selectedItem={selectedFontItem}
           popoverProps={{ matchTargetWidth: false, minimal: false }}
@@ -416,7 +416,11 @@ export default observer(function FontProperties({
           minimal
           value={fontStore.boldWeight}
           onChange={(e) => {
-            fontStore.boldWeight = Number(e.target.value);
+            fontStore.setRootProperty(
+              'boldWeight',
+              Number(e.target.value),
+              'Bold weight',
+            );
           }}
           options={[100, 200, 300, 400, 500, 600, 700, 800, 900].map((w) => ({
             value: w,
@@ -431,7 +435,7 @@ export default observer(function FontProperties({
           small
           value={fontStore.fontSize}
           onValueChange={(value) => {
-            fontStore.fontSize = value;
+            fontStore.setRootProperty('fontSize', value, 'Font size');
           }}
           min={1}
           max={2048}

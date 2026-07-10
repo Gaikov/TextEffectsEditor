@@ -28,7 +28,17 @@ Write TypeScript with `strict` mode in mind. Use React function components, `obs
 
 Use CSS Modules for local styles and camelCase class names. Prefer Blueprint controls, matching the existing compact `small` style. In property panels, keep labels and values on one line with the same Blueprint font family, normal weight, and a slightly larger shared size; use tight vertical gaps and checkbox controls for boolean properties such as italic. Keep JSON indented with two spaces and follow surrounding TypeScript/CSS style.
 
+## Architecture & Extension Patterns
+
+Use OOP/SOLID principles for extensible domains, especially font effects. Prefer polymorphism over conditionals: new behavior should usually be added through an interface implementation plus registry/factory entries, not by adding `switch` or `instanceof` branches to orchestration code. Use inheritance or small reusable base helpers when multiple effects share rendering, serialization, or editor behavior, but avoid abstract layers that do not remove real duplication.
+
 For font effects, keep each `IFontEffect` implementation in its own `src/effects/` file and its editor in `src/components/effects/`. Every effect must expose `visible` and every visual effect must expose `opacity`, apply it with `globalAlpha` inside `draw()`, serialize/deserialize both fields, and register both model and editor through the effect registries. Use the composite pattern: `GroupEffect` is an `IFontEffect`, renders child effects into an offscreen buffer, and draws that buffer into its parent; group UI state such as `name` and `collapsed` must also serialize. Effects like `ShadowText` transform the current buffer by composing shadow first and original content above it. Do not add `instanceof` editor branching to `FontProperties.tsx` or canvas rendering.
+
+Effect editor cards should keep their header visible and support manual collapse. Non-group effects default to collapsed; groups default to expanded so their children are visible. Put common actions such as drag, expand/collapse, visibility, reorder, and delete in the header; keep editable fields in the card body with consistent compact rows.
+
+All user-facing state edits must go through the undo-aware APIs. Use `fontStore.setRootProperty()`, `fontStore.setEffectProperty()`, `fontStore.setArrayValue()`, or store methods such as `addEffectToGroup()` instead of direct assignment in UI components. New structural operations should create `IUndoOperation` implementations or compose existing ones with `UndoBatch`.
+
+Undo operations must never enqueue other undo operations. `IUndoOperation.undo()` and `IUndoOperation.redo()` must not call `undoService.execute()`, `undoService.record()`, or undo-aware store setters. Operation implementations should mutate their target state directly and call any required refresh callback. When one user action needs multiple state changes, wrap those direct operations in `UndoBatch`; do not add recording suppression paths to `UndoService`.
 
 ## Testing Guidelines
 

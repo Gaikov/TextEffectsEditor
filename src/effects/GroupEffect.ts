@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
 import {
   isRecord,
-  readBoolean,
+  readCollapsed,
   readOpacity,
   readString,
   readVisible,
@@ -104,6 +104,6 @@ export function applySerializedGroupFields(
   if (!isRecord(value)) return;
   effect.visible = readVisible(value.visible, effect.visible);
   effect.name = readString(value.name, effect.name);
-  effect.collapsed = readBoolean(value.collapsed, effect.collapsed);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
 }

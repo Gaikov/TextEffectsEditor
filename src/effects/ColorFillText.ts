@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { createEffectId } from './effectId';
 import {
   isRecord,
+  readCollapsed,
   readNumber,
   readOpacity,
   readString,
@@ -18,6 +19,7 @@ export class ColorFillText implements IFontEffect {
   id = createEffectId();
   type: FontEffectType = 'fill';
   visible = true;
+  collapsed = true;
   color = '#10161A';
   opacity = 1;
   xOffset = 0;
@@ -51,6 +53,7 @@ export class ColorFillText implements IFontEffect {
 export interface SerializedColorFillText extends SerializedFontEffect {
   type: 'fill';
   visible: boolean;
+  collapsed: boolean;
   color: string;
   opacity: number;
   xOffset: number;
@@ -63,6 +66,7 @@ export function serializeColorFillText(
   return {
     type: 'fill',
     visible: effect.visible,
+    collapsed: effect.collapsed,
     color: effect.color,
     opacity: effect.opacity,
     xOffset: effect.xOffset,
@@ -75,6 +79,7 @@ export function deserializeColorFillText(value: unknown) {
 
   const effect = new ColorFillText();
   effect.visible = readVisible(value.visible, effect.visible);
+  effect.collapsed = readCollapsed(value.collapsed, effect.collapsed);
   effect.color = readString(value.color, effect.color);
   effect.opacity = readOpacity(value.opacity, effect.opacity);
   effect.xOffset = readNumber(value.xOffset, effect.xOffset);

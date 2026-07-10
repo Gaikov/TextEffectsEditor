@@ -15,6 +15,12 @@ import {
   readString,
 } from '../effects/effectSnapshot';
 import { isValidFont } from '../fonts';
+import {
+  UndoArrayChange,
+  UndoBatch,
+  UndoPropertyChange,
+  undoService,
+} from '../undo';
 
 export type FontEffectMoveDirection = 'up' | 'down';
 
@@ -70,46 +76,64 @@ class FontStore {
   }
 
   setCanvasWidth = (v: number) => {
-    this.canvasWidth = clamp(v, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE);
+    this.setRootProperty(
+      'canvasWidth',
+      clamp(v, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE),
+      'Canvas width',
+    );
   };
 
   setCanvasHeight = (v: number) => {
-    this.canvasHeight = clamp(v, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE);
+    this.setRootProperty(
+      'canvasHeight',
+      clamp(v, MIN_CANVAS_SIZE, MAX_CANVAS_SIZE),
+      'Canvas height',
+    );
   };
 
   toggleItalic = () => {
-    this.italic = !this.italic;
+    this.setRootProperty('italic', !this.italic, 'Italic');
   };
 
   addEffect = (type: FontEffectType) => {
-    this.effects.push(createFontEffect(type));
-    this.touchEffects();
+    this.addEffectToGroup(type);
   };
 
   addEffectToGroup = (type: FontEffectType, groupId?: string) => {
     const effect = createFontEffect(type);
-    if (!groupId) {
-      this.effects.push(effect);
-      this.touchEffects();
-      return;
-    }
+    const effects = this.getEffectsForParent(groupId ?? null);
+    if (!effects) return;
 
-    const group = this.findGroup(groupId);
-    if (!group) return;
-
-    group.addEffect(effect);
-    this.touchEffects();
+    this.applyEffectsArrayChange(
+      effects,
+      [...effects, effect],
+      `Add ${type}`,
+    );
   };
 
   removeEffect = (id: string) => {
-    this.effects = this.removeEffectFromList(this.effects, id);
-    this.touchEffects();
+    const location = this.findEffectLocation(this.effects, id, null);
+    if (!location) return;
+
+    this.applyEffectsArrayChange(
+      location.effects,
+      location.effects.filter((effect) => effect.id !== id),
+      'Remove effect',
+    );
   };
 
   moveEffect = (id: string, direction: FontEffectMoveDirection) => {
-    if (this.moveEffectInList(this.effects, id, direction)) {
-      this.touchEffects();
-    }
+    const location = this.findEffectLocation(this.effects, id, null);
+    if (!location) return;
+
+    const nextIndex =
+      direction === 'up' ? location.index - 1 : location.index + 1;
+    if (nextIndex < 0 || nextIndex >= location.effects.length) return;
+
+    const nextEffects = [...location.effects];
+    const [effect] = nextEffects.splice(location.index, 1);
+    nextEffects.splice(nextIndex, 0, effect);
+    this.applyEffectsArrayChange(location.effects, nextEffects, 'Move effect');
   };
 
   moveEffectToParent = (
@@ -138,21 +162,105 @@ class FontStore {
       nextTargetIndex -= 1;
     }
 
-    const [effect] = location.effects.splice(location.index, 1);
     const targetEffects = this.getEffectsForParent(targetParentId);
-    if (!targetEffects) {
-      location.effects.splice(location.index, 0, effect);
-      return false;
+    if (!targetEffects) return false;
+
+    if (location.effects === targetEffects) {
+      const nextEffects = [...location.effects];
+      const [effect] = nextEffects.splice(location.index, 1);
+      nextEffects.splice(clamp(nextTargetIndex, 0, nextEffects.length), 0, effect);
+      this.applyEffectsArrayChange(location.effects, nextEffects, 'Move effect');
+      return true;
     }
 
-    const clampedIndex = clamp(nextTargetIndex, 0, targetEffects.length);
-    targetEffects.splice(clampedIndex, 0, effect);
-    this.touchEffects();
+    const sourceNext = location.effects.filter(
+      (effect) => effect.id !== effectId,
+    );
+    const targetNext = [...targetEffects];
+    targetNext.splice(clamp(nextTargetIndex, 0, targetNext.length), 0, location.effect);
+    undoService.execute(
+      new UndoBatch(
+        [
+          new UndoArrayChange(
+            location.effects,
+            [...location.effects],
+            sourceNext,
+            'Move effect source',
+            this.touchEffects,
+          ),
+          new UndoArrayChange(
+            targetEffects,
+            [...targetEffects],
+            targetNext,
+            'Move effect target',
+            this.touchEffects,
+          ),
+        ],
+        'Move effect',
+      ),
+    );
     return true;
   };
 
   touchEffects = () => {
     this.effectsVersion += 1;
+  };
+
+  setProperty = <T extends object, K extends keyof T>(
+    target: T,
+    key: K,
+    value: T[K],
+    label?: string,
+    afterApply?: () => void,
+  ) => {
+    if (Object.is(target[key], value)) return;
+
+    undoService.execute(
+      new UndoPropertyChange(
+        target,
+        key,
+        target[key],
+        value,
+        label,
+        afterApply,
+      ),
+    );
+  };
+
+  setEffectProperty = <T extends IFontEffect, K extends keyof T>(
+    effect: T,
+    key: K,
+    value: T[K],
+    label?: string,
+  ) => {
+    this.setProperty(effect, key, value, label, this.touchEffects);
+  };
+
+  setRootProperty = <K extends keyof FontStore>(
+    key: K,
+    value: FontStore[K],
+    label?: string,
+  ) => {
+    this.setProperty(this, key, value, label);
+  };
+
+  setArrayValue = <T>(
+    target: T[],
+    value: T[],
+    label?: string,
+    afterApply?: () => void,
+  ) => {
+    undoService.execute(
+      new UndoArrayChange(target, [...target], value, label, afterApply),
+    );
+  };
+
+  private applyEffectsArrayChange = (
+    target: IFontEffect[],
+    value: IFontEffect[],
+    label?: string,
+  ) => {
+    this.setArrayValue(target, value, label, this.touchEffects);
   };
 
   private findGroup = (id: string): GroupEffect | undefined => {
@@ -219,56 +327,6 @@ class FontStore {
     );
   };
 
-  private removeEffectFromList = (
-    effects: IFontEffect[],
-    id: string,
-  ): IFontEffect[] => {
-    return effects
-      .filter((effect) => effect.id !== id)
-      .map((effect) => {
-        if (effect instanceof GroupEffect) {
-          effect.children = this.removeEffectFromList(effect.children, id);
-        }
-        return effect;
-      });
-  };
-
-  private moveEffectInList = (
-    effects: IFontEffect[],
-    id: string,
-    direction: FontEffectMoveDirection,
-  ): boolean => {
-    const index = effects.findIndex((effect) => effect.id === id);
-    if (index === -1) {
-      for (const effect of effects) {
-        if (
-          effect instanceof GroupEffect &&
-          this.moveEffectInList(effect.children, id, direction)
-        ) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    const nextIndex = direction === 'up' ? index - 1 : index + 1;
-    if (nextIndex >= 0 && nextIndex < effects.length) {
-      const nextEffects = [...effects];
-      const [effect] = nextEffects.splice(index, 1);
-      nextEffects.splice(nextIndex, 0, effect);
-
-      if (effects === this.effects) {
-        this.effects = nextEffects;
-      } else {
-        effects.splice(0, effects.length, ...nextEffects);
-      }
-      return true;
-    }
-
-    return false;
-  };
-
   get fontValid(): boolean {
     return isValidFont(this.fontFamily);
   }
@@ -317,8 +375,13 @@ class FontStore {
           .map(deserializeFontEffect)
           .filter((effect): effect is IFontEffect => effect !== null)
       : [];
-    this.effects = effects.length > 0 ? effects : [createFontEffect('fill')];
+    this.effects.splice(
+      0,
+      this.effects.length,
+      ...(effects.length > 0 ? effects : [createFontEffect('fill')]),
+    );
     this.touchEffects();
+    undoService.clear();
 
     return true;
   };

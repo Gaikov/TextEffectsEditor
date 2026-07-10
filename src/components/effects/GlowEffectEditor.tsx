@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import type { GlowEffect } from '../../effects';
+import { fontStore } from '../../store/fontStore';
 import {
   EffectColorInput,
   EffectNumberInput,
@@ -7,6 +8,7 @@ import {
   EffectRow,
 } from './EffectEditorFields';
 import { EffectEditorFrame } from './EffectEditorFrame';
+import { commitEffectColor, previewEffectColor } from './effectColorUndo';
 import type { EffectEditorProps } from './effectEditorRegistry';
 
 export const GlowEffectEditor = observer(function GlowEffectEditor({
@@ -31,14 +33,20 @@ export const GlowEffectEditor = observer(function GlowEffectEditor({
         <EffectColorInput
           color={effect.color}
           onChange={(value) => {
-            effect.color = value;
+            fontStore.setEffectProperty(effect, 'color', value, 'Glow color');
+          }}
+          onPickerCommit={(previousValue, nextValue) => {
+            commitEffectColor(effect, previousValue, nextValue, 'Glow color');
+          }}
+          onPickerPreview={(value) => {
+            previewEffectColor(effect, value);
           }}
         />
       </EffectRow>
       <EffectOpacityRow
         value={effect.opacity}
         onChange={(value) => {
-          effect.opacity = value;
+          fontStore.setEffectProperty(effect, 'opacity', value, 'Glow opacity');
         }}
       />
       <EffectRow label="Blur">
@@ -46,7 +54,7 @@ export const GlowEffectEditor = observer(function GlowEffectEditor({
           value={effect.blur}
           min={0}
           onChange={(value) => {
-            effect.blur = value;
+            fontStore.setEffectProperty(effect, 'blur', value, 'Glow blur');
           }}
         />
       </EffectRow>
@@ -58,7 +66,12 @@ export const GlowEffectEditor = observer(function GlowEffectEditor({
           stepSize={1}
           minorStepSize={1}
           onChange={(value) => {
-            effect.spread = Math.round(Math.max(1, Math.min(8, value)));
+            fontStore.setEffectProperty(
+              effect,
+              'spread',
+              Math.round(Math.max(1, Math.min(8, value))),
+              'Glow spread',
+            );
           }}
         />
       </EffectRow>

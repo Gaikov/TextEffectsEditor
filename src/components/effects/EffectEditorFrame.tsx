@@ -56,13 +56,32 @@ export function EffectEditorFrame({
           <Button
             small
             minimal
+            icon={effect.collapsed ? 'chevron-right' : 'chevron-down'}
+            aria-label={effect.collapsed ? 'Expand effect' : 'Collapse effect'}
+            style={ICON_BUTTON_STYLE}
+            onClick={() => {
+              fontStore.setEffectProperty(
+                effect,
+                'collapsed',
+                !effect.collapsed,
+                'Effect collapse',
+              );
+            }}
+          />
+          <Button
+            small
+            minimal
             icon={effect.visible ? 'eye-open' : 'eye-off'}
             aria-label={effect.visible ? 'Hide effect' : 'Show effect'}
             intent={effect.visible ? undefined : 'warning'}
             style={ICON_BUTTON_STYLE}
             onClick={() => {
-              effect.visible = !effect.visible;
-              fontStore.touchEffects();
+              fontStore.setEffectProperty(
+                effect,
+                'visible',
+                !effect.visible,
+                'Effect visibility',
+              );
             }}
           />
           <Button
@@ -94,7 +113,9 @@ export function EffectEditorFrame({
           />
         </div>
       </div>
-      {children}
+      {!effect.collapsed && children && (
+        <div className={styles.effectBody}>{children}</div>
+      )}
     </div>
   );
 }

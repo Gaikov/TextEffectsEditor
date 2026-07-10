@@ -26,6 +26,7 @@ export interface IFontEffect {
   id: string;
   type: FontEffectType;
   visible: boolean;
+  collapsed: boolean;
   opacity: number;
   draw: (renderContext: FontEffectRenderContext) => void;
 }

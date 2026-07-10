@@ -1,6 +1,7 @@
 import { HTMLSelect, InputGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react-lite';
 import type { StrokeText } from '../../effects';
+import { fontStore } from '../../store/fontStore';
 import {
   EffectColorInput,
   EffectNumberInput,
@@ -9,6 +10,7 @@ import {
   parseLineDash,
 } from './EffectEditorFields';
 import { EffectEditorFrame } from './EffectEditorFrame';
+import { commitEffectColor, previewEffectColor } from './effectColorUndo';
 import type { EffectEditorProps } from './effectEditorRegistry';
 
 export const StrokeTextEditor = observer(function StrokeTextEditor({
@@ -33,21 +35,27 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
         <EffectColorInput
           color={effect.color}
           onChange={(value) => {
-            effect.color = value;
+            fontStore.setEffectProperty(effect, 'color', value, 'Stroke color');
+          }}
+          onPickerCommit={(previousValue, nextValue) => {
+            commitEffectColor(effect, previousValue, nextValue, 'Stroke color');
+          }}
+          onPickerPreview={(value) => {
+            previewEffectColor(effect, value);
           }}
         />
       </EffectRow>
       <EffectOpacityRow
         value={effect.opacity}
         onChange={(value) => {
-          effect.opacity = value;
+          fontStore.setEffectProperty(effect, 'opacity', value, 'Stroke opacity');
         }}
       />
       <EffectRow label="X offset">
         <EffectNumberInput
           value={effect.xOffset}
           onChange={(value) => {
-            effect.xOffset = value;
+            fontStore.setEffectProperty(effect, 'xOffset', value, 'Stroke X offset');
           }}
         />
       </EffectRow>
@@ -55,7 +63,7 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
         <EffectNumberInput
           value={effect.yOffset}
           onChange={(value) => {
-            effect.yOffset = value;
+            fontStore.setEffectProperty(effect, 'yOffset', value, 'Stroke Y offset');
           }}
         />
       </EffectRow>
@@ -64,7 +72,7 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           value={effect.lineWidth}
           min={0}
           onChange={(value) => {
-            effect.lineWidth = value;
+            fontStore.setEffectProperty(effect, 'lineWidth', value, 'Stroke width');
           }}
         />
       </EffectRow>
@@ -74,7 +82,12 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           minimal
           value={effect.lineCap}
           onChange={(e) => {
-            effect.lineCap = e.target.value as CanvasLineCap;
+            fontStore.setEffectProperty(
+              effect,
+              'lineCap',
+              e.target.value as CanvasLineCap,
+              'Stroke cap',
+            );
           }}
           options={['butt', 'round', 'square'].map((value) => ({
             value,
@@ -88,7 +101,12 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           minimal
           value={effect.lineJoin}
           onChange={(e) => {
-            effect.lineJoin = e.target.value as CanvasLineJoin;
+            fontStore.setEffectProperty(
+              effect,
+              'lineJoin',
+              e.target.value as CanvasLineJoin,
+              'Stroke join',
+            );
           }}
           options={['miter', 'round', 'bevel'].map((value) => ({
             value,
@@ -101,7 +119,7 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           value={effect.miterLimit}
           min={0}
           onChange={(value) => {
-            effect.miterLimit = value;
+            fontStore.setEffectProperty(effect, 'miterLimit', value, 'Stroke miter');
           }}
         />
       </EffectRow>
@@ -110,7 +128,12 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
           small
           value={effect.lineDash.join(', ')}
           onChange={(e) => {
-            effect.lineDash = parseLineDash(e.target.value);
+            fontStore.setArrayValue(
+              effect.lineDash,
+              parseLineDash(e.target.value),
+              'Stroke dash',
+              fontStore.touchEffects,
+            );
           }}
           placeholder="4, 2"
           fill
@@ -120,7 +143,12 @@ export const StrokeTextEditor = observer(function StrokeTextEditor({
         <EffectNumberInput
           value={effect.lineDashOffset}
           onChange={(value) => {
-            effect.lineDashOffset = value;
+            fontStore.setEffectProperty(
+              effect,
+              'lineDashOffset',
+              value,
+              'Stroke dash offset',
+            );
           }}
         />
       </EffectRow>

@@ -8,6 +8,7 @@ import {
   loadSettingsFromLocalStorage,
   saveSettingsToLocalStorage,
 } from './store/settingsPersistence';
+import { undoService } from './undo';
 import styles from './App.module.css';
 
 const PANEL_WIDTH_KEY = 'fontEffects.propertiesPanelWidth';
@@ -38,6 +39,15 @@ function loadPanelWidth() {
 
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === 'AbortError';
+}
+
+function isEditableShortcutTarget(target: EventTarget | null) {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
 }
 
 export default function App() {
@@ -137,6 +147,35 @@ export default function App() {
   useEffect(() => {
     window.localStorage.setItem(PANEL_WIDTH_KEY, String(propertiesPanelWidth));
   }, [propertiesPanelWidth]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const modifierPressed = e.metaKey || e.ctrlKey;
+      if (!modifierPressed) return;
+      if (isEditableShortcutTarget(e.target)) return;
+
+      const key = e.key.toLowerCase();
+      if (key === 'z' && e.shiftKey) {
+        e.preventDefault();
+        undoService.redo();
+        return;
+      }
+
+      if (key === 'z') {
+        e.preventDefault();
+        undoService.undo();
+        return;
+      }
+
+      if (key === 'y') {
+        e.preventDefault();
+        undoService.redo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!resizingPropertiesPanel) return;

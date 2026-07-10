@@ -48,6 +48,12 @@
   gap: 6px;
 }
 
+.effectBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .effectHeader {
   display: flex;
   align-items: center;

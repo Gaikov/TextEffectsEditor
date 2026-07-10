@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from '@blueprintjs/core';
 import { fontStore } from '../store/fontStore';
+import { undoService } from '../undo';
 
 const BAR_STYLE: React.CSSProperties = {
   display: 'flex',
@@ -97,6 +98,28 @@ export default observer(function CanvasSizeInputs({
         />
       </div>
       <div style={ACTIONS_STYLE}>
+        <Tooltip content="Undo" compact>
+          <Button
+            small
+            icon="undo"
+            text="Undo"
+            aria-label="Undo"
+            disabled={!undoService.canUndo}
+            style={BUTTON_STYLE}
+            onClick={() => undoService.undo()}
+          />
+        </Tooltip>
+        <Tooltip content="Redo" compact>
+          <Button
+            small
+            icon="redo"
+            text="Redo"
+            aria-label="Redo"
+            disabled={!undoService.canRedo}
+            style={BUTTON_STYLE}
+            onClick={() => undoService.redo()}
+          />
+        </Tooltip>
         <Tooltip content="Center View" compact>
           <Button
             small
