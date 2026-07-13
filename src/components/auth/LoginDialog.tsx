@@ -33,7 +33,6 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             />
             <Button
               icon="endorsed"
-              intent="primary"
               text="Continue with Yandex"
               onClick={() => loginWithProvider('yandex')}
             />

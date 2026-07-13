@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "font-effects-gallery"
-database_id = "replace-with-cloudflare-d1-database-id"
+database_id = "78da3b07-5090-4fd8-b0a3-8a2d5397c754"
