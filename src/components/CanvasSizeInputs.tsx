@@ -343,20 +343,6 @@ export default observer(function CanvasSizeInputs({
         <MenuBarItem
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
-          text="Help"
-          content={
-            <Menu>
-              <MenuItem
-                icon="info-sign"
-                text="About"
-                onClick={() => setAboutOpen(true)}
-              />
-            </Menu>
-          }
-        />
-        <MenuBarItem
-          activeMenu={activeMenu}
-          setActiveMenu={setActiveMenu}
           text="Account"
           content={
             <Menu>
@@ -391,6 +377,20 @@ export default observer(function CanvasSizeInputs({
                   onClick={onOpenLogin}
                 />
               )}
+            </Menu>
+          }
+        />
+        <MenuBarItem
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          text="Help"
+          content={
+            <Menu>
+              <MenuItem
+                icon="info-sign"
+                text="About"
+                onClick={() => setAboutOpen(true)}
+              />
             </Menu>
           }
         />

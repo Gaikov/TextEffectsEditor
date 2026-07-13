@@ -194,7 +194,7 @@ Global gallery submissions from registered users are stored as `pending`. Public
 
 ## Menus And Shortcuts
 
-The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, `Help`, or `Account` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, `Account`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
 
 `Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 
