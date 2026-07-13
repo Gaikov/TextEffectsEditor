@@ -58,9 +58,10 @@ The build output is written to `dist/`.
 9. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
 10. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
 11. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
-12. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
-13. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
-14. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+12. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
+13. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
+14. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
+15. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
 
@@ -193,7 +194,9 @@ Global gallery submissions from registered users are stored as `pending`. Public
 
 ## Menus And Shortcuts
 
-The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, `Help`, or `Account` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+
+`Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 
 `View -> Checkerboard` switches the preview background between light and dark squares. This is an application preference saved in local storage; it does not affect PNG export or JSON presets.
 

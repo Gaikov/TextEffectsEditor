@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { loadAuthState, type AuthUser } from './auth/authClient';
+import { loadAuthState, logout, type AuthUser } from './auth/authClient';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
 import LoginDialog from './components/auth/LoginDialog';
 import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
@@ -357,6 +357,20 @@ export default function App() {
     canvasRef.current?.resetZoom();
   }, []);
 
+  const signOut = useCallback(async () => {
+    try {
+      await logout();
+      setAuthUser(null);
+      showSuccessToast('Signed out');
+      if (activeGalleryId === 'global' && galleryOpen) {
+        void reloadGallery();
+      }
+    } catch (error) {
+      console.warn('Unable to sign out.', error);
+      showFailureToast('Unable to sign out');
+    }
+  }, [activeGalleryId, galleryOpen, reloadGallery]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -520,6 +534,7 @@ export default function App() {
   return (
     <div className={styles.root}>
       <CanvasSizeInputs
+        authUser={authUser}
         onAddToGlobalGallery={() => openAddToGallery('global')}
         onAddToLocalGallery={() => openAddToGallery('local')}
         onCenterView={centerView}
@@ -538,10 +553,14 @@ export default function App() {
         onNewDocument={newDocument}
         onOpenGlobalGallery={() => openGallery('global')}
         onOpenLocalGallery={() => openGallery('local')}
+        onOpenLogin={() => setLoginOpen(true)}
         onResetZoom={resetZoom}
         onSaveSettings={saveSettings}
         checkerboardTheme={checkerboardTheme}
         onSetCheckerboardTheme={setCheckerboardTheme}
+        onSignOut={() => {
+          void signOut();
+        }}
       />
       <AddToGalleryDialog
         isOpen={addToGalleryOpen}

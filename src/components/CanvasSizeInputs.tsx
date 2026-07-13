@@ -13,6 +13,7 @@ import {
   Popover,
   PopoverInteractionKind,
 } from '@blueprintjs/core';
+import type { AuthUser } from '../auth/authClient';
 import { fontStore } from '../store/fontStore';
 import { undoService } from '../undo';
 import type { CheckerboardTheme } from '../viewPreferences';
@@ -102,6 +103,7 @@ const PAYPAL_DONATE_URL =
   'https://www.paypal.com/donate/?business=grom.games%40gmail.com&currency_code=USD';
 
 interface Props {
+  authUser: AuthUser | null;
   checkerboardTheme: CheckerboardTheme;
   onAddToGlobalGallery: () => void;
   onAddToLocalGallery: () => void;
@@ -113,9 +115,11 @@ interface Props {
   onNewDocument: () => void;
   onOpenGlobalGallery: () => void;
   onOpenLocalGallery: () => void;
+  onOpenLogin: () => void;
   onResetZoom: () => void;
   onSaveSettings: () => void;
   onSetCheckerboardTheme: (theme: CheckerboardTheme) => void;
+  onSignOut: () => void;
 }
 
 function Shortcut({ children }: { children: string }) {
@@ -170,6 +174,7 @@ function MenuBarItem({
 }
 
 export default observer(function CanvasSizeInputs({
+  authUser,
   checkerboardTheme,
   onAddToGlobalGallery,
   onAddToLocalGallery,
@@ -181,9 +186,11 @@ export default observer(function CanvasSizeInputs({
   onNewDocument,
   onOpenGlobalGallery,
   onOpenLocalGallery,
+  onOpenLogin,
   onResetZoom,
   onSaveSettings,
   onSetCheckerboardTheme,
+  onSignOut,
 }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -344,6 +351,46 @@ export default observer(function CanvasSizeInputs({
                 text="About"
                 onClick={() => setAboutOpen(true)}
               />
+            </Menu>
+          }
+        />
+        <MenuBarItem
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          text="Account"
+          content={
+            <Menu>
+              {authUser ? (
+                <>
+                  <MenuItem
+                    icon="user"
+                    text={authUser.displayName || authUser.email}
+                    disabled
+                  />
+                  <MenuItem
+                    icon="envelope"
+                    text={authUser.email}
+                    disabled
+                  />
+                  <MenuItem
+                    icon={authUser.role === 'admin' ? 'shield' : 'person'}
+                    text={`Role: ${authUser.role}`}
+                    disabled
+                  />
+                  <MenuDivider />
+                  <MenuItem
+                    icon="log-out"
+                    text="Sign out"
+                    onClick={onSignOut}
+                  />
+                </>
+              ) : (
+                <MenuItem
+                  icon="log-in"
+                  text="Sign in"
+                  onClick={onOpenLogin}
+                />
+              )}
             </Menu>
           }
         />
