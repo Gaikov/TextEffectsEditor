@@ -17,12 +17,16 @@ interface AddToGalleryDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (name: string) => void;
+  saveText?: string;
+  title?: string;
 }
 
 export default function AddToGalleryDialog({
   isOpen,
   onClose,
   onSave,
+  saveText = 'Save',
+  title = 'Add To Gallery',
 }: AddToGalleryDialogProps) {
   const [name, setName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +46,7 @@ export default function AddToGalleryDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Add To Gallery"
+      title={title}
       style={{ width: 420 }}
     >
       <DialogBody>
@@ -66,7 +70,7 @@ export default function AddToGalleryDialog({
         actions={
           <>
             <Button text="Cancel" onClick={onClose} />
-            <Button intent="primary" text="Save" onClick={save} />
+            <Button intent="primary" text={saveText} onClick={save} />
           </>
         }
       />

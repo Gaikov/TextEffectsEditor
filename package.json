@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "node esbuild.config.mjs --dev",
-    "build": "node esbuild.config.mjs"
+    "build": "node esbuild.config.mjs",
+    "cf:dev": "npm run build && wrangler pages dev dist --d1 DB=DB --persist-to .wrangler/state --port 8789",
+    "cf:d1:migrate": "wrangler d1 migrations apply font-effects-gallery",
+    "cf:d1:migrate:local": "wrangler d1 migrations apply DB --local --persist-to .wrangler/state"
   },
   "dependencies": {
     "@blueprintjs/core": "^6.17.1",
@@ -20,9 +23,11 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260710.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "esbuild": "^0.25.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "wrangler": "^4.110.0"
   }
 }

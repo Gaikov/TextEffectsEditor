@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -9,7 +9,7 @@ import {
   NonIdealState,
 } from '@blueprintjs/core';
 import { deserializeFontEffect, type IFontEffect } from '../../effects';
-import type { EffectsGalleryItem } from '../../gallery/effectsGallery';
+import type { GalleryItem } from '../../gallery/GalleryProvider';
 import { drawTextEffects } from '../../render/renderFontEffects';
 import { fontStore } from '../../store/fontStore';
 
@@ -76,10 +76,17 @@ const ACTIONS_STYLE: React.CSSProperties = {
 
 interface EffectsGalleryDialogProps {
   isOpen: boolean;
-  items: EffectsGalleryItem[];
-  onApply: (item: EffectsGalleryItem) => void;
+  canModerate?: boolean;
+  isLoading?: boolean;
+  items: GalleryItem[];
+  providerLabel: string;
+  query: string;
+  onApply: (item: GalleryItem) => void;
+  onApprove?: (id: string) => void;
   onClose: () => void;
   onDelete: (id: string) => void;
+  onQueryChange: (query: string) => void;
+  onReject?: (id: string) => void;
 }
 
 function drawChecker(ctx: CanvasRenderingContext2D, w: number, h: number) {
@@ -99,12 +106,12 @@ function formatDate(value: string) {
   return date.toLocaleString();
 }
 
-function getGalleryDisplayName(item: EffectsGalleryItem) {
+function getGalleryDisplayName(item: GalleryItem) {
   return item.name.trim() || 'Untitled';
 }
 
 interface GalleryPreviewProps {
-  item: EffectsGalleryItem;
+  item: GalleryItem;
 }
 
 const GalleryPreview = observer(function GalleryPreview({
@@ -188,79 +195,98 @@ const GalleryPreview = observer(function GalleryPreview({
 });
 
 export default observer(function EffectsGalleryDialog({
+  canModerate = false,
   isOpen,
+  isLoading = false,
   items,
+  providerLabel,
+  query,
   onApply,
+  onApprove,
   onClose,
   onDelete,
+  onQueryChange,
+  onReject,
 }: EffectsGalleryDialogProps) {
-  const [query, setQuery] = useState('');
-  const normalizedQuery = query.trim().toLowerCase();
-  const filteredItems = normalizedQuery
-    ? items.filter((item) =>
-        getGalleryDisplayName(item).toLowerCase().includes(normalizedQuery),
-      )
-    : items;
-
   useEffect(() => {
-    if (!isOpen) setQuery('');
-  }, [isOpen]);
+    if (!isOpen) onQueryChange('');
+  }, [isOpen, onQueryChange]);
 
   return (
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Effects Gallery"
+      title={providerLabel}
       style={{ width: 720 }}
     >
       <DialogBody style={BODY_STYLE}>
-        {items.length === 0 ? (
+        <InputGroup
+          leftIcon="search"
+          placeholder="Search by name..."
+          style={SEARCH_STYLE}
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+        />
+        {isLoading ? (
+          <NonIdealState
+            icon="cloud-download"
+            title="Loading gallery"
+            description="Fetching saved effect stacks."
+          />
+        ) : items.length === 0 && query.trim() === '' ? (
           <NonIdealState
             icon="media"
             title="No gallery items"
-            description="Use File -> Add To Gallery to save the current effect stack."
+            description="Use an Add To Gallery command to save the current effect stack."
           />
-        ) : filteredItems.length === 0 ? (
-          <>
-            <InputGroup
-              leftIcon="search"
-              placeholder="Search by name..."
-              style={SEARCH_STYLE}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <NonIdealState
-              icon="search"
-              title="No matching gallery items"
-              description="Try a different effect name."
-            />
-          </>
+        ) : items.length === 0 ? (
+          <NonIdealState
+            icon="search"
+            title="No matching gallery items"
+            description="Try a different effect name."
+          />
         ) : (
-          <>
-            <InputGroup
-              leftIcon="search"
-              placeholder="Search by name..."
-              style={SEARCH_STYLE}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div style={GRID_STYLE}>
-              {filteredItems.map((item) => {
-                const displayName = getGalleryDisplayName(item);
-                return (
-                  <Card key={item.id} compact style={CARD_STYLE}>
-                    <GalleryPreview item={item} />
-                    <div style={CARD_HEADER_STYLE}>
-                      <div style={TITLE_STYLE}>{displayName}</div>
-                      <div style={DATE_STYLE}>{formatDate(item.createdAt)}</div>
+          <div style={GRID_STYLE}>
+            {items.map((item) => {
+              const displayName = getGalleryDisplayName(item);
+              return (
+                <Card key={item.id} compact style={CARD_STYLE}>
+                  <GalleryPreview item={item} />
+                  <div style={CARD_HEADER_STYLE}>
+                    <div style={TITLE_STYLE}>{displayName}</div>
+                    <div style={DATE_STYLE}>
+                      {item.authorName ? `${item.authorName} · ` : ''}
+                      {formatDate(item.createdAt)}
+                      {item.status && item.status !== 'approved'
+                        ? ` · ${item.status}`
+                        : ''}
                     </div>
-                    <div style={ACTIONS_STYLE}>
+                  </div>
+                  <div style={ACTIONS_STYLE}>
+                    {canModerate && item.status === 'pending' && (
+                      <>
                       <Button
                         small
                         icon="tick"
-                        text="Apply"
-                        onClick={() => onApply(item)}
+                          text="Approve"
+                          onClick={() => onApprove?.(item.id)}
                       />
+                      <Button
+                        small
+                          icon="cross"
+                        intent="danger"
+                          text="Reject"
+                          onClick={() => onReject?.(item.id)}
+                      />
+                      </>
+                    )}
+                    <Button
+                      small
+                      icon="tick"
+                      text="Apply"
+                      onClick={() => onApply(item)}
+                    />
+                    {item.canDelete && (
                       <Button
                         small
                         icon="trash"
@@ -268,12 +294,12 @@ export default observer(function EffectsGalleryDialog({
                         aria-label={`Delete ${displayName}`}
                         onClick={() => onDelete(item.id)}
                       />
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
         )}
       </DialogBody>
     </Dialog>

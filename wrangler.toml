@@ -1,0 +1,8 @@
+name = "text-effects-editor"
+compatibility_date = "2026-07-10"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "font-effects-gallery"
+database_id = "replace-with-cloudflare-d1-database-id"

@@ -2,3 +2,5 @@ node_modules
 dist
 .cache
 .idea
+.wrangler
+.dev.vars

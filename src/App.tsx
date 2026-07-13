@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { loadAuthState, type AuthUser } from './auth/authClient';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
+import LoginDialog from './components/auth/LoginDialog';
 import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
 import EffectsGalleryDialog from './components/gallery/EffectsGalleryDialog';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
 import { getCuratedFonts, loadSystemFonts } from './fonts';
-import {
-  createEffectsGalleryItem,
-  loadEffectsGallery,
-  saveEffectsGallery,
-  type EffectsGalleryItem,
-} from './gallery/effectsGallery';
+import type { GalleryItem, GalleryProviderId } from './gallery/GalleryProvider';
+import { GlobalGalleryProvider } from './gallery/providers/GlobalGalleryProvider';
+import { LocalGalleryProvider } from './gallery/providers/LocalGalleryProvider';
 import { fontStore } from './store/fontStore';
 import {
   loadSettingsFromLocalStorage,
@@ -77,15 +76,36 @@ export default function App() {
   const jsonImportInputRef = useRef<HTMLInputElement>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [galleryItems, setGalleryItems] = useState<EffectsGalleryItem[]>(
-    loadEffectsGallery,
-  );
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [addToGalleryOpen, setAddToGalleryOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [activeGalleryId, setActiveGalleryId] =
+    useState<GalleryProviderId>('local');
+  const [addGalleryId, setAddGalleryId] =
+    useState<GalleryProviderId>('local');
+  const [galleryQuery, setGalleryQuery] = useState('');
+  const [galleryLoading, setGalleryLoading] = useState(false);
   const [checkerboardTheme, setCheckerboardTheme] =
     useState<CheckerboardTheme>(loadCheckerboardTheme);
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
+  const galleryProviders = useMemo(
+    () => ({
+      global: new GlobalGalleryProvider(),
+      local: new LocalGalleryProvider(),
+    }),
+    [],
+  );
+  const activeGalleryProvider = galleryProviders[activeGalleryId];
+  const addGalleryProvider = galleryProviders[addGalleryId];
+
+  const refreshAuthState = useCallback(async () => {
+    const state = await loadAuthState();
+    setAuthUser(state.user);
+    return state.user;
+  }, []);
 
   const loadSettingsJsonText = useCallback((text: string) => {
     try {
@@ -209,44 +229,125 @@ export default function App() {
     }
   }, []);
 
-  const addToGallery = useCallback((name: string) => {
+  const openAddToGallery = useCallback((id: GalleryProviderId) => {
+    const provider = galleryProviders[id];
+    if (provider.addRequiresAuth && !authUser) {
+      setLoginOpen(true);
+      return;
+    }
+    setAddGalleryId(id);
+    setAddToGalleryOpen(true);
+  }, [authUser, galleryProviders]);
+
+  const openGallery = useCallback((id: GalleryProviderId) => {
+    setActiveGalleryId(id);
+    setGalleryQuery('');
+    setGalleryOpen(true);
+  }, []);
+
+  const reloadGallery = useCallback(async () => {
+    setGalleryLoading(true);
+    try {
+      setGalleryItems(await activeGalleryProvider.list({ query: galleryQuery }));
+    } catch (error) {
+      console.warn('Unable to load gallery.', error);
+      showFailureToast(`Unable to load ${activeGalleryProvider.label}`);
+      setGalleryItems([]);
+    } finally {
+      setGalleryLoading(false);
+    }
+  }, [activeGalleryProvider, galleryQuery]);
+
+  const addToGallery = useCallback(async (name: string) => {
+    if (addGalleryProvider.addRequiresAuth && !authUser) {
+      setLoginOpen(true);
+      return;
+    }
+
     const effects = fontStore.toJSON().effects;
     if (effects.length === 0) {
       showFailureToast('Nothing to add to gallery');
       return;
     }
 
-    const item = createEffectsGalleryItem(effects, name);
-    setGalleryItems((items) => {
-      const nextItems = [item, ...items];
-      saveEffectsGallery(nextItems);
-      return nextItems;
-    });
-    showSuccessToast('Added to gallery');
-  }, []);
+    const result = await addGalleryProvider.add({ effects, name });
+    if (result.requiresAuth) {
+      setLoginOpen(true);
+      return;
+    }
+    if (!result.ok) {
+      showFailureToast(result.message ?? 'Unable to add to gallery');
+      return;
+    }
 
-  const applyGalleryItem = useCallback((item: EffectsGalleryItem) => {
+    showSuccessToast(
+      addGalleryProvider.id === 'global'
+        ? 'Submitted to global gallery for moderation'
+        : 'Added to local gallery',
+    );
+    if (galleryOpen && activeGalleryId === addGalleryProvider.id) {
+      void reloadGallery();
+    }
+  }, [
+    activeGalleryId,
+    addGalleryProvider,
+    authUser,
+    galleryOpen,
+    reloadGallery,
+  ]);
+
+  const applyGalleryItem = useCallback((item: GalleryItem) => {
+    if (activeGalleryProvider.applyRequiresAuth && !authUser) {
+      setLoginOpen(true);
+      return;
+    }
+
     if (fontStore.replaceEffectsFromSerialized(item.effects, 'Apply gallery effect')) {
       setGalleryOpen(false);
       showSuccessToast('Gallery item applied');
     } else {
       showFailureToast('Unable to apply gallery item');
     }
-  }, []);
+  }, [activeGalleryProvider, authUser]);
 
   const deleteGalleryItem = useCallback((id: string) => {
-    if (!galleryItems.some((item) => item.id === id)) {
-      showFailureToast('Unable to delete gallery item');
-      return;
-    }
-
-    setGalleryItems((items) => {
-      const nextItems = items.filter((item) => item.id !== id);
-      saveEffectsGallery(nextItems);
-      return nextItems;
+    void activeGalleryProvider.delete(id).then((result) => {
+      if (result.requiresAuth) {
+        setLoginOpen(true);
+        return;
+      }
+      if (result.ok) {
+        showSuccessToast('Gallery item deleted');
+        void reloadGallery();
+      } else {
+        showFailureToast(result.message ?? 'Unable to delete gallery item');
+      }
     });
-    showSuccessToast('Gallery item deleted');
-  }, [galleryItems]);
+  }, [activeGalleryProvider, reloadGallery]);
+
+  const moderateGalleryItem = useCallback((
+    id: string,
+    action: 'approve' | 'reject',
+  ) => {
+    const request =
+      action === 'approve'
+        ? activeGalleryProvider.approve(id)
+        : activeGalleryProvider.reject(id);
+    void request.then((result) => {
+      if (result.requiresAuth) {
+        setLoginOpen(true);
+        return;
+      }
+      if (result.ok) {
+        showSuccessToast(
+          action === 'approve' ? 'Gallery item approved' : 'Gallery item rejected',
+        );
+        void reloadGallery();
+      } else {
+        showFailureToast(result.message ?? 'Unable to moderate gallery item');
+      }
+    });
+  }, [activeGalleryProvider, reloadGallery]);
 
   const centerView = useCallback(() => {
     canvasRef.current?.centerView();
@@ -271,6 +372,33 @@ export default function App() {
     })();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const authResult = new URLSearchParams(window.location.search).get('auth');
+    void refreshAuthState().then((user) => {
+      if (user) setLoginOpen(false);
+      if (authResult === 'success') {
+        showSuccessToast('Signed in');
+      } else if (authResult) {
+        showFailureToast('Unable to sign in');
+      }
+
+      if (authResult) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('auth');
+        window.history.replaceState({}, '', url.toString());
+      }
+    });
+  }, [refreshAuthState]);
+
+  useEffect(() => {
+    if (authUser) setLoginOpen(false);
+  }, [authUser]);
+
+  useEffect(() => {
+    if (!galleryOpen) return;
+    void reloadGallery();
+  }, [galleryOpen, reloadGallery]);
 
   useEffect(() => {
     window.localStorage.setItem(PANEL_WIDTH_KEY, String(propertiesPanelWidth));
@@ -392,7 +520,8 @@ export default function App() {
   return (
     <div className={styles.root}>
       <CanvasSizeInputs
-        onAddToGallery={() => setAddToGalleryOpen(true)}
+        onAddToGlobalGallery={() => openAddToGallery('global')}
+        onAddToLocalGallery={() => openAddToGallery('local')}
         onCenterView={centerView}
         onCopyToClipboard={() => {
           void copyPngToClipboard();
@@ -407,7 +536,8 @@ export default function App() {
           void importJsonWithFeedback();
         }}
         onNewDocument={newDocument}
-        onOpenGallery={() => setGalleryOpen(true)}
+        onOpenGlobalGallery={() => openGallery('global')}
+        onOpenLocalGallery={() => openGallery('local')}
         onResetZoom={resetZoom}
         onSaveSettings={saveSettings}
         checkerboardTheme={checkerboardTheme}
@@ -417,13 +547,28 @@ export default function App() {
         isOpen={addToGalleryOpen}
         onClose={() => setAddToGalleryOpen(false)}
         onSave={addToGallery}
+        saveText={
+          addGalleryProvider.id === 'global' ? 'Submit' : 'Save'
+        }
+        title={`Add To ${addGalleryProvider.label}`}
       />
       <EffectsGalleryDialog
+        canModerate={authUser?.role === 'admin'}
         isOpen={galleryOpen}
+        isLoading={galleryLoading}
         items={galleryItems}
+        providerLabel={activeGalleryProvider.label}
+        query={galleryQuery}
         onApply={applyGalleryItem}
+        onApprove={(id) => moderateGalleryItem(id, 'approve')}
         onClose={() => setGalleryOpen(false)}
         onDelete={deleteGalleryItem}
+        onQueryChange={setGalleryQuery}
+        onReject={(id) => moderateGalleryItem(id, 'reject')}
+      />
+      <LoginDialog
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
       />
       <input
         ref={jsonImportInputRef}

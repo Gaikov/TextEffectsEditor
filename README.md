@@ -23,7 +23,7 @@ Text Effects Editor is developed by Roman Gaikov.
 - Import/export JSON presets.
 - Export the current result as a PNG file.
 - Copy the current transparent PNG image to the system clipboard.
-- Save reusable effect stacks in a local gallery with dynamic previews.
+- Save reusable effect stacks in local and Cloudflare-backed global galleries.
 - Pan, zoom, center view, reset zoom, and resizable properties panel.
 - Two-row top bar with a hover menu and compact canvas toolbar.
 - Light or dark checkerboard preview background stored as an app preference.
@@ -56,9 +56,11 @@ The build output is written to `dist/`.
 7. Use `File -> Save Settings` to store the current setup in this browser.
 8. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
 9. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
-10. Use `File -> Add To Gallery` to name and save the current effect stack, and `File -> Gallery` to search, apply, or delete saved stacks.
-11. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
-12. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+10. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
+11. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
+12. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
+13. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
+14. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
 
@@ -154,16 +156,44 @@ Use Glow after a fill, stroke, or gradient layer to create neon, magic, or selec
 - `Export JSON`: saves text, canvas settings, font settings, and the full effect tree.
 - `Export PNG`: saves the current canvas result as a transparent PNG.
 - `Copy to Clipboard`: copies the current canvas result as a transparent PNG image.
-- `Add To Gallery`: asks for an optional name and saves the current root effect stack to local storage.
-- `Gallery`: opens saved effect stacks with dynamic previews and case-insensitive name search; applying an item replaces the current root effects and can be undone.
+- `Add To Local Gallery`: asks for an optional name and saves the current root effect stack to local storage.
+- `Show Local Gallery`: opens private browser-local effect stacks with dynamic previews and case-insensitive name search.
+- `Add To Global Gallery`: submits the current root effect stack to the Cloudflare global gallery for moderation. Sign-in is required.
+- `Show Global Gallery`: opens approved global effect stacks. Viewing is public; applying an item requires sign-in.
 
 File actions show non-blocking toast feedback after successful operations or recoverable errors.
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
 Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
 
+## Cloudflare Global Gallery
+
+The app can run as a Cloudflare Pages project with Pages Functions and D1 for a shared global gallery.
+
+```bash
+npm run cf:d1:migrate:local
+npm run cf:dev
+```
+
+Production setup:
+
+1. Create a Cloudflare D1 database named `font-effects-gallery`.
+2. Replace `database_id` in `wrangler.toml`.
+3. Configure Pages build command `npm run build` and output directory `dist`.
+4. Set OAuth secrets for `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`.
+5. Set `ADMIN_EMAILS=grom.games@gmail.com` or another comma-separated allowlist for moderation.
+6. Apply remote migrations with `npm run cf:d1:migrate -- --remote`.
+
+For local Cloudflare dev, copy `.dev.vars.example` to `.dev.vars` and fill OAuth credentials. Configure provider redirect URLs to match the environment:
+
+- Local Google callback: `http://localhost:8789/api/auth/callback/google`
+- Local Yandex callback: `http://localhost:8789/api/auth/callback/yandex`
+- Production callbacks use your Pages domain with the same paths.
+
+Global gallery submissions from registered users are stored as `pending`. Public users see only `approved` items. Admin users can approve or reject pending items.
+
 ## Menus And Shortcuts
 
-The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, or `View` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
 
 `View -> Checkerboard` switches the preview background between light and dark squares. This is an application preference saved in local storage; it does not affect PNG export or JSON presets.
 
@@ -192,3 +222,5 @@ npm run build  # TypeScript build and minified production bundle
 ```
 
 Source code lives in `src/`. Font effect models are in `src/effects/`; effect editors are in `src/components/effects/`. New effects should follow the existing polymorphic pattern: model file, editor component, registry entries, JSON serialization, opacity support, and no effect-specific branching in `FontProperties`.
+
+Gallery backends use the same pattern: add a `GalleryProvider` implementation and keep shared gallery UI provider-driven instead of branching directly on local/global behavior.

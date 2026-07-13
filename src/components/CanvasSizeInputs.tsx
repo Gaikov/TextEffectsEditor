@@ -103,14 +103,16 @@ const PAYPAL_DONATE_URL =
 
 interface Props {
   checkerboardTheme: CheckerboardTheme;
-  onAddToGallery: () => void;
+  onAddToGlobalGallery: () => void;
+  onAddToLocalGallery: () => void;
   onCenterView: () => void;
   onCopyToClipboard: () => void;
   onExport: () => void;
   onExportJson: () => void;
   onImportJson: () => void;
   onNewDocument: () => void;
-  onOpenGallery: () => void;
+  onOpenGlobalGallery: () => void;
+  onOpenLocalGallery: () => void;
   onResetZoom: () => void;
   onSaveSettings: () => void;
   onSetCheckerboardTheme: (theme: CheckerboardTheme) => void;
@@ -169,14 +171,16 @@ function MenuBarItem({
 
 export default observer(function CanvasSizeInputs({
   checkerboardTheme,
-  onAddToGallery,
+  onAddToGlobalGallery,
+  onAddToLocalGallery,
   onCenterView,
   onCopyToClipboard,
   onExport,
   onExportJson,
   onImportJson,
   onNewDocument,
-  onOpenGallery,
+  onOpenGlobalGallery,
+  onOpenLocalGallery,
   onResetZoom,
   onSaveSettings,
   onSetCheckerboardTheme,
@@ -232,17 +236,6 @@ export default observer(function CanvasSizeInputs({
                 labelElement={<Shortcut>Ctrl/Cmd+Shift+C</Shortcut>}
                 onClick={onCopyToClipboard}
               />
-              <MenuDivider />
-              <MenuItem
-                icon="add-to-artifact"
-                text="Add To Gallery"
-                onClick={onAddToGallery}
-              />
-              <MenuItem
-                icon="grid-view"
-                text="Gallery"
-                onClick={onOpenGallery}
-              />
             </Menu>
           }
         />
@@ -272,6 +265,36 @@ export default observer(function CanvasSizeInputs({
                 labelElement={<Shortcut>Ctrl/Cmd+Y</Shortcut>}
                 disabled={!undoService.canRedo}
                 onClick={() => undoService.redo()}
+              />
+            </Menu>
+          }
+        />
+        <MenuBarItem
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          text="Gallery"
+          content={
+            <Menu>
+              <MenuItem
+                icon="add-to-artifact"
+                text="Add To Local Gallery"
+                onClick={onAddToLocalGallery}
+              />
+              <MenuItem
+                icon="grid-view"
+                text="Show Local Gallery"
+                onClick={onOpenLocalGallery}
+              />
+              <MenuDivider />
+              <MenuItem
+                icon="cloud-upload"
+                text="Add To Global Gallery"
+                onClick={onAddToGlobalGallery}
+              />
+              <MenuItem
+                icon="cloud-download"
+                text="Show Global Gallery"
+                onClick={onOpenGlobalGallery}
               />
             </Menu>
           }
