@@ -4,6 +4,8 @@ Text Effects Editor is a browser-based editor for designing styled text and expo
 
 The app uses a canvas preview with a tree of effects. Effects can be grouped, reordered, disabled, and saved as JSON presets.
 
+Live app: [https://text-effects-editor.pages.dev/](https://text-effects-editor.pages.dev/)
+
 ![Text Effects Editor screenshot](docs/app-screenshot.png)
 
 ## Developer And Support
