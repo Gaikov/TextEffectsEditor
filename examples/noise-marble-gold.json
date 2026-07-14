@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "text": "MARBLE",
+  "fontFamily": "Arial Black",
+  "fontSize": 170,
+  "canvasWidth": 1600,
+  "canvasHeight": 650,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Gold Marble",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#1B1205",
+          "opacity": 0.55,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 18,
+          "shadowOffsetX": 12,
+          "shadowOffsetY": 18
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#3D2503",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 24,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFF7D1",
+            "#D8A332",
+            "#7C4A08",
+            "#FFF0A8"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "noise",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.46,
+          "seed": 41,
+          "scale": 1.35,
+          "xOffset": 40,
+          "yOffset": -20,
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#5F3400",
+          "backgroundOpacity": 0.08,
+          "noiseType": "fractal",
+          "density": 0.72,
+          "contrast": 0.42,
+          "grainSize": 18,
+          "octaves": 6,
+          "persistence": 0.62,
+          "lacunarity": 2.35,
+          "rotation": -18,
+          "stretchX": 3.2,
+          "stretchY": 0.45,
+          "monochrome": false,
+          "invert": false,
+          "threshold": -0.18,
+          "softness": 0.42
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#2A1600",
+          "opacity": 0.58,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 10,
+          "shadowOffsetX": 6,
+          "shadowOffsetY": 8
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFF4B8",
+          "opacity": 0.66,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 4,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        }
+      ]
+    }
+  ]
+}

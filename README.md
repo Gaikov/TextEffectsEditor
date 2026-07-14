@@ -53,7 +53,7 @@ The build output is written to `dist/`.
 1. On startup, choose whether to load system fonts if permission has not already been granted. Supported browsers will ask for local font permission.
 2. Set the canvas `Width` and `Height` in the top bar.
 3. Edit the text, font, style, and size in the right properties panel.
-4. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Shadow`, `Glow`, `Blur`, or `Group`.
+4. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Pattern Fill`, `Noise`, `Shadow`, `Inner Shadow`, `Glow`, `Blur`, `Composite / Blend`, or `Group`.
 5. Drag effects by the handle to change their order or move them into groups.
 6. Toggle the eye icon to temporarily hide an effect.
 7. Use `File -> New` to reset the current document and clear undo/redo history.
@@ -130,6 +130,43 @@ Draws filled text using a gradient that automatically spans the text bounds.
 
 Use Gradient Fill for colorful titles without manually setting gradient coordinates.
 
+### Pattern Fill
+
+Draws filled text using a generated repeating pattern.
+
+- `Type`: `Stripes`, `Dots`, `Checker`, or `Grid`.
+- `Foreground`: primary pattern color.
+- `Background`: secondary pattern color.
+- `Bg opacity`: transparency of the background color.
+- `Opacity`: transparency of the whole patterned fill.
+- `Cell`: base tile size in pixels.
+- `Thickness`: stripe/grid thickness or dot radius.
+- `Rotation`: pattern rotation in degrees, especially useful for stripe direction.
+- `Scale`: pattern tile scale.
+- `X offset`, `Y offset`: shifts the patterned text.
+
+Use Pattern Fill for candy stripes, halftone dots, checker fills, and grid textures without embedding image assets.
+
+### Noise
+
+Generates deterministic procedural noise and clips it to the current buffer alpha.
+
+- `Type`: `Value`, `Fractal`, `Cellular`, or `Speckle`.
+- `Foreground`, `Background`: noise colors.
+- `Bg opacity`: transparency of the background color.
+- `Opacity`: strength of the noise overlay.
+- `Seed`: changes the deterministic texture layout.
+- `Density`: amount of foreground noise.
+- `Contrast`: softness versus harsher speckle.
+- `Grain`: base sample size in pixels.
+- `Octaves`, `Persistence`, `Lacunarity`: fractal noise detail controls.
+- `Scale`, `Rotation`, `Stretch X`, `Stretch Y`: texture coordinate transform.
+- `X offset`, `Y offset`: shifts the sampled texture.
+- `Threshold`, `Softness`: masks low/high noise values.
+- `Mono`, `Invert`: grayscale output and inverted noise values.
+
+Use Noise after one or more visible effects. It draws nothing before any content exists. Add `Composite / Blend` as a separate effect when the result needs blend/composite behavior.
+
 ### Shadow
 
 Creates a shadow from the current buffer, draws it behind the existing content, then redraws the original content above it.
@@ -141,6 +178,18 @@ Creates a shadow from the current buffer, draws it behind the existing content, 
 - `Shadow X`, `Shadow Y`: main shadow offset in pixels.
 
 Use Shadow after one or more visible effects. Put effects in a group when only that group should cast the shadow.
+
+### Inner Shadow
+
+Creates a colored, blurred shadow from the transparent pixels around the current buffer, then clips it inward onto the filled pixels.
+
+- `Color`: inner shadow color.
+- `Opacity`: inner shadow transparency.
+- `X offset`, `Y offset`: additional inner shadow shift.
+- `Blur`: blur radius in pixels.
+- `Shadow X`, `Shadow Y`: main inner shadow offset in pixels.
+
+Use Inner Shadow after a fill, stroke, or gradient layer to add inset depth from the shape edge. Put effects in a group when only that group should receive the inset.
 
 ### Glow
 
@@ -162,6 +211,15 @@ Transforms the current buffer into a blurred version of itself.
 - `Passes`: blur strength, repeated from `1` to `8`.
 
 Use Blur after a fill, stroke, or gradient layer to soften everything drawn so far. Draw later effects after Blur when they should stay sharp.
+
+### Composite / Blend
+
+Composites the current buffer over itself with a selected canvas blend or composite operation.
+
+- `Opacity`: strength of the composited copy.
+- `Mode`: canvas `globalCompositeOperation`, including blend modes such as `multiply`, `screen`, and `overlay`, plus composite modes such as `destination-out`, `copy`, and `xor`.
+
+Use Composite / Blend after one or more visible effects to darken, lighten, intensify, mask, or experimentally combine the accumulated buffer. Put it inside a group when the blend should affect only that group.
 
 ## Saving And Export
 

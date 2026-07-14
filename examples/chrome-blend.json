@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "text": "CHROME",
+  "fontFamily": "Arial Black",
+  "fontSize": 140,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "shadow",
+      "visible": true,
+      "collapsed": true,
+      "color": "#02050B",
+      "opacity": 0.52,
+      "xOffset": 0,
+      "yOffset": 0,
+      "shadowBlur": 16,
+      "shadowOffsetX": 10,
+      "shadowOffsetY": 14
+    },
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Chrome Body",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#020409",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 22,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#253047",
+          "opacity": 0.9,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 12,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFFFFF",
+            "#EAFDFF",
+            "#6BEFFF",
+            "#287EC4",
+            "#23365F",
+            "#E8F5FF",
+            "#FFFFFF"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "compositeBlend",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.28,
+          "operation": "overlay"
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#00040A",
+          "opacity": 0.48,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 7,
+          "shadowOffsetX": 4,
+          "shadowOffsetY": 7
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.32,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 5,
+          "shadowOffsetX": -3,
+          "shadowOffsetY": -4
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 3,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "compositeBlend",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.18,
+          "operation": "screen"
+        }
+      ]
+    },
+    {
+      "type": "glow",
+      "visible": true,
+      "collapsed": true,
+      "color": "#5BEFFF",
+      "opacity": 0.18,
+      "blur": 18,
+      "spread": 1
+    }
+  ]
+}

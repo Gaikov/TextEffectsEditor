@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "text": "CRYSTAL",
+  "fontFamily": "Arial Black",
+  "fontSize": 132,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Crystal Inset",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#E8FBFF",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 20,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.96,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFFFFF",
+            "#9DF0FF",
+            "#3182CE",
+            "#1B2A6B"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#032D60",
+          "opacity": 0.66,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 12,
+          "shadowOffsetX": 8,
+          "shadowOffsetY": 10
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 8,
+          "shadowOffsetX": -7,
+          "shadowOffsetY": -8
+        },
+        {
+          "type": "fill",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.22,
+          "xOffset": -4,
+          "yOffset": -7
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Cold Blur Aura",
+      "collapsed": false,
+      "opacity": 0.82,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#6EE7F9",
+          "opacity": 0.8,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 30,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "blur",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.58,
+          "radius": 14,
+          "iterations": 2
+        }
+      ]
+    },
+    {
+      "type": "shadow",
+      "visible": true,
+      "collapsed": true,
+      "color": "#031525",
+      "opacity": 0.52,
+      "xOffset": 0,
+      "yOffset": 0,
+      "shadowBlur": 18,
+      "shadowOffsetX": 12,
+      "shadowOffsetY": 18
+    }
+  ]
+}

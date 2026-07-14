@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "text": "STATIC",
+  "fontFamily": "Arial Black",
+  "fontSize": 175,
+  "canvasWidth": 1500,
+  "canvasHeight": 620,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Neon Grain",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FF2FD6",
+          "opacity": 0.45,
+          "blur": 24,
+          "spread": 2
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#120022",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 22,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#F8E7FF",
+            "#FF2FD6",
+            "#14F1FF",
+            "#2B5CFF"
+          ],
+          "direction": "horizontal"
+        },
+        {
+          "type": "noise",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.52,
+          "seed": 93,
+          "scale": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#05000A",
+          "backgroundOpacity": 0,
+          "noiseType": "speckle",
+          "density": 0.38,
+          "contrast": 1,
+          "grainSize": 3,
+          "octaves": 4,
+          "persistence": 0.5,
+          "lacunarity": 2,
+          "rotation": 0,
+          "stretchX": 1,
+          "stretchY": 1,
+          "monochrome": false,
+          "invert": false,
+          "threshold": 0.2,
+          "softness": 0.08
+        },
+        {
+          "type": "compositeBlend",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.24,
+          "operation": "screen"
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.55,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 3,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        }
+      ]
+    }
+  ]
+}

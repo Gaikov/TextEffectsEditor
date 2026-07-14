@@ -9,6 +9,11 @@ import {
   deserializeColorFillText,
   serializeColorFillText,
 } from './ColorFillText';
+import {
+  CompositeBlendEffect,
+  deserializeCompositeBlendEffect,
+  serializeCompositeBlendEffect,
+} from './CompositeBlendEffect';
 import { isRecord, type SerializedFontEffect } from './effectSnapshot';
 import {
   GradientFillText,
@@ -26,7 +31,22 @@ import {
   readGroupChildren,
   serializeGroupEffect,
 } from './GroupEffect';
+import {
+  InnerShadowEffect,
+  deserializeInnerShadowEffect,
+  serializeInnerShadowEffect,
+} from './InnerShadowEffect';
 import type { FontEffectType, IFontEffect } from './IFontEffect';
+import {
+  PatternFillText,
+  deserializePatternFillText,
+  serializePatternFillText,
+} from './PatternFillText';
+import {
+  NoiseEffect,
+  deserializeNoiseEffect,
+  serializeNoiseEffect,
+} from './NoiseEffect';
 import {
   ShadowText,
   deserializeShadowText,
@@ -87,6 +107,17 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     deserialize: deserializeShadowText,
   },
   {
+    type: 'innerShadow',
+    label: 'Inner Shadow',
+    icon: 'inner-join',
+    create: () => new InnerShadowEffect(),
+    serialize: (effect) =>
+      effect instanceof InnerShadowEffect
+        ? serializeInnerShadowEffect(effect)
+        : null,
+    deserialize: deserializeInnerShadowEffect,
+  },
+  {
     type: 'glow',
     label: 'Glow',
     icon: 'highlight',
@@ -103,6 +134,35 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof BlurEffect ? serializeBlurEffect(effect) : null,
     deserialize: deserializeBlurEffect,
+  },
+  {
+    type: 'compositeBlend',
+    label: 'Composite / Blend',
+    icon: 'merge-columns',
+    create: () => new CompositeBlendEffect(),
+    serialize: (effect) =>
+      effect instanceof CompositeBlendEffect
+        ? serializeCompositeBlendEffect(effect)
+        : null,
+    deserialize: deserializeCompositeBlendEffect,
+  },
+  {
+    type: 'patternFill',
+    label: 'Pattern Fill',
+    icon: 'grid',
+    create: () => new PatternFillText(),
+    serialize: (effect) =>
+      effect instanceof PatternFillText ? serializePatternFillText(effect) : null,
+    deserialize: deserializePatternFillText,
+  },
+  {
+    type: 'noise',
+    label: 'Noise',
+    icon: 'scatter-plot',
+    create: () => new NoiseEffect(),
+    serialize: (effect) =>
+      effect instanceof NoiseEffect ? serializeNoiseEffect(effect) : null,
+    deserialize: deserializeNoiseEffect,
   },
   {
     type: 'gradientFill',

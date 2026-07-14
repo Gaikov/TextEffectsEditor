@@ -118,14 +118,16 @@ export function EffectNumberInput({
 }
 
 export function EffectOpacityRow({
+  label = 'Opacity',
   value,
   onChange,
 }: {
+  label?: string;
   value: number;
   onChange: (value: number) => void;
 }) {
   return (
-    <EffectRow label="Opacity">
+    <EffectRow label={label}>
       <input
         className="bp6-input bp6-small"
         type="number"

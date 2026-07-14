@@ -5,8 +5,12 @@ export type FontEffectType =
   | 'fill'
   | 'stroke'
   | 'shadow'
+  | 'innerShadow'
   | 'glow'
   | 'blur'
+  | 'compositeBlend'
+  | 'patternFill'
+  | 'noise'
   | 'gradientFill';
 
 export interface FontEffectRenderContext {

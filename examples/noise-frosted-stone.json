@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "text": "STONE",
+  "fontFamily": "Arial Black",
+  "fontSize": 185,
+  "canvasWidth": 1500,
+  "canvasHeight": 640,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Frosted Stone",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#17212B",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 28,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#F7FBFF",
+            "#A9B7C7",
+            "#5B6878",
+            "#EEF7FF"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "noise",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.55,
+          "seed": 7,
+          "scale": 1,
+          "xOffset": -18,
+          "yOffset": 34,
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#17212B",
+          "backgroundOpacity": 0.15,
+          "noiseType": "cellular",
+          "density": 0.58,
+          "contrast": 0.86,
+          "grainSize": 10,
+          "octaves": 4,
+          "persistence": 0.5,
+          "lacunarity": 2,
+          "rotation": 12,
+          "stretchX": 1.4,
+          "stretchY": 0.9,
+          "monochrome": true,
+          "invert": false,
+          "threshold": -0.08,
+          "softness": 0.28
+        },
+        {
+          "type": "blur",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.96,
+          "radius": 0.7,
+          "iterations": 1
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#0C1118",
+          "opacity": 0.44,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 9,
+          "shadowOffsetX": 5,
+          "shadowOffsetY": 8
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#B9F2FF",
+          "opacity": 0.22,
+          "blur": 20,
+          "spread": 1
+        }
+      ]
+    }
+  ]
+}

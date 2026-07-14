@@ -134,6 +134,7 @@ class FontStore {
 
   addEffectToGroup = (type: FontEffectType, groupId?: string) => {
     const effect = createFontEffect(type);
+    effect.collapsed = false;
     const effects = this.getEffectsForParent(groupId ?? null);
     if (!effects) return;
 

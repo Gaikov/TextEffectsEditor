@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "text": "CANDY",
+  "fontFamily": "Arial Black",
+  "fontSize": 180,
+  "canvasWidth": 1500,
+  "canvasHeight": 600,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Candy Stripes",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#4A0A21",
+          "opacity": 0.34,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 18,
+          "shadowOffsetX": 12,
+          "shadowOffsetY": 16
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 30,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#E91E63",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 16,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "patternFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "patternType": "stripes",
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#FF3D7F",
+          "backgroundOpacity": 1,
+          "cellSize": 26,
+          "thickness": 10,
+          "rotation": -32,
+          "scale": 1
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#8F0032",
+          "opacity": 0.45,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 9,
+          "shadowOffsetX": 5,
+          "shadowOffsetY": 7
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFB3CE",
+          "opacity": 0.28,
+          "blur": 18,
+          "spread": 2
+        }
+      ]
+    }
+  ]
+}

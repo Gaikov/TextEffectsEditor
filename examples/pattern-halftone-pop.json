@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "text": "POP",
+  "fontFamily": "Arial Black",
+  "fontSize": 220,
+  "canvasWidth": 1500,
+  "canvasHeight": 650,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Halftone Pop",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#08131F",
+          "opacity": 0.55,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 10,
+          "shadowOffsetX": 12,
+          "shadowOffsetY": 14
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#10161A",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 24,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFE066",
+            "#F84AA7",
+            "#4CC9F0"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "patternFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.42,
+          "xOffset": 0,
+          "yOffset": 0,
+          "patternType": "dots",
+          "foregroundColor": "#10161A",
+          "backgroundColor": "#FFFFFF",
+          "backgroundOpacity": 0,
+          "cellSize": 22,
+          "thickness": 5,
+          "rotation": 0,
+          "scale": 1
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.65,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 5,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "text": "GRID",
+  "fontFamily": "Arial Black",
+  "fontSize": 190,
+  "canvasWidth": 1500,
+  "canvasHeight": 620,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Blueprint Grid",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#EAFDFF",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 26,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#0B3954",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 16,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "patternFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "patternType": "grid",
+          "foregroundColor": "#9BF6FF",
+          "backgroundColor": "#0B3954",
+          "backgroundOpacity": 1,
+          "cellSize": 18,
+          "thickness": 2,
+          "rotation": 0,
+          "scale": 1
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#001B2E",
+          "opacity": 0.48,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 8,
+          "shadowOffsetX": 5,
+          "shadowOffsetY": 7
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#4CC9F0",
+          "opacity": 0.3,
+          "blur": 22,
+          "spread": 2
+        }
+      ]
+    }
+  ]
+}

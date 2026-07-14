@@ -6,15 +6,16 @@
 
 ## Planned
 
-2. Pattern Fill
-3. Inner Shadow
-4. Composite / Blend
-5. Wave / Distort
+2. Wave / Distort
 
 ## Completed
 
 1. Glow
 2. Blur
+3. Inner Shadow
+4. Composite / Blend
+5. Pattern Fill
+6. Noise
 
 ## Effect Pattern
 
