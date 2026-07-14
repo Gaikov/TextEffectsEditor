@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "text": "FROST",
+  "fontFamily": "Arial Black",
+  "fontSize": 150,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Soft Frost Backing",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#B7F7FF",
+          "opacity": 0.78,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 42,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.86,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#EFFFFF",
+            "#74D7FF",
+            "#6C63FF"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "blur",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.8,
+          "radius": 11,
+          "iterations": 2
+        }
+      ]
+    },
+    {
+      "type": "stroke",
+      "visible": true,
+      "collapsed": true,
+      "color": "#FFFFFF",
+      "opacity": 1,
+      "xOffset": 0,
+      "yOffset": 0,
+      "lineWidth": 12,
+      "lineCap": "round",
+      "lineJoin": "round",
+      "miterLimit": 10,
+      "lineDash": [],
+      "lineDashOffset": 0
+    },
+    {
+      "type": "gradientFill",
+      "visible": true,
+      "collapsed": true,
+      "opacity": 1,
+      "xOffset": 0,
+      "yOffset": 0,
+      "colors": [
+        "#FFFFFF",
+        "#B8F3FF",
+        "#2D72D2"
+      ],
+      "direction": "vertical"
+    },
+    {
+      "type": "stroke",
+      "visible": true,
+      "collapsed": true,
+      "color": "#244B8F",
+      "opacity": 0.86,
+      "xOffset": 0,
+      "yOffset": 0,
+      "lineWidth": 3,
+      "lineCap": "round",
+      "lineJoin": "round",
+      "miterLimit": 10,
+      "lineDash": [],
+      "lineDashOffset": 0
+    },
+    {
+      "type": "fill",
+      "visible": true,
+      "collapsed": true,
+      "color": "#FFFFFF",
+      "opacity": 0.32,
+      "xOffset": -5,
+      "yOffset": -8
+    },
+    {
+      "type": "shadow",
+      "visible": true,
+      "collapsed": true,
+      "color": "#0A1B3F",
+      "opacity": 0.5,
+      "xOffset": 0,
+      "yOffset": 0,
+      "shadowBlur": 18,
+      "shadowOffsetX": 12,
+      "shadowOffsetY": 18
+    }
+  ]
+}

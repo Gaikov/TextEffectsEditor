@@ -19,6 +19,7 @@ Text Effects Editor is developed by Roman Gaikov.
 
 - Live text preview on a transparent checkerboard canvas.
 - Editable text, font family, italic flag, font weight, font size, and canvas size.
+- Optional startup prompt for loading locally installed system fonts in supported browsers.
 - Layered effects with drag-and-drop ordering and nested groups.
 - Undo/redo for property edits and effect tree changes.
 - Save settings to browser local storage.
@@ -49,21 +50,22 @@ The build output is written to `dist/`.
 
 ## Basic Workflow
 
-1. Set the canvas `Width` and `Height` in the top bar.
-2. Edit the text, font, style, and size in the right properties panel.
-3. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Shadow`, `Glow`, or `Group`.
-4. Drag effects by the handle to change their order or move them into groups.
-5. Toggle the eye icon to temporarily hide an effect.
-6. Use `File -> New` to reset the current document and clear undo/redo history.
-7. Use `File -> Save Settings` to store the current setup in this browser.
-8. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
-9. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
-10. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
-11. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
-12. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
-13. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
-14. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
-15. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+1. On startup, choose whether to load system fonts if permission has not already been granted. Supported browsers will ask for local font permission.
+2. Set the canvas `Width` and `Height` in the top bar.
+3. Edit the text, font, style, and size in the right properties panel.
+4. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Shadow`, `Glow`, `Blur`, or `Group`.
+5. Drag effects by the handle to change their order or move them into groups.
+6. Toggle the eye icon to temporarily hide an effect.
+7. Use `File -> New` to reset the current document and clear undo/redo history.
+8. Use `File -> Save Settings` to store the current setup in this browser.
+9. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
+10. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
+11. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
+12. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
+13. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
+14. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
+15. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
+16. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
 
@@ -150,6 +152,16 @@ Creates a colored blurred halo from the current buffer, draws it behind the exis
 - `Spread`: glow strength, repeated from `1` to `8`.
 
 Use Glow after a fill, stroke, or gradient layer to create neon, magic, or selection-highlight effects.
+
+### Blur
+
+Transforms the current buffer into a blurred version of itself.
+
+- `Opacity`: blurred result transparency.
+- `Radius`: blur radius in pixels.
+- `Passes`: blur strength, repeated from `1` to `8`.
+
+Use Blur after a fill, stroke, or gradient layer to soften everything drawn so far. Draw later effects after Blur when they should stay sharp.
 
 ## Saving And Export
 

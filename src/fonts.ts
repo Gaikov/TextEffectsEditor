@@ -30,6 +30,18 @@ export function getCuratedFonts(): string[] {
   return CURATED;
 }
 
+export function mergeFontLists(...fontLists: string[][]): string[] {
+  const names = new Set<string>();
+  fontLists.flat().forEach((font) => {
+    const name = font.trim();
+    if (name) names.add(name);
+  });
+
+  const fonts = [...names].sort((a, b) => a.localeCompare(b));
+  fonts.forEach((font) => validFontsSet.add(font.toLowerCase()));
+  return fonts;
+}
+
 export async function loadSystemFonts(): Promise<string[]> {
   if (!window.queryLocalFonts) {
     throw new Error('Not supported');

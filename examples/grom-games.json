@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "text": "GROm Games",
+  "fontFamily": "Comic Sans MS",
+  "fontSize": 150,
+  "canvasWidth": 1500,
+  "canvasHeight": 500,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Group",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": false,
+          "color": "#ffffff",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 50,
+          "lineCap": "butt",
+          "lineJoin": "bevel",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": false,
+          "color": "#ffe74d",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 30,
+          "lineCap": "butt",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Group",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "fill",
+          "visible": true,
+          "collapsed": false,
+          "color": "#006600",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": false,
+          "color": "#000000",
+          "opacity": 0.2,
+          "blur": 6,
+          "spread": 8
+        }
+      ]
+    },
+    {
+      "type": "fill",
+      "visible": true,
+      "collapsed": false,
+      "color": "#00a800",
+      "opacity": 1,
+      "xOffset": 0,
+      "yOffset": -10
+    }
+  ]
+}

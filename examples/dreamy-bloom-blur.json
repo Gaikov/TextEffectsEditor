@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "text": "DREAM",
+  "fontFamily": "Arial Black",
+  "fontSize": 150,
+  "canvasWidth": 1400,
+  "canvasHeight": 700,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Rose Bloom Blur",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.9,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FF2DAA",
+            "#FFB000",
+            "#7C4DFF"
+          ],
+          "direction": "horizontal"
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.65,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 24,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "blur",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.64,
+          "radius": 18,
+          "iterations": 2
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Blue Haze Blur",
+      "collapsed": false,
+      "opacity": 0.9,
+      "children": [
+        {
+          "type": "fill",
+          "visible": true,
+          "collapsed": true,
+          "color": "#00E5FF",
+          "opacity": 0.7,
+          "xOffset": 12,
+          "yOffset": 10
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#7C4DFF",
+          "opacity": 0.55,
+          "xOffset": 10,
+          "yOffset": 10,
+          "lineWidth": 18,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "blur",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.72,
+          "radius": 9,
+          "iterations": 3
+        }
+      ]
+    },
+    {
+      "type": "stroke",
+      "visible": true,
+      "collapsed": true,
+      "color": "#1D0B3F",
+      "opacity": 1,
+      "xOffset": 0,
+      "yOffset": 0,
+      "lineWidth": 16,
+      "lineCap": "round",
+      "lineJoin": "round",
+      "miterLimit": 10,
+      "lineDash": [],
+      "lineDashOffset": 0
+    },
+    {
+      "type": "gradientFill",
+      "visible": true,
+      "collapsed": true,
+      "opacity": 1,
+      "xOffset": 0,
+      "yOffset": 0,
+      "colors": [
+        "#FFF4A8",
+        "#FF6BCB",
+        "#7C4DFF"
+      ],
+      "direction": "vertical"
+    },
+    {
+      "type": "stroke",
+      "visible": true,
+      "collapsed": true,
+      "color": "#FFFFFF",
+      "opacity": 0.82,
+      "xOffset": 0,
+      "yOffset": -2,
+      "lineWidth": 4,
+      "lineCap": "round",
+      "lineJoin": "round",
+      "miterLimit": 10,
+      "lineDash": [],
+      "lineDashOffset": 0
+    },
+    {
+      "type": "glow",
+      "visible": true,
+      "collapsed": true,
+      "color": "#FF2DAA",
+      "opacity": 0.48,
+      "blur": 28,
+      "spread": 2
+    }
+  ]
+}

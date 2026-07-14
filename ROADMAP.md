@@ -2,16 +2,19 @@
 
 ## Current
 
-1. Glow
+1. Duplicate / Offset
 
 ## Planned
 
+2. Pattern Fill
+3. Inner Shadow
+4. Composite / Blend
+5. Wave / Distort
+
+## Completed
+
+1. Glow
 2. Blur
-3. Duplicate / Offset
-4. Pattern Fill
-5. Inner Shadow
-6. Composite / Blend
-7. Wave / Distort
 
 ## Effect Pattern
 

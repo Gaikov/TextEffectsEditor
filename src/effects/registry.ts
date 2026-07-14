@@ -1,5 +1,10 @@
 import type { IconName } from '@blueprintjs/core';
 import {
+  BlurEffect,
+  deserializeBlurEffect,
+  serializeBlurEffect,
+} from './BlurEffect';
+import {
   ColorFillText,
   deserializeColorFillText,
   serializeColorFillText,
@@ -89,6 +94,15 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof GlowEffect ? serializeGlowEffect(effect) : null,
     deserialize: deserializeGlowEffect,
+  },
+  {
+    type: 'blur',
+    label: 'Blur',
+    icon: 'filter',
+    create: () => new BlurEffect(),
+    serialize: (effect) =>
+      effect instanceof BlurEffect ? serializeBlurEffect(effect) : null,
+    deserialize: deserializeBlurEffect,
   },
   {
     type: 'gradientFill',

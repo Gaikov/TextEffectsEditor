@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Dialog, DialogBody, DialogFooter } from '@blueprintjs/core';
 import { loadAuthState, logout, type AuthUser } from './auth/authClient';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
 import LoginDialog from './components/auth/LoginDialog';
@@ -6,7 +7,7 @@ import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
 import EffectsGalleryDialog from './components/gallery/EffectsGalleryDialog';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
-import { getCuratedFonts, loadSystemFonts } from './fonts';
+import { getCuratedFonts, loadSystemFonts, mergeFontLists } from './fonts';
 import type { GalleryItem, GalleryProviderId } from './gallery/GalleryProvider';
 import { GlobalGalleryProvider } from './gallery/providers/GlobalGalleryProvider';
 import { LocalGalleryProvider } from './gallery/providers/LocalGalleryProvider';
@@ -66,6 +67,19 @@ function isEditableShortcutTarget(target: EventTarget | null) {
   );
 }
 
+async function getLocalFontsPermissionState(): Promise<PermissionState | null> {
+  if (!navigator.permissions?.query) return null;
+
+  try {
+    const status = await navigator.permissions.query({
+      name: 'local-fonts' as PermissionName,
+    });
+    return status.state;
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   useState(() => {
     loadSettingsFromLocalStorage();
@@ -75,7 +89,9 @@ export default function App() {
   const canvasRef = useRef<FontCanvasHandle>(null);
   const jsonImportInputRef = useRef<HTMLInputElement>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(true);
+  const [systemFontsDialogOpen, setSystemFontsDialogOpen] = useState(false);
+  const [systemFontsLoading, setSystemFontsLoading] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -371,19 +387,57 @@ export default function App() {
     }
   }, [activeGalleryId, galleryOpen, reloadGallery]);
 
+  const loadSystemFontsWithFeedback = useCallback(async () => {
+    if (!window.queryLocalFonts) {
+      setSystemFontsDialogOpen(false);
+      showFailureToast('System fonts are supported only in desktop Chromium browsers');
+      return;
+    }
+
+    setSystemFontsLoading(true);
+    setFontsLoaded(false);
+    try {
+      const systemFonts = await loadSystemFonts();
+      setFontList((currentFonts) => mergeFontLists(currentFonts, systemFonts));
+      setSystemFontsDialogOpen(false);
+      showSuccessToast('System fonts loaded');
+    } catch (error) {
+      console.warn('Unable to load system fonts.', error);
+      setSystemFontsDialogOpen(false);
+      showFailureToast('Unable to load system fonts');
+    } finally {
+      setSystemFontsLoading(false);
+      setFontsLoaded(true);
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+
+    if (!window.queryLocalFonts) return () => { cancelled = true; };
+
+    void (async () => {
+      const permissionState = await getLocalFontsPermissionState();
+      if (cancelled) return;
+
+      if (permissionState !== 'granted') {
+        setSystemFontsDialogOpen(true);
+        return;
+      }
+
+      setFontsLoaded(false);
       try {
         const systemFonts = await loadSystemFonts();
         if (!cancelled) {
-          setFontList(systemFonts);
-          setFontsLoaded(true);
+          setFontList((currentFonts) => mergeFontLists(currentFonts, systemFonts));
         }
-      } catch {
+      } catch (error) {
+        console.warn('Unable to load system fonts.', error);
+      } finally {
         if (!cancelled) setFontsLoaded(true);
       }
     })();
+
     return () => { cancelled = true; };
   }, []);
 
@@ -589,6 +643,41 @@ export default function App() {
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
       />
+      <Dialog
+        isOpen={systemFontsDialogOpen}
+        onClose={() => setSystemFontsDialogOpen(false)}
+        title="Show system fonts?"
+      >
+        <DialogBody>
+          <p>
+            Text Effects Editor can request access to the fonts installed on
+            this computer and show them in the font list.
+          </p>
+          <p>
+            Your browser will ask for permission. If you skip this step, the
+            editor will use the built-in font list.
+          </p>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <Button
+                disabled={systemFontsLoading}
+                text="Skip"
+                onClick={() => setSystemFontsDialogOpen(false)}
+              />
+              <Button
+                intent="primary"
+                loading={systemFontsLoading}
+                text="Show System Fonts"
+                onClick={() => {
+                  void loadSystemFontsWithFeedback();
+                }}
+              />
+            </>
+          }
+        />
+      </Dialog>
       <input
         ref={jsonImportInputRef}
         type="file"

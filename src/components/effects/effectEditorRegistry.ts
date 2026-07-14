@@ -4,6 +4,7 @@ import type {
   DraggableSyntheticListeners,
 } from '@dnd-kit/core';
 import type {
+  BlurEffect,
   ColorFillText,
   FontEffectType,
   GlowEffect,
@@ -13,6 +14,7 @@ import type {
   ShadowText,
   StrokeText,
 } from '../../effects';
+import { BlurEffectEditor } from './BlurEffectEditor';
 import { ColorFillTextEditor } from './ColorFillTextEditor';
 import { GlowEffectEditor } from './GlowEffectEditor';
 import { GradientFillTextEditor } from './GradientFillTextEditor';
@@ -45,6 +47,7 @@ export const effectEditorRegistry: Record<
   stroke: StrokeTextEditor as ComponentType<EffectEditorProps<StrokeText>>,
   shadow: ShadowTextEditor as ComponentType<EffectEditorProps<ShadowText>>,
   glow: GlowEffectEditor as ComponentType<EffectEditorProps<GlowEffect>>,
+  blur: BlurEffectEditor as ComponentType<EffectEditorProps<BlurEffect>>,
   gradientFill: GradientFillTextEditor as ComponentType<
     EffectEditorProps<GradientFillText>
   >,

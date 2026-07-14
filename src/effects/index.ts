@@ -1,3 +1,4 @@
+export { BlurEffect } from './BlurEffect';
 export { ColorFillText } from './ColorFillText';
 export { GlowEffect } from './GlowEffect';
 export { GradientFillText } from './GradientFillText';

@@ -6,6 +6,7 @@ export type FontEffectType =
   | 'stroke'
   | 'shadow'
   | 'glow'
+  | 'blur'
   | 'gradientFill';
 
 export interface FontEffectRenderContext {
