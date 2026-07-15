@@ -20,6 +20,7 @@ const CHECKER_COLORS: Record<CheckerboardTheme, [string, string]> = {
 
 function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
   fontStore.effectsVersion;
+  ctx.clearRect(0, 0, w, h);
   drawTextEffects(ctx, w, h, {
     boldWeight: fontStore.boldWeight,
     effects: fontStore.effects,
@@ -30,39 +31,17 @@ function drawText(ctx: CanvasRenderingContext2D, w: number, h: number) {
   });
 }
 
-function draw(canvas: HTMLCanvasElement, checkerboardTheme: CheckerboardTheme) {
+function draw(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d')!;
   const w = fontStore.canvasWidth;
   const h = fontStore.canvasHeight;
-  const [checkerA, checkerB] = CHECKER_COLORS[checkerboardTheme];
 
   canvas.width = w;
   canvas.height = h;
-
-  for (let y = 0; y < h; y += CHECKER_SIZE) {
-    for (let x = 0; x < w; x += CHECKER_SIZE) {
-      const even =
-        ((x / CHECKER_SIZE) | 0) % 2 === ((y / CHECKER_SIZE) | 0) % 2;
-      ctx.fillStyle = even ? checkerA : checkerB;
-      ctx.fillRect(x, y, CHECKER_SIZE, CHECKER_SIZE);
-    }
-  }
-
   drawText(ctx, w, h);
 }
 
-function createExportCanvas() {
-  const canvas = document.createElement('canvas');
-  const w = fontStore.canvasWidth;
-  const h = fontStore.canvasHeight;
-  canvas.width = w;
-  canvas.height = h;
-  drawText(canvas.getContext('2d')!, w, h);
-  return canvas;
-}
-
-function createExportBlob() {
-  const canvas = createExportCanvas();
+function createCanvasBlob(canvas: HTMLCanvasElement) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((value) => {
       if (value) {
@@ -72,6 +51,28 @@ function createExportBlob() {
       }
     }, 'image/png');
   });
+}
+
+function getCheckerboardStyle(
+  checkerboardTheme: CheckerboardTheme,
+): React.CSSProperties {
+  const [checkerA, checkerB] = CHECKER_COLORS[checkerboardTheme];
+  return {
+    backgroundColor: checkerA,
+    backgroundImage: `
+      linear-gradient(45deg, ${checkerB} 25%, transparent 25%),
+      linear-gradient(-45deg, ${checkerB} 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, ${checkerB} 75%),
+      linear-gradient(-45deg, transparent 75%, ${checkerB} 75%)
+    `,
+    backgroundPosition: `
+      0 0,
+      0 ${CHECKER_SIZE}px,
+      ${CHECKER_SIZE}px -${CHECKER_SIZE}px,
+      -${CHECKER_SIZE}px 0
+    `,
+    backgroundSize: `${CHECKER_SIZE * 2}px ${CHECKER_SIZE * 2}px`,
+  };
 }
 
 export interface FontCanvasHandle {
@@ -91,15 +92,16 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const surfaceRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef({ zoom: 1, ox: 0, oy: 0 });
   const [dragging, setDragging] = useState(false);
   const anchorRef = useRef({ mx: 0, my: 0, ox: 0, oy: 0 });
 
   const applyTransform = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const surface = surfaceRef.current;
+    if (!surface) return;
     const v = viewRef.current;
-    canvas.style.transform = `translate(${v.ox}px, ${v.oy}px) scale(${v.zoom})`;
+    surface.style.transform = `translate(${v.ox}px, ${v.oy}px) scale(${v.zoom})`;
   }, []);
 
   const centerView = useCallback(
@@ -127,7 +129,10 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
     }
 
     try {
-      const blob = await createExportBlob();
+      const canvas = canvasRef.current;
+      if (!canvas) return false;
+
+      const blob = await createCanvasBlob(canvas);
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
@@ -160,7 +165,10 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
       }
     }
 
-    const blob = await createExportBlob();
+    const canvas = canvasRef.current;
+    if (!canvas) return false;
+
+    const blob = await createCanvasBlob(canvas);
 
     if (writable) {
       await writable.write(blob);
@@ -189,10 +197,15 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
   useEffect(() => {
     return autorun(() => {
       const canvas = canvasRef.current;
+      const surface = surfaceRef.current;
       if (!canvas) return;
-      draw(canvas, checkerboardTheme);
+      draw(canvas);
+      if (surface) {
+        surface.style.width = `${fontStore.canvasWidth}px`;
+        surface.style.height = `${fontStore.canvasHeight}px`;
+      }
     });
-  }, [checkerboardTheme]);
+  }, []);
 
   useEffect(() => {
     return autorun(() => {
@@ -262,16 +275,25 @@ export default forwardRef<FontCanvasHandle, FontCanvasProps>(function FontCanvas
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
     >
-      <canvas
-        ref={canvasRef}
+      <div
+        ref={surfaceRef}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           transformOrigin: '0 0',
-          display: 'block',
+          ...getCheckerboardStyle(checkerboardTheme),
         }}
-      />
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+          }}
+        />
+      </div>
     </div>
   );
 });

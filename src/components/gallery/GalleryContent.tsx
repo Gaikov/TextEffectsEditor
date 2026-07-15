@@ -59,21 +59,27 @@ const CARD_STYLE: React.CSSProperties = {
   gap: 10,
 };
 
-const PREVIEW_STYLE: React.CSSProperties = {
+const PREVIEW_FRAME_STYLE: React.CSSProperties = {
   width: '100%',
   aspectRatio: `${PREVIEW_WIDTH} / ${PREVIEW_HEIGHT}`,
   border: '1px solid #383e47',
   borderRadius: 4,
+  overflow: 'hidden',
+};
+
+const PREVIEW_STYLE: React.CSSProperties = {
+  width: '100%',
+  height: '100%',
   display: 'block',
 };
 
 const PREVIEW_PLACEHOLDER_STYLE: React.CSSProperties = {
-  ...PREVIEW_STYLE,
   alignItems: 'center',
-  backgroundColor: '#252A31',
   color: '#A7B6C2',
   display: 'flex',
+  height: '100%',
   justifyContent: 'center',
+  width: '100%',
 };
 
 const CARD_CONTENT_STYLE: React.CSSProperties = {
@@ -124,21 +130,26 @@ export interface GalleryContentProps {
   onSetCheckerboardTheme: (theme: CheckerboardTheme) => void;
 }
 
-function drawChecker(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
+function getCheckerboardStyle(
   checkerboardTheme: CheckerboardTheme,
-) {
+): React.CSSProperties {
   const [checkerA, checkerB] = CHECKER_COLORS[checkerboardTheme];
-  for (let y = 0; y < h; y += CHECKER_SIZE) {
-    for (let x = 0; x < w; x += CHECKER_SIZE) {
-      const even =
-        ((x / CHECKER_SIZE) | 0) % 2 === ((y / CHECKER_SIZE) | 0) % 2;
-      ctx.fillStyle = even ? checkerA : checkerB;
-      ctx.fillRect(x, y, CHECKER_SIZE, CHECKER_SIZE);
-    }
-  }
+  return {
+    backgroundColor: checkerA,
+    backgroundImage: `
+      linear-gradient(45deg, ${checkerB} 25%, transparent 25%),
+      linear-gradient(-45deg, ${checkerB} 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, ${checkerB} 75%),
+      linear-gradient(-45deg, transparent 75%, ${checkerB} 75%)
+    `,
+    backgroundPosition: `
+      0 0,
+      0 ${CHECKER_SIZE}px,
+      ${CHECKER_SIZE}px -${CHECKER_SIZE}px,
+      -${CHECKER_SIZE}px 0
+    `,
+    backgroundSize: `${CHECKER_SIZE * 2}px ${CHECKER_SIZE * 2}px`,
+  };
 }
 
 function formatDate(value: string) {
@@ -212,8 +223,6 @@ const GalleryPreview = observer(function GalleryPreview({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    drawChecker(ctx, PREVIEW_WIDTH, PREVIEW_HEIGHT, checkerboardTheme);
-
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = canvasWidth;
     sourceCanvas.height = canvasHeight;
@@ -246,7 +255,6 @@ const GalleryPreview = observer(function GalleryPreview({
     boldWeight,
     canvasHeight,
     canvasWidth,
-    checkerboardTheme,
     effects,
     fontFamily,
     fontSize,
@@ -256,7 +264,13 @@ const GalleryPreview = observer(function GalleryPreview({
   ]);
 
   return (
-    <div ref={previewRef}>
+    <div
+      ref={previewRef}
+      style={{
+        ...PREVIEW_FRAME_STYLE,
+        ...getCheckerboardStyle(checkerboardTheme),
+      }}
+    >
       <canvas
         ref={canvasRef}
         aria-label={`${getGalleryDisplayName(item)} preview`}
