@@ -17,6 +17,7 @@ import type {
   PatternFillText,
   ShadowText,
   StrokeText,
+  WaveEffect,
 } from '../../effects';
 import { BlurEffectEditor } from './BlurEffectEditor';
 import { ColorFillTextEditor } from './ColorFillTextEditor';
@@ -29,6 +30,7 @@ import { NoiseEffectEditor } from './NoiseEffectEditor';
 import { PatternFillTextEditor } from './PatternFillTextEditor';
 import { ShadowTextEditor } from './ShadowTextEditor';
 import { StrokeTextEditor } from './StrokeTextEditor';
+import { WaveEffectEditor } from './WaveEffectEditor';
 
 export interface EffectEditorProps<T extends IFontEffect = IFontEffect> {
   effect: T;
@@ -59,6 +61,7 @@ export const effectEditorRegistry: Record<
   >,
   glow: GlowEffectEditor as ComponentType<EffectEditorProps<GlowEffect>>,
   blur: BlurEffectEditor as ComponentType<EffectEditorProps<BlurEffect>>,
+  wave: WaveEffectEditor as ComponentType<EffectEditorProps<WaveEffect>>,
   compositeBlend: CompositeBlendEffectEditor as ComponentType<
     EffectEditorProps<CompositeBlendEffect>
   >,

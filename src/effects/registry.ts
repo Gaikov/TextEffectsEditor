@@ -57,6 +57,11 @@ import {
   deserializeStrokeText,
   serializeStrokeText,
 } from './StrokeText';
+import {
+  WaveEffect,
+  deserializeWaveEffect,
+  serializeWaveEffect,
+} from './WaveEffect';
 
 export interface FontEffectDefinition {
   type: FontEffectType;
@@ -134,6 +139,15 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof BlurEffect ? serializeBlurEffect(effect) : null,
     deserialize: deserializeBlurEffect,
+  },
+  {
+    type: 'wave',
+    label: 'Wave',
+    icon: 'waves',
+    create: () => new WaveEffect(),
+    serialize: (effect) =>
+      effect instanceof WaveEffect ? serializeWaveEffect(effect) : null,
+    deserialize: deserializeWaveEffect,
   },
   {
     type: 'compositeBlend',

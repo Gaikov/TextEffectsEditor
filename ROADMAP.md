@@ -6,7 +6,7 @@
 
 ## Planned
 
-2. Wave / Distort
+2. Distort
 
 ## Completed
 
@@ -16,6 +16,7 @@
 4. Composite / Blend
 5. Pattern Fill
 6. Noise
+7. Wave
 
 ## Effect Pattern
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import {
   Button,
@@ -13,32 +13,42 @@ import type { GalleryItem } from '../../gallery/GalleryProvider';
 import { drawTextEffects } from '../../render/renderFontEffects';
 import { fontStore } from '../../store/fontStore';
 
-const PREVIEW_WIDTH = 280;
-const PREVIEW_HEIGHT = 148;
+const PREVIEW_WIDTH = 960;
+const PREVIEW_HEIGHT = 508;
 const CHECKER_SIZE = 10;
 const CHECKER_A = '#E7E9EC';
 const CHECKER_B = '#FFFFFF';
 
 const BODY_STYLE: React.CSSProperties = {
-  minHeight: 320,
-  maxHeight: '70vh',
-  overflow: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  minHeight: 420,
+  maxHeight: '78vh',
+  overflow: 'hidden',
 };
 
-const GRID_STYLE: React.CSSProperties = {
+const GALLERY_CONTENT_STYLE: React.CSSProperties = {
+  flex: '1 1 auto',
+  minHeight: 0,
+  overflow: 'auto',
+  paddingRight: 4,
+};
+
+const LIST_STYLE: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gridTemplateColumns: '1fr',
   gap: 12,
 };
 
 const SEARCH_STYLE: React.CSSProperties = {
+  flex: '0 0 auto',
   marginBottom: 12,
 };
 
 const CARD_STYLE: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 8,
+  gap: 10,
 };
 
 const PREVIEW_STYLE: React.CSSProperties = {
@@ -47,6 +57,23 @@ const PREVIEW_STYLE: React.CSSProperties = {
   border: '1px solid #383e47',
   borderRadius: 4,
   display: 'block',
+};
+
+const PREVIEW_PLACEHOLDER_STYLE: React.CSSProperties = {
+  ...PREVIEW_STYLE,
+  alignItems: 'center',
+  backgroundColor: '#252A31',
+  color: '#A7B6C2',
+  display: 'flex',
+  justifyContent: 'center',
+};
+
+const CARD_CONTENT_STYLE: React.CSSProperties = {
+  alignItems: 'flex-start',
+  display: 'grid',
+  gap: 10,
+  gridTemplateColumns: 'minmax(0, 1fr) auto',
+  minWidth: 0,
 };
 
 const CARD_HEADER_STYLE: React.CSSProperties = {
@@ -70,6 +97,7 @@ const DATE_STYLE: React.CSSProperties = {
 
 const ACTIONS_STYLE: React.CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   gap: 6,
   justifyContent: 'flex-end',
 };
@@ -118,6 +146,8 @@ const GalleryPreview = observer(function GalleryPreview({
   item,
 }: GalleryPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [shouldRender, setShouldRender] = useState(false);
   const text = fontStore.text;
   const fontFamily = fontStore.fontFamily;
   const fontSize = fontStore.fontSize;
@@ -127,14 +157,42 @@ const GalleryPreview = observer(function GalleryPreview({
   const canvasHeight = fontStore.canvasHeight;
 
   const effects = useMemo(
-    () =>
-      item.effects
+    () => {
+      if (!shouldRender) return [];
+      return item.effects
         .map(deserializeFontEffect)
-        .filter((effect): effect is IFontEffect => effect !== null),
-    [item.effects],
+        .filter((effect): effect is IFontEffect => effect !== null);
+    },
+    [item.effects, shouldRender],
   );
 
   useEffect(() => {
+    if (shouldRender) return;
+
+    const preview = previewRef.current;
+    if (!preview) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setShouldRender(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setShouldRender(true);
+        observer.disconnect();
+      },
+      { rootMargin: '180px 0px' },
+    );
+
+    observer.observe(preview);
+    return () => observer.disconnect();
+  }, [shouldRender]);
+
+  useEffect(() => {
+    if (!shouldRender) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -183,14 +241,20 @@ const GalleryPreview = observer(function GalleryPreview({
     fontSize,
     italic,
     text,
+    shouldRender,
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      aria-label={`${getGalleryDisplayName(item)} preview`}
-      style={PREVIEW_STYLE}
-    />
+    <div ref={previewRef}>
+      <canvas
+        ref={canvasRef}
+        aria-label={`${getGalleryDisplayName(item)} preview`}
+        style={shouldRender ? PREVIEW_STYLE : { display: 'none' }}
+      />
+      {!shouldRender && (
+        <div style={PREVIEW_PLACEHOLDER_STYLE}>Preview loads on scroll</div>
+      )}
+    </div>
   );
 });
 
@@ -217,7 +281,7 @@ export default observer(function EffectsGalleryDialog({
       isOpen={isOpen}
       onClose={onClose}
       title={providerLabel}
-      style={{ width: 720 }}
+      style={{ maxWidth: 'calc(100vw - 80px)', width: 1040 }}
     >
       <DialogBody style={BODY_STYLE}>
         <InputGroup
@@ -227,80 +291,84 @@ export default observer(function EffectsGalleryDialog({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
         />
-        {isLoading ? (
-          <NonIdealState
-            icon="cloud-download"
-            title="Loading gallery"
-            description="Fetching saved effect stacks."
-          />
-        ) : items.length === 0 && query.trim() === '' ? (
-          <NonIdealState
-            icon="media"
-            title="No gallery items"
-            description="Use an Add To Gallery command to save the current effect stack."
-          />
-        ) : items.length === 0 ? (
-          <NonIdealState
-            icon="search"
-            title="No matching gallery items"
-            description="Try a different effect name."
-          />
-        ) : (
-          <div style={GRID_STYLE}>
-            {items.map((item) => {
-              const displayName = getGalleryDisplayName(item);
-              return (
-                <Card key={item.id} compact style={CARD_STYLE}>
-                  <GalleryPreview item={item} />
-                  <div style={CARD_HEADER_STYLE}>
-                    <div style={TITLE_STYLE}>{displayName}</div>
-                    <div style={DATE_STYLE}>
-                      {item.authorName ? `${item.authorName} · ` : ''}
-                      {formatDate(item.createdAt)}
-                      {item.status && item.status !== 'approved'
-                        ? ` · ${item.status}`
-                        : ''}
+        <div style={GALLERY_CONTENT_STYLE}>
+          {isLoading ? (
+            <NonIdealState
+              icon="cloud-download"
+              title="Loading gallery"
+              description="Fetching saved effect stacks."
+            />
+          ) : items.length === 0 && query.trim() === '' ? (
+            <NonIdealState
+              icon="media"
+              title="No gallery items"
+              description="Use an Add To Gallery command to save the current effect stack."
+            />
+          ) : items.length === 0 ? (
+            <NonIdealState
+              icon="search"
+              title="No matching gallery items"
+              description="Try a different effect name."
+            />
+          ) : (
+            <div style={LIST_STYLE}>
+              {items.map((item) => {
+                const displayName = getGalleryDisplayName(item);
+                return (
+                  <Card key={item.id} compact style={CARD_STYLE}>
+                    <GalleryPreview item={item} />
+                    <div style={CARD_CONTENT_STYLE}>
+                      <div style={CARD_HEADER_STYLE}>
+                        <div style={TITLE_STYLE}>{displayName}</div>
+                        <div style={DATE_STYLE}>
+                          {item.authorName ? `${item.authorName} · ` : ''}
+                          {formatDate(item.createdAt)}
+                          {item.status && item.status !== 'approved'
+                            ? ` · ${item.status}`
+                            : ''}
+                        </div>
+                      </div>
+                      <div style={ACTIONS_STYLE}>
+                        {canModerate && item.status === 'pending' && (
+                          <>
+                            <Button
+                              small
+                              icon="tick"
+                              text="Approve"
+                              onClick={() => onApprove?.(item.id)}
+                            />
+                            <Button
+                              small
+                              icon="cross"
+                              intent="danger"
+                              text="Reject"
+                              onClick={() => onReject?.(item.id)}
+                            />
+                          </>
+                        )}
+                        <Button
+                          small
+                          icon="tick"
+                          text="Apply"
+                          onClick={() => onApply(item)}
+                        />
+                        {item.canDelete && (
+                          <Button
+                            small
+                            icon="trash"
+                            intent="danger"
+                            aria-label={`Delete ${displayName}`}
+                            onClick={() => onDelete(item.id)}
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div style={ACTIONS_STYLE}>
-                    {canModerate && item.status === 'pending' && (
-                      <>
-                      <Button
-                        small
-                        icon="tick"
-                          text="Approve"
-                          onClick={() => onApprove?.(item.id)}
-                      />
-                      <Button
-                        small
-                          icon="cross"
-                        intent="danger"
-                          text="Reject"
-                          onClick={() => onReject?.(item.id)}
-                      />
-                      </>
-                    )}
-                    <Button
-                      small
-                      icon="tick"
-                      text="Apply"
-                      onClick={() => onApply(item)}
-                    />
-                    {item.canDelete && (
-                      <Button
-                        small
-                        icon="trash"
-                        intent="danger"
-                        aria-label={`Delete ${displayName}`}
-                        onClick={() => onDelete(item.id)}
-                      />
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </DialogBody>
     </Dialog>
   );

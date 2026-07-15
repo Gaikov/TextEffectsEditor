@@ -53,7 +53,7 @@ The build output is written to `dist/`.
 1. On startup, choose whether to load system fonts if permission has not already been granted. Supported browsers will ask for local font permission.
 2. Set the canvas `Width` and `Height` in the top bar.
 3. Edit the text, font, style, and size in the right properties panel.
-4. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Pattern Fill`, `Noise`, `Shadow`, `Inner Shadow`, `Glow`, `Blur`, `Composite / Blend`, or `Group`.
+4. Use the Effects section to add `Fill`, `Stroke`, `Gradient Fill`, `Pattern Fill`, `Noise`, `Shadow`, `Inner Shadow`, `Glow`, `Blur`, `Wave`, `Composite / Blend`, or `Group`.
 5. Drag effects by the handle to change their order or move them into groups.
 6. Toggle the eye icon to temporarily hide an effect.
 7. Use `File -> New` to reset the current document and clear undo/redo history.
@@ -211,6 +211,18 @@ Transforms the current buffer into a blurred version of itself.
 - `Passes`: blur strength, repeated from `1` to `8`.
 
 Use Blur after a fill, stroke, or gradient layer to soften everything drawn so far. Draw later effects after Blur when they should stay sharp.
+
+### Wave
+
+Transforms the current buffer into a sine-warped version of itself.
+
+- `Opacity`: warped result transparency.
+- `Direction`: `horizontal`, `vertical`, or `both`.
+- `Amplitude`: maximum displacement in pixels.
+- `Wavelength`: distance in pixels between wave repeats.
+- `Phase`: wave offset in degrees.
+
+Use Wave after a fill, stroke, gradient, or group to bend everything drawn so far. Draw later effects after Wave when they should stay unwarped.
 
 ### Composite / Blend
 

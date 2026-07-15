@@ -11,7 +11,8 @@ export type FontEffectType =
   | 'compositeBlend'
   | 'patternFill'
   | 'noise'
-  | 'gradientFill';
+  | 'gradientFill'
+  | 'wave';
 
 export interface FontEffectRenderContext {
   text: string;

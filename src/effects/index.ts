@@ -21,6 +21,11 @@ export {
 } from './NoiseEffect';
 export { ShadowText } from './ShadowText';
 export { StrokeText } from './StrokeText';
+export {
+  WAVE_DIRECTIONS,
+  WaveEffect,
+  type WaveDirection,
+} from './WaveEffect';
 export { createEffectId } from './effectId';
 export {
   createFontEffect,
