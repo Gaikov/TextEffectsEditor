@@ -12,7 +12,8 @@ export type FontEffectType =
   | 'patternFill'
   | 'noise'
   | 'gradientFill'
-  | 'wave';
+  | 'wave'
+  | 'distort';
 
 export interface FontEffectRenderContext {
   text: string;

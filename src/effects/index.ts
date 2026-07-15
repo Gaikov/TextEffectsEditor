@@ -5,6 +5,11 @@ export {
   CompositeBlendEffect,
   type CompositeBlendOperation,
 } from './CompositeBlendEffect';
+export {
+  DISTORT_NOISE_TYPES,
+  DistortEffect,
+  type DistortNoiseType,
+} from './DistortEffect';
 export { GlowEffect } from './GlowEffect';
 export { GradientFillText } from './GradientFillText';
 export { GroupEffect } from './GroupEffect';

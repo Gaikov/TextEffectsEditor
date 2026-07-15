@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "text": "HEAT",
+  "fontFamily": "Arial Black",
+  "fontSize": 200,
+  "canvasWidth": 1500,
+  "canvasHeight": 640,
+  "boldWeight": 900,
+  "italic": true,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Heat Haze",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#4F1400",
+          "opacity": 0.48,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 20,
+          "shadowOffsetX": 12,
+          "shadowOffsetY": 18
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#4A0A00",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 24,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFF3A3",
+            "#FFB000",
+            "#FF4E11",
+            "#8B0000"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "wave",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "direction": "vertical",
+          "amplitude": 18,
+          "wavelength": 82,
+          "phase": 115
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FF6B00",
+          "opacity": 0.42,
+          "blur": 28,
+          "spread": 2
+        },
+        {
+          "type": "noise",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.24,
+          "seed": 14,
+          "scale": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#7A1400",
+          "backgroundOpacity": 0,
+          "noiseType": "speckle",
+          "density": 0.32,
+          "contrast": 1,
+          "grainSize": 4,
+          "octaves": 4,
+          "persistence": 0.5,
+          "lacunarity": 2,
+          "rotation": 0,
+          "stretchX": 1,
+          "stretchY": 1,
+          "monochrome": false,
+          "invert": false,
+          "threshold": 0.25,
+          "softness": 0.1
+        }
+      ]
+    }
+  ]
+}

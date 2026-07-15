@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "text": "GLITCH",
+  "fontFamily": "Arial Black",
+  "fontSize": 175,
+  "canvasWidth": 1600,
+  "canvasHeight": 640,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Glitch Pulse",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#07000D",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 20,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFFFFF",
+            "#00F5FF",
+            "#FF2FD6",
+            "#5B2CFF"
+          ],
+          "direction": "horizontal"
+        },
+        {
+          "type": "distort",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "noiseType": "fractal",
+          "seed": 77,
+          "strength": 15,
+          "grainSize": 46,
+          "scale": 1.15,
+          "xAmount": 1.75,
+          "yAmount": 0.22,
+          "rotation": 0,
+          "octaves": 4,
+          "persistence": 0.48,
+          "lacunarity": 2.15
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.45,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 3,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [
+            22,
+            8
+          ],
+          "lineDashOffset": 4
+        },
+        {
+          "type": "noise",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.2,
+          "seed": 23,
+          "scale": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "foregroundColor": "#FFFFFF",
+          "backgroundColor": "#000000",
+          "backgroundOpacity": 0,
+          "noiseType": "speckle",
+          "density": 0.16,
+          "contrast": 0.78,
+          "grainSize": 5,
+          "octaves": 4,
+          "persistence": 0.5,
+          "lacunarity": 2,
+          "rotation": 0,
+          "stretchX": 1,
+          "stretchY": 1,
+          "monochrome": false,
+          "invert": false,
+          "threshold": 0.32,
+          "softness": 0.18
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FF2FD6",
+          "opacity": 0.32,
+          "blur": 22,
+          "spread": 2
+        }
+      ]
+    }
+  ]
+}

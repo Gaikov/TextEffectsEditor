@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "text": "NEON",
+  "fontFamily": "Arial Black",
+  "fontSize": 195,
+  "canvasWidth": 1500,
+  "canvasHeight": 640,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Neon Flag",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#B200FF",
+          "opacity": 0.5,
+          "blur": 30,
+          "spread": 3
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#120022",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 22,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "patternFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "patternType": "stripes",
+          "foregroundColor": "#13F1FF",
+          "backgroundColor": "#FF2FD6",
+          "backgroundOpacity": 1,
+          "cellSize": 30,
+          "thickness": 15,
+          "rotation": 0,
+          "scale": 1
+        },
+        {
+          "type": "wave",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "direction": "both",
+          "amplitude": 14,
+          "wavelength": 128,
+          "phase": 220
+        },
+        {
+          "type": "compositeBlend",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.28,
+          "operation": "screen"
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#FFFFFF",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 4,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        }
+      ]
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import type {
   BlurEffect,
   ColorFillText,
   CompositeBlendEffect,
+  DistortEffect,
   FontEffectType,
   GlowEffect,
   GradientFillText,
@@ -22,6 +23,7 @@ import type {
 import { BlurEffectEditor } from './BlurEffectEditor';
 import { ColorFillTextEditor } from './ColorFillTextEditor';
 import { CompositeBlendEffectEditor } from './CompositeBlendEffectEditor';
+import { DistortEffectEditor } from './DistortEffectEditor';
 import { GlowEffectEditor } from './GlowEffectEditor';
 import { GradientFillTextEditor } from './GradientFillTextEditor';
 import { GroupEffectEditor } from './GroupEffectEditor';
@@ -62,6 +64,7 @@ export const effectEditorRegistry: Record<
   glow: GlowEffectEditor as ComponentType<EffectEditorProps<GlowEffect>>,
   blur: BlurEffectEditor as ComponentType<EffectEditorProps<BlurEffect>>,
   wave: WaveEffectEditor as ComponentType<EffectEditorProps<WaveEffect>>,
+  distort: DistortEffectEditor as ComponentType<EffectEditorProps<DistortEffect>>,
   compositeBlend: CompositeBlendEffectEditor as ComponentType<
     EffectEditorProps<CompositeBlendEffect>
   >,

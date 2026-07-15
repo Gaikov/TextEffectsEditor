@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "text": "WAVE",
+  "fontFamily": "Arial Black",
+  "fontSize": 190,
+  "canvasWidth": 1500,
+  "canvasHeight": 640,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Ocean Ribbon",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#001B2E",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 18,
+          "shadowOffsetX": 10,
+          "shadowOffsetY": 16
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#EAFDFF",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 26,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#EAFDFF",
+            "#42D9FF",
+            "#0B77BD",
+            "#083B7A"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "wave",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "direction": "horizontal",
+          "amplitude": 22,
+          "wavelength": 155,
+          "phase": 30
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#003E63",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 8,
+          "shadowOffsetX": 5,
+          "shadowOffsetY": 8
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#4CC9F0",
+          "opacity": 0.35,
+          "blur": 22,
+          "spread": 2
+        }
+      ]
+    }
+  ]
+}

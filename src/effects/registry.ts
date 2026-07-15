@@ -14,6 +14,11 @@ import {
   deserializeCompositeBlendEffect,
   serializeCompositeBlendEffect,
 } from './CompositeBlendEffect';
+import {
+  DistortEffect,
+  deserializeDistortEffect,
+  serializeDistortEffect,
+} from './DistortEffect';
 import { isRecord, type SerializedFontEffect } from './effectSnapshot';
 import {
   GradientFillText,
@@ -148,6 +153,15 @@ export const fontEffectDefinitions: FontEffectDefinition[] = [
     serialize: (effect) =>
       effect instanceof WaveEffect ? serializeWaveEffect(effect) : null,
     deserialize: deserializeWaveEffect,
+  },
+  {
+    type: 'distort',
+    label: 'Distort',
+    icon: 'random',
+    create: () => new DistortEffect(),
+    serialize: (effect) =>
+      effect instanceof DistortEffect ? serializeDistortEffect(effect) : null,
+    deserialize: deserializeDistortEffect,
   },
   {
     type: 'compositeBlend',

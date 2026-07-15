@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "text": "LIQUID",
+  "fontFamily": "Arial Black",
+  "fontSize": 170,
+  "canvasWidth": 1600,
+  "canvasHeight": 660,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Liquid Chrome",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#050712",
+          "opacity": 0.52,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 18,
+          "shadowOffsetX": 12,
+          "shadowOffsetY": 18
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#05070D",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 28,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "gradientFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "colors": [
+            "#FFFFFF",
+            "#98F6FF",
+            "#2A72D4",
+            "#19284F",
+            "#F7FBFF"
+          ],
+          "direction": "vertical"
+        },
+        {
+          "type": "distort",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "noiseType": "fractal",
+          "seed": 31,
+          "strength": 18,
+          "grainSize": 95,
+          "scale": 1.2,
+          "xAmount": 1.8,
+          "yAmount": 0.55,
+          "rotation": -18,
+          "octaves": 5,
+          "persistence": 0.58,
+          "lacunarity": 2.25
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#05070D",
+          "opacity": 0.5,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 8,
+          "shadowOffsetX": 5,
+          "shadowOffsetY": 7
+        },
+        {
+          "type": "compositeBlend",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 0.22,
+          "operation": "screen"
+        }
+      ]
+    }
+  ]
+}

@@ -4,10 +4,6 @@
 
 1. Duplicate / Offset
 
-## Planned
-
-2. Distort
-
 ## Completed
 
 1. Glow
@@ -17,6 +13,7 @@
 5. Pattern Fill
 6. Noise
 7. Wave
+8. Distort
 
 ## Effect Pattern
 

@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "text": "MOSS",
+  "fontFamily": "Arial Black",
+  "fontSize": 210,
+  "canvasWidth": 1500,
+  "canvasHeight": 650,
+  "boldWeight": 900,
+  "italic": false,
+  "effects": [
+    {
+      "type": "group",
+      "visible": true,
+      "name": "Organic Moss",
+      "collapsed": false,
+      "opacity": 1,
+      "children": [
+        {
+          "type": "shadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#071A08",
+          "opacity": 0.58,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 16,
+          "shadowOffsetX": 10,
+          "shadowOffsetY": 16
+        },
+        {
+          "type": "stroke",
+          "visible": true,
+          "collapsed": true,
+          "color": "#F1FFE4",
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "lineWidth": 30,
+          "lineCap": "round",
+          "lineJoin": "round",
+          "miterLimit": 10,
+          "lineDash": [],
+          "lineDashOffset": 0
+        },
+        {
+          "type": "patternFill",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "xOffset": 0,
+          "yOffset": 0,
+          "patternType": "dots",
+          "foregroundColor": "#B7F55A",
+          "backgroundColor": "#117A25",
+          "backgroundOpacity": 1,
+          "cellSize": 18,
+          "thickness": 5,
+          "rotation": 0,
+          "scale": 1
+        },
+        {
+          "type": "distort",
+          "visible": true,
+          "collapsed": true,
+          "opacity": 1,
+          "noiseType": "cellular",
+          "seed": 9,
+          "strength": 14,
+          "grainSize": 46,
+          "scale": 1.35,
+          "xAmount": 0.9,
+          "yAmount": 1.35,
+          "rotation": 22,
+          "octaves": 4,
+          "persistence": 0.5,
+          "lacunarity": 2
+        },
+        {
+          "type": "innerShadow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#06330B",
+          "opacity": 0.55,
+          "xOffset": 0,
+          "yOffset": 0,
+          "shadowBlur": 10,
+          "shadowOffsetX": 6,
+          "shadowOffsetY": 8
+        },
+        {
+          "type": "glow",
+          "visible": true,
+          "collapsed": true,
+          "color": "#7CFF4F",
+          "opacity": 0.28,
+          "blur": 20,
+          "spread": 2
+        }
+      ]
+    }
+  ]
+}
