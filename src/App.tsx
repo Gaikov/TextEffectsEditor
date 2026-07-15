@@ -51,7 +51,7 @@ function loadPanelWidth() {
 
 function loadCheckerboardTheme(): CheckerboardTheme {
   const storedValue = window.localStorage.getItem(CHECKERBOARD_THEME_KEY);
-  return storedValue === 'dark' ? 'dark' : 'light';
+  return storedValue === 'light' ? 'light' : 'dark';
 }
 
 function isAbortError(error: unknown) {
@@ -627,6 +627,7 @@ export default function App() {
       />
       <EffectsGalleryDialog
         canModerate={authUser?.role === 'admin'}
+        checkerboardTheme={checkerboardTheme}
         isOpen={galleryOpen}
         isLoading={galleryLoading}
         items={galleryItems}
@@ -638,6 +639,7 @@ export default function App() {
         onDelete={deleteGalleryItem}
         onQueryChange={setGalleryQuery}
         onReject={(id) => moderateGalleryItem(id, 'reject')}
+        onSetCheckerboardTheme={setCheckerboardTheme}
       />
       <LoginDialog
         isOpen={loginOpen}

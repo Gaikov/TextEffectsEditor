@@ -64,7 +64,7 @@ The build output is written to `dist/`.
 12. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
 13. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
 14. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
-15. Use `View -> Checkerboard` to switch between light and dark transparency backgrounds.
+15. Use `View -> Checkerboard` or the Gallery switch to choose dark or light transparency backgrounds.
 16. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
 
 ## Effect Model
@@ -298,7 +298,7 @@ The top bar has a classic menu row above the canvas toolbar. Hover over `File`, 
 
 `Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 
-`View -> Checkerboard` switches the preview background between light and dark squares. This is an application preference saved in local storage; it does not affect PNG export or JSON presets.
+`View -> Checkerboard` switches the preview background between light and dark squares. The Gallery dialog has the same switch for preview cards. This application preference defaults to dark, is saved in local storage, and does not affect PNG export or JSON presets.
 
 | Command | Shortcut |
 |---|---|

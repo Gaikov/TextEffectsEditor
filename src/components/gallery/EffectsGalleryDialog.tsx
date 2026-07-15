@@ -7,17 +7,21 @@ import {
   DialogBody,
   InputGroup,
   NonIdealState,
+  SegmentedControl,
 } from '@blueprintjs/core';
 import { deserializeFontEffect, type IFontEffect } from '../../effects';
 import type { GalleryItem } from '../../gallery/GalleryProvider';
 import { drawTextEffects } from '../../render/renderFontEffects';
 import { fontStore } from '../../store/fontStore';
+import type { CheckerboardTheme } from '../../viewPreferences';
 
 const PREVIEW_WIDTH = 960;
 const PREVIEW_HEIGHT = 508;
 const CHECKER_SIZE = 10;
-const CHECKER_A = '#E7E9EC';
-const CHECKER_B = '#FFFFFF';
+const CHECKER_COLORS: Record<CheckerboardTheme, [string, string]> = {
+  light: ['#E7E9EC', '#FFFFFF'],
+  dark: ['#2F343C', '#1F242B'],
+};
 
 const BODY_STYLE: React.CSSProperties = {
   display: 'flex',
@@ -42,6 +46,13 @@ const LIST_STYLE: React.CSSProperties = {
 
 const SEARCH_STYLE: React.CSSProperties = {
   flex: '0 0 auto',
+};
+
+const GALLERY_TOOLS_STYLE: React.CSSProperties = {
+  alignItems: 'center',
+  display: 'grid',
+  gap: 10,
+  gridTemplateColumns: 'minmax(0, 1fr) auto',
   marginBottom: 12,
 };
 
@@ -109,20 +120,28 @@ interface EffectsGalleryDialogProps {
   items: GalleryItem[];
   providerLabel: string;
   query: string;
+  checkerboardTheme: CheckerboardTheme;
   onApply: (item: GalleryItem) => void;
   onApprove?: (id: string) => void;
   onClose: () => void;
   onDelete: (id: string) => void;
   onQueryChange: (query: string) => void;
   onReject?: (id: string) => void;
+  onSetCheckerboardTheme: (theme: CheckerboardTheme) => void;
 }
 
-function drawChecker(ctx: CanvasRenderingContext2D, w: number, h: number) {
+function drawChecker(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  checkerboardTheme: CheckerboardTheme,
+) {
+  const [checkerA, checkerB] = CHECKER_COLORS[checkerboardTheme];
   for (let y = 0; y < h; y += CHECKER_SIZE) {
     for (let x = 0; x < w; x += CHECKER_SIZE) {
       const even =
         ((x / CHECKER_SIZE) | 0) % 2 === ((y / CHECKER_SIZE) | 0) % 2;
-      ctx.fillStyle = even ? CHECKER_A : CHECKER_B;
+      ctx.fillStyle = even ? checkerA : checkerB;
       ctx.fillRect(x, y, CHECKER_SIZE, CHECKER_SIZE);
     }
   }
@@ -139,10 +158,12 @@ function getGalleryDisplayName(item: GalleryItem) {
 }
 
 interface GalleryPreviewProps {
+  checkerboardTheme: CheckerboardTheme;
   item: GalleryItem;
 }
 
 const GalleryPreview = observer(function GalleryPreview({
+  checkerboardTheme,
   item,
 }: GalleryPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -202,7 +223,7 @@ const GalleryPreview = observer(function GalleryPreview({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    drawChecker(ctx, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+    drawChecker(ctx, PREVIEW_WIDTH, PREVIEW_HEIGHT, checkerboardTheme);
 
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = canvasWidth;
@@ -242,6 +263,7 @@ const GalleryPreview = observer(function GalleryPreview({
     italic,
     text,
     shouldRender,
+    checkerboardTheme,
   ]);
 
   return (
@@ -260,6 +282,7 @@ const GalleryPreview = observer(function GalleryPreview({
 
 export default observer(function EffectsGalleryDialog({
   canModerate = false,
+  checkerboardTheme,
   isOpen,
   isLoading = false,
   items,
@@ -271,6 +294,7 @@ export default observer(function EffectsGalleryDialog({
   onDelete,
   onQueryChange,
   onReject,
+  onSetCheckerboardTheme,
 }: EffectsGalleryDialogProps) {
   useEffect(() => {
     if (!isOpen) onQueryChange('');
@@ -284,13 +308,26 @@ export default observer(function EffectsGalleryDialog({
       style={{ maxWidth: 'calc(100vw - 80px)', width: 1040 }}
     >
       <DialogBody style={BODY_STYLE}>
-        <InputGroup
-          leftIcon="search"
-          placeholder="Search by name..."
-          style={SEARCH_STYLE}
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-        />
+        <div style={GALLERY_TOOLS_STYLE}>
+          <InputGroup
+            leftIcon="search"
+            placeholder="Search by name..."
+            style={SEARCH_STYLE}
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+          />
+          <SegmentedControl
+            small
+            value={checkerboardTheme}
+            onValueChange={(value) => {
+              onSetCheckerboardTheme(value as CheckerboardTheme);
+            }}
+            options={[
+              { label: 'Dark', value: 'dark' },
+              { label: 'Light', value: 'light' },
+            ]}
+          />
+        </div>
         <div style={GALLERY_CONTENT_STYLE}>
           {isLoading ? (
             <NonIdealState
@@ -316,7 +353,10 @@ export default observer(function EffectsGalleryDialog({
                 const displayName = getGalleryDisplayName(item);
                 return (
                   <Card key={item.id} compact style={CARD_STYLE}>
-                    <GalleryPreview item={item} />
+                    <GalleryPreview
+                      checkerboardTheme={checkerboardTheme}
+                      item={item}
+                    />
                     <div style={CARD_CONTENT_STYLE}>
                       <div style={CARD_HEADER_STYLE}>
                         <div style={TITLE_STYLE}>{displayName}</div>
