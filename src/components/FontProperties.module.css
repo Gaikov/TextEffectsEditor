@@ -10,6 +10,25 @@
   font-weight: 400;
 }
 
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.panelTitle {
+  min-width: 0;
+  color: #f6f7f9;
+  font: inherit;
+  font-weight: 600;
+  line-height: 24px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .propertyRow {
   display: grid;
   grid-template-columns: 56px minmax(0, 1fr);

@@ -65,6 +65,7 @@ export const GlowEffectEditor = observer(function GlowEffectEditor({
           max={8}
           stepSize={1}
           minorStepSize={1}
+          allowFloat={false}
           onChange={(value) => {
             fontStore.setEffectProperty(
               effect,

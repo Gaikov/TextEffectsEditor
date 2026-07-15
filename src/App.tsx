@@ -4,7 +4,7 @@ import { loadAuthState, logout, type AuthUser } from './auth/authClient';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
 import LoginDialog from './components/auth/LoginDialog';
 import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
-import EffectsGalleryDialog from './components/gallery/EffectsGalleryDialog';
+import GalleryPanel from './components/gallery/GalleryPanel';
 import FontCanvas, { type FontCanvasHandle } from './components/FontCanvas';
 import FontProperties from './components/FontProperties';
 import { getCuratedFonts, loadSystemFonts, mergeFontLists } from './fonts';
@@ -22,10 +22,16 @@ import type { CheckerboardTheme } from './viewPreferences';
 import styles from './App.module.css';
 
 const PANEL_WIDTH_KEY = 'fontEffects.propertiesPanelWidth';
+const PROPERTIES_PANEL_OPEN_KEY = 'fontEffects.propertiesPanelOpen';
+const GALLERY_PANEL_WIDTH_KEY = 'fontEffects.galleryPanelWidth';
 const CHECKERBOARD_THEME_KEY = 'fontEffects.checkerboardTheme';
+const GALLERY_PANEL_OPEN_KEY = 'fontEffects.galleryPanelOpen';
 const DEFAULT_PANEL_WIDTH = 240;
 const MIN_PANEL_WIDTH = 240;
 const MAX_PANEL_WIDTH = 520;
+const DEFAULT_GALLERY_PANEL_WIDTH = 320;
+const MIN_GALLERY_PANEL_WIDTH = 260;
+const MAX_GALLERY_PANEL_WIDTH = 560;
 const SETTINGS_FILE_NAME = 'font-effects.json';
 const SETTINGS_FILE_TYPES = [
   {
@@ -39,6 +45,13 @@ function clampPanelWidth(value: number) {
   return Math.max(MIN_PANEL_WIDTH, Math.min(MAX_PANEL_WIDTH, value));
 }
 
+function clampGalleryPanelWidth(value: number) {
+  return Math.max(
+    MIN_GALLERY_PANEL_WIDTH,
+    Math.min(MAX_GALLERY_PANEL_WIDTH, value),
+  );
+}
+
 function loadPanelWidth() {
   const storedValue = window.localStorage.getItem(PANEL_WIDTH_KEY);
   if (storedValue == null) return DEFAULT_PANEL_WIDTH;
@@ -49,9 +62,27 @@ function loadPanelWidth() {
     : DEFAULT_PANEL_WIDTH;
 }
 
+function loadGalleryPanelWidth() {
+  const storedValue = window.localStorage.getItem(GALLERY_PANEL_WIDTH_KEY);
+  if (storedValue == null) return DEFAULT_GALLERY_PANEL_WIDTH;
+
+  const parsedValue = Number(storedValue);
+  return Number.isFinite(parsedValue)
+    ? clampGalleryPanelWidth(parsedValue)
+    : DEFAULT_GALLERY_PANEL_WIDTH;
+}
+
 function loadCheckerboardTheme(): CheckerboardTheme {
   const storedValue = window.localStorage.getItem(CHECKERBOARD_THEME_KEY);
   return storedValue === 'light' ? 'light' : 'dark';
+}
+
+function loadGalleryPanelOpen() {
+  return window.localStorage.getItem(GALLERY_PANEL_OPEN_KEY) !== 'false';
+}
+
+function loadPropertiesPanelOpen() {
+  return window.localStorage.getItem(PROPERTIES_PANEL_OPEN_KEY) !== 'false';
 }
 
 function isAbortError(error: unknown) {
@@ -94,18 +125,24 @@ export default function App() {
   const [systemFontsLoading, setSystemFontsLoading] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
-  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryPanelOpen, setGalleryPanelOpen] = useState(loadGalleryPanelOpen);
   const [addToGalleryOpen, setAddToGalleryOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [activeGalleryId, setActiveGalleryId] =
-    useState<GalleryProviderId>('local');
+    useState<GalleryProviderId>('global');
   const [addGalleryId, setAddGalleryId] =
     useState<GalleryProviderId>('local');
-  const [galleryQuery, setGalleryQuery] = useState('');
+  const [galleryQueries, setGalleryQueries] = useState<
+    Record<GalleryProviderId, string>
+  >({ global: '', local: '' });
   const [galleryLoading, setGalleryLoading] = useState(false);
   const [checkerboardTheme, setCheckerboardTheme] =
     useState<CheckerboardTheme>(loadCheckerboardTheme);
+  const [propertiesPanelOpen, setPropertiesPanelOpen] =
+    useState(loadPropertiesPanelOpen);
+  const [galleryPanelWidth, setGalleryPanelWidth] = useState(loadGalleryPanelWidth);
   const [propertiesPanelWidth, setPropertiesPanelWidth] = useState(loadPanelWidth);
+  const [resizingGalleryPanel, setResizingGalleryPanel] = useState(false);
   const [resizingPropertiesPanel, setResizingPropertiesPanel] = useState(false);
   const galleryProviders = useMemo(
     () => ({
@@ -116,6 +153,7 @@ export default function App() {
   );
   const activeGalleryProvider = galleryProviders[activeGalleryId];
   const addGalleryProvider = galleryProviders[addGalleryId];
+  const galleryQuery = galleryQueries[activeGalleryId];
 
   const refreshAuthState = useCallback(async () => {
     const state = await loadAuthState();
@@ -257,8 +295,7 @@ export default function App() {
 
   const openGallery = useCallback((id: GalleryProviderId) => {
     setActiveGalleryId(id);
-    setGalleryQuery('');
-    setGalleryOpen(true);
+    setGalleryPanelOpen(true);
   }, []);
 
   const reloadGallery = useCallback(async () => {
@@ -301,14 +338,14 @@ export default function App() {
         ? 'Submitted to global gallery for moderation'
         : 'Added to local gallery',
     );
-    if (galleryOpen && activeGalleryId === addGalleryProvider.id) {
+    if (galleryPanelOpen && activeGalleryId === addGalleryProvider.id) {
       void reloadGallery();
     }
   }, [
     activeGalleryId,
     addGalleryProvider,
     authUser,
-    galleryOpen,
+    galleryPanelOpen,
     reloadGallery,
   ]);
 
@@ -319,7 +356,6 @@ export default function App() {
     }
 
     if (fontStore.replaceEffectsFromSerialized(item.effects, 'Apply gallery effect')) {
-      setGalleryOpen(false);
       showSuccessToast('Gallery item applied');
     } else {
       showFailureToast('Unable to apply gallery item');
@@ -378,14 +414,14 @@ export default function App() {
       await logout();
       setAuthUser(null);
       showSuccessToast('Signed out');
-      if (activeGalleryId === 'global' && galleryOpen) {
+      if (activeGalleryId === 'global' && galleryPanelOpen) {
         void reloadGallery();
       }
     } catch (error) {
       console.warn('Unable to sign out.', error);
       showFailureToast('Unable to sign out');
     }
-  }, [activeGalleryId, galleryOpen, reloadGallery]);
+  }, [activeGalleryId, galleryPanelOpen, reloadGallery]);
 
   const loadSystemFontsWithFeedback = useCallback(async () => {
     if (!window.queryLocalFonts) {
@@ -464,17 +500,38 @@ export default function App() {
   }, [authUser]);
 
   useEffect(() => {
-    if (!galleryOpen) return;
+    if (!galleryPanelOpen) return;
     void reloadGallery();
-  }, [galleryOpen, reloadGallery]);
+  }, [authUser?.id, authUser?.role, galleryPanelOpen, reloadGallery]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      GALLERY_PANEL_WIDTH_KEY,
+      String(galleryPanelWidth),
+    );
+  }, [galleryPanelWidth]);
 
   useEffect(() => {
     window.localStorage.setItem(PANEL_WIDTH_KEY, String(propertiesPanelWidth));
   }, [propertiesPanelWidth]);
 
   useEffect(() => {
+    window.localStorage.setItem(
+      PROPERTIES_PANEL_OPEN_KEY,
+      String(propertiesPanelOpen),
+    );
+  }, [propertiesPanelOpen]);
+
+  useEffect(() => {
     window.localStorage.setItem(CHECKERBOARD_THEME_KEY, checkerboardTheme);
   }, [checkerboardTheme]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      GALLERY_PANEL_OPEN_KEY,
+      String(galleryPanelOpen),
+    );
+  }, [galleryPanelOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -565,6 +622,27 @@ export default function App() {
   ]);
 
   useEffect(() => {
+    if (!resizingGalleryPanel) return;
+
+    const handlePointerMove = (e: PointerEvent) => {
+      setGalleryPanelWidth(clampGalleryPanelWidth(e.clientX));
+    };
+    const stopResize = () => setResizingGalleryPanel(false);
+
+    document.body.classList.add(styles.resizingPanel);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', stopResize);
+    window.addEventListener('pointercancel', stopResize);
+
+    return () => {
+      document.body.classList.remove(styles.resizingPanel);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', stopResize);
+      window.removeEventListener('pointercancel', stopResize);
+    };
+  }, [resizingGalleryPanel]);
+
+  useEffect(() => {
     if (!resizingPropertiesPanel) return;
 
     const handlePointerMove = (e: PointerEvent) => {
@@ -572,13 +650,13 @@ export default function App() {
     };
     const stopResize = () => setResizingPropertiesPanel(false);
 
-    document.body.classList.add(styles.resizingPropertiesPanel);
+    document.body.classList.add(styles.resizingPanel);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', stopResize);
     window.addEventListener('pointercancel', stopResize);
 
     return () => {
-      document.body.classList.remove(styles.resizingPropertiesPanel);
+      document.body.classList.remove(styles.resizingPanel);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', stopResize);
       window.removeEventListener('pointercancel', stopResize);
@@ -625,22 +703,112 @@ export default function App() {
         }
         title={`Add To ${addGalleryProvider.label}`}
       />
-      <EffectsGalleryDialog
-        canModerate={authUser?.role === 'admin'}
-        checkerboardTheme={checkerboardTheme}
-        isOpen={galleryOpen}
-        isLoading={galleryLoading}
-        items={galleryItems}
-        providerLabel={activeGalleryProvider.label}
-        query={galleryQuery}
-        onApply={applyGalleryItem}
-        onApprove={(id) => moderateGalleryItem(id, 'approve')}
-        onClose={() => setGalleryOpen(false)}
-        onDelete={deleteGalleryItem}
-        onQueryChange={setGalleryQuery}
-        onReject={(id) => moderateGalleryItem(id, 'reject')}
-        onSetCheckerboardTheme={setCheckerboardTheme}
+      <input
+        ref={jsonImportInputRef}
+        type="file"
+        accept="application/json,.json"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file) return;
+
+          void file.text().then((text) => {
+            if (loadSettingsJsonText(text)) {
+              showSuccessToast('JSON imported');
+            } else {
+              showFailureToast('Unable to import JSON');
+            }
+          }).catch((error) => {
+            console.warn('Unable to read FontEffects JSON settings.', error);
+            showFailureToast('Unable to import JSON');
+          });
+        }}
       />
+      <div className={styles.body}>
+        <GalleryPanel
+          activeTab={activeGalleryId}
+          canModerate={authUser?.role === 'admin'}
+          checkerboardTheme={checkerboardTheme}
+          isOpen={galleryPanelOpen}
+          isLoading={galleryLoading}
+          items={galleryItems}
+          query={galleryQuery}
+          onAdd={() => openAddToGallery(activeGalleryId)}
+          onApply={applyGalleryItem}
+          onApprove={(id) => moderateGalleryItem(id, 'approve')}
+          onClose={() => setGalleryPanelOpen(false)}
+          onDelete={deleteGalleryItem}
+          onOpen={() => setGalleryPanelOpen(true)}
+          onQueryChange={(query) => {
+            setGalleryQueries((currentQueries) => ({
+              ...currentQueries,
+              [activeGalleryId]: query,
+            }));
+          }}
+          onReject={(id) => moderateGalleryItem(id, 'reject')}
+          onSetCheckerboardTheme={setCheckerboardTheme}
+          onTabChange={(tab) => {
+            setActiveGalleryId(tab);
+            setGalleryPanelOpen(true);
+          }}
+          width={galleryPanelWidth}
+        />
+        {galleryPanelOpen && (
+          <div
+            className={`${styles.galleryResizeHandle} ${
+              resizingGalleryPanel ? styles.galleryResizeHandleActive : ''
+            }`}
+            aria-label="Resize gallery panel"
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuemin={MIN_GALLERY_PANEL_WIDTH}
+            aria-valuemax={MAX_GALLERY_PANEL_WIDTH}
+            aria-valuenow={galleryPanelWidth}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setResizingGalleryPanel(true);
+            }}
+          />
+        )}
+        <FontCanvas ref={canvasRef} checkerboardTheme={checkerboardTheme} />
+        {propertiesPanelOpen && (
+          <div
+            className={`${styles.propertiesResizeHandle} ${
+              resizingPropertiesPanel ? styles.propertiesResizeHandleActive : ''
+            }`}
+            aria-label="Resize properties panel"
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuemin={MIN_PANEL_WIDTH}
+            aria-valuemax={MAX_PANEL_WIDTH}
+            aria-valuenow={propertiesPanelWidth}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setResizingPropertiesPanel(true);
+            }}
+          />
+        )}
+        {propertiesPanelOpen ? (
+          <FontProperties
+            fontList={fontList}
+            fontsLoaded={fontsLoaded}
+            onClose={() => setPropertiesPanelOpen(false)}
+            width={propertiesPanelWidth}
+          />
+        ) : (
+          <div className={styles.propertiesRail}>
+            <Button
+              minimal
+              small
+              icon="cog"
+              title="Show Properties"
+              aria-label="Show Properties"
+              onClick={() => setPropertiesPanelOpen(true)}
+            />
+          </div>
+        )}
+      </div>
       <LoginDialog
         isOpen={loginOpen}
         onClose={() => setLoginOpen(false)}
@@ -680,51 +848,6 @@ export default function App() {
           }
         />
       </Dialog>
-      <input
-        ref={jsonImportInputRef}
-        type="file"
-        accept="application/json,.json"
-        style={{ display: 'none' }}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          e.target.value = '';
-          if (!file) return;
-
-          void file.text().then((text) => {
-            if (loadSettingsJsonText(text)) {
-              showSuccessToast('JSON imported');
-            } else {
-              showFailureToast('Unable to import JSON');
-            }
-          }).catch((error) => {
-            console.warn('Unable to read FontEffects JSON settings.', error);
-            showFailureToast('Unable to import JSON');
-          });
-        }}
-      />
-      <div className={styles.body}>
-        <FontCanvas ref={canvasRef} checkerboardTheme={checkerboardTheme} />
-        <div
-          className={`${styles.propertiesResizeHandle} ${
-            resizingPropertiesPanel ? styles.propertiesResizeHandleActive : ''
-          }`}
-          aria-label="Resize properties panel"
-          role="separator"
-          aria-orientation="vertical"
-          aria-valuemin={MIN_PANEL_WIDTH}
-          aria-valuemax={MAX_PANEL_WIDTH}
-          aria-valuenow={propertiesPanelWidth}
-          onPointerDown={(e) => {
-            e.preventDefault();
-            setResizingPropertiesPanel(true);
-          }}
-        />
-        <FontProperties
-          fontList={fontList}
-          fontsLoaded={fontsLoaded}
-          width={propertiesPanelWidth}
-        />
-      </div>
     </div>
   );
 }

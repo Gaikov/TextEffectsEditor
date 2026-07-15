@@ -3,8 +3,6 @@ import { observer } from 'mobx-react-lite';
 import {
   Button,
   Card,
-  Dialog,
-  DialogBody,
   InputGroup,
   NonIdealState,
   SegmentedControl,
@@ -23,15 +21,14 @@ const CHECKER_COLORS: Record<CheckerboardTheme, [string, string]> = {
   dark: ['#2F343C', '#1F242B'],
 };
 
-const BODY_STYLE: React.CSSProperties = {
+const ROOT_STYLE: React.CSSProperties = {
   display: 'flex',
+  flex: '1 1 auto',
   flexDirection: 'column',
-  minHeight: 420,
-  maxHeight: '78vh',
-  overflow: 'hidden',
+  minHeight: 0,
 };
 
-const GALLERY_CONTENT_STYLE: React.CSSProperties = {
+const CONTENT_STYLE: React.CSSProperties = {
   flex: '1 1 auto',
   minHeight: 0,
   overflow: 'auto',
@@ -48,7 +45,7 @@ const SEARCH_STYLE: React.CSSProperties = {
   flex: '0 0 auto',
 };
 
-const GALLERY_TOOLS_STYLE: React.CSSProperties = {
+const TOOLS_STYLE: React.CSSProperties = {
   alignItems: 'center',
   display: 'grid',
   gap: 10,
@@ -113,17 +110,14 @@ const ACTIONS_STYLE: React.CSSProperties = {
   justifyContent: 'flex-end',
 };
 
-interface EffectsGalleryDialogProps {
-  isOpen: boolean;
+export interface GalleryContentProps {
   canModerate?: boolean;
+  checkerboardTheme: CheckerboardTheme;
   isLoading?: boolean;
   items: GalleryItem[];
-  providerLabel: string;
   query: string;
-  checkerboardTheme: CheckerboardTheme;
   onApply: (item: GalleryItem) => void;
   onApprove?: (id: string) => void;
-  onClose: () => void;
   onDelete: (id: string) => void;
   onQueryChange: (query: string) => void;
   onReject?: (id: string) => void;
@@ -157,15 +151,13 @@ function getGalleryDisplayName(item: GalleryItem) {
   return item.name.trim() || 'Untitled';
 }
 
-interface GalleryPreviewProps {
-  checkerboardTheme: CheckerboardTheme;
-  item: GalleryItem;
-}
-
 const GalleryPreview = observer(function GalleryPreview({
   checkerboardTheme,
   item,
-}: GalleryPreviewProps) {
+}: {
+  checkerboardTheme: CheckerboardTheme;
+  item: GalleryItem;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [shouldRender, setShouldRender] = useState(false);
@@ -177,15 +169,12 @@ const GalleryPreview = observer(function GalleryPreview({
   const canvasWidth = fontStore.canvasWidth;
   const canvasHeight = fontStore.canvasHeight;
 
-  const effects = useMemo(
-    () => {
-      if (!shouldRender) return [];
-      return item.effects
-        .map(deserializeFontEffect)
-        .filter((effect): effect is IFontEffect => effect !== null);
-    },
-    [item.effects, shouldRender],
-  );
+  const effects = useMemo(() => {
+    if (!shouldRender) return [];
+    return item.effects
+      .map(deserializeFontEffect)
+      .filter((effect): effect is IFontEffect => effect !== null);
+  }, [item.effects, shouldRender]);
 
   useEffect(() => {
     if (shouldRender) return;
@@ -257,13 +246,13 @@ const GalleryPreview = observer(function GalleryPreview({
     boldWeight,
     canvasHeight,
     canvasWidth,
+    checkerboardTheme,
     effects,
     fontFamily,
     fontSize,
     italic,
-    text,
     shouldRender,
-    checkerboardTheme,
+    text,
   ]);
 
   return (
@@ -280,136 +269,122 @@ const GalleryPreview = observer(function GalleryPreview({
   );
 });
 
-export default observer(function EffectsGalleryDialog({
+export default observer(function GalleryContent({
   canModerate = false,
   checkerboardTheme,
-  isOpen,
   isLoading = false,
   items,
-  providerLabel,
   query,
   onApply,
   onApprove,
-  onClose,
   onDelete,
   onQueryChange,
   onReject,
   onSetCheckerboardTheme,
-}: EffectsGalleryDialogProps) {
-  useEffect(() => {
-    if (!isOpen) onQueryChange('');
-  }, [isOpen, onQueryChange]);
-
+}: GalleryContentProps) {
   return (
-    <Dialog
-      isOpen={isOpen}
-      onClose={onClose}
-      title={providerLabel}
-      style={{ maxWidth: 'calc(100vw - 80px)', width: 1040 }}
-    >
-      <DialogBody style={BODY_STYLE}>
-        <div style={GALLERY_TOOLS_STYLE}>
-          <InputGroup
-            leftIcon="search"
-            placeholder="Search by name..."
-            style={SEARCH_STYLE}
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+    <div style={ROOT_STYLE}>
+      <div style={TOOLS_STYLE}>
+        <InputGroup
+          leftIcon="search"
+          placeholder="Search by name..."
+          style={SEARCH_STYLE}
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+        />
+        <SegmentedControl
+          small
+          value={checkerboardTheme}
+          onValueChange={(value) => {
+            onSetCheckerboardTheme(value as CheckerboardTheme);
+          }}
+          options={[
+            { label: 'Dark', value: 'dark' },
+            { label: 'Light', value: 'light' },
+          ]}
+        />
+      </div>
+      <div style={CONTENT_STYLE}>
+        {isLoading ? (
+          <NonIdealState
+            icon="cloud-download"
+            title="Loading gallery"
+            description="Fetching saved effect stacks."
           />
-          <SegmentedControl
-            small
-            value={checkerboardTheme}
-            onValueChange={(value) => {
-              onSetCheckerboardTheme(value as CheckerboardTheme);
-            }}
-            options={[
-              { label: 'Dark', value: 'dark' },
-              { label: 'Light', value: 'light' },
-            ]}
+        ) : items.length === 0 && query.trim() === '' ? (
+          <NonIdealState
+            icon="media"
+            title="No gallery items"
+            description="Use an Add To Gallery command to save the current effect stack."
           />
-        </div>
-        <div style={GALLERY_CONTENT_STYLE}>
-          {isLoading ? (
-            <NonIdealState
-              icon="cloud-download"
-              title="Loading gallery"
-              description="Fetching saved effect stacks."
-            />
-          ) : items.length === 0 && query.trim() === '' ? (
-            <NonIdealState
-              icon="media"
-              title="No gallery items"
-              description="Use an Add To Gallery command to save the current effect stack."
-            />
-          ) : items.length === 0 ? (
-            <NonIdealState
-              icon="search"
-              title="No matching gallery items"
-              description="Try a different effect name."
-            />
-          ) : (
-            <div style={LIST_STYLE}>
-              {items.map((item) => {
-                const displayName = getGalleryDisplayName(item);
-                return (
-                  <Card key={item.id} compact style={CARD_STYLE}>
-                    <GalleryPreview
-                      checkerboardTheme={checkerboardTheme}
-                      item={item}
-                    />
-                    <div style={CARD_CONTENT_STYLE}>
-                      <div style={CARD_HEADER_STYLE}>
-                        <div style={TITLE_STYLE}>{displayName}</div>
-                        <div style={DATE_STYLE}>
-                          {item.authorName ? `${item.authorName} · ` : ''}
-                          {formatDate(item.createdAt)}
-                          {item.status && item.status !== 'approved'
-                            ? ` · ${item.status}`
-                            : ''}
-                        </div>
-                      </div>
-                      <div style={ACTIONS_STYLE}>
-                        {canModerate && item.status === 'pending' && (
-                          <>
-                            <Button
-                              small
-                              icon="tick"
-                              text="Approve"
-                              onClick={() => onApprove?.(item.id)}
-                            />
-                            <Button
-                              small
-                              icon="cross"
-                              intent="danger"
-                              text="Reject"
-                              onClick={() => onReject?.(item.id)}
-                            />
-                          </>
-                        )}
-                        <Button
-                          small
-                          icon="tick"
-                          text="Apply"
-                          onClick={() => onApply(item)}
-                        />
-                        {item.canDelete && (
-                          <Button
-                            small
-                            icon="trash"
-                            intent="danger"
-                            aria-label={`Delete ${displayName}`}
-                            onClick={() => onDelete(item.id)}
-                          />
-                        )}
+        ) : items.length === 0 ? (
+          <NonIdealState
+            icon="search"
+            title="No matching gallery items"
+            description="Try a different effect name."
+          />
+        ) : (
+          <div style={LIST_STYLE}>
+            {items.map((item) => {
+              const displayName = getGalleryDisplayName(item);
+              return (
+                <Card key={item.id} compact style={CARD_STYLE}>
+                  <GalleryPreview
+                    checkerboardTheme={checkerboardTheme}
+                    item={item}
+                  />
+                  <div style={CARD_CONTENT_STYLE}>
+                    <div style={CARD_HEADER_STYLE}>
+                      <div style={TITLE_STYLE}>{displayName}</div>
+                      <div style={DATE_STYLE}>
+                        {item.authorName ? `${item.authorName} · ` : ''}
+                        {formatDate(item.createdAt)}
+                        {item.status && item.status !== 'approved'
+                          ? ` · ${item.status}`
+                          : ''}
                       </div>
                     </div>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </DialogBody>
-    </Dialog>
+                    <div style={ACTIONS_STYLE}>
+                      {canModerate && item.status === 'pending' && (
+                        <>
+                          <Button
+                            small
+                            icon="tick"
+                            text="Approve"
+                            onClick={() => onApprove?.(item.id)}
+                          />
+                          <Button
+                            small
+                            icon="cross"
+                            intent="danger"
+                            text="Reject"
+                            onClick={() => onReject?.(item.id)}
+                          />
+                        </>
+                      )}
+                      <Button
+                        small
+                        icon="tick"
+                        text="Apply"
+                        onClick={() => onApply(item)}
+                      />
+                      {item.canDelete && (
+                        <Button
+                          small
+                          icon="trash"
+                          intent="danger"
+                          aria-label={`Delete ${displayName}`}
+                          onClick={() => onDelete(item.id)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 });

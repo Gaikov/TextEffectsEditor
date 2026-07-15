@@ -23,7 +23,6 @@ import {
   InputGroup,
   Icon,
   Menu,
-  NumericInput,
   Popover,
   MenuItem,
   Spinner,
@@ -32,6 +31,7 @@ import { Suggest } from '@blueprintjs/select';
 import { fontEffectDefinitions, type IFontEffect } from '../effects';
 import { fontStore } from '../store/fontStore';
 import { getEffectEditor } from './effects/effectEditorRegistry';
+import NumberInput from './NumberInput';
 import styles from './FontProperties.module.css';
 
 interface FontItem {
@@ -55,6 +55,7 @@ const EFFECT_INSERT_ID_PREFIX = 'effect-insert:';
 interface Props {
   fontList: string[];
   fontsLoaded: boolean;
+  onClose: () => void;
   width: number;
 }
 
@@ -308,6 +309,7 @@ const EffectList = observer(function EffectList({
 export default observer(function FontProperties({
   fontList,
   fontsLoaded,
+  onClose,
   width,
 }: Props) {
   fontStore.effectsVersion;
@@ -370,6 +372,18 @@ export default observer(function FontProperties({
       className={`${styles.panel} font-properties-panel`}
       style={{ width }}
     >
+      <div className={styles.panelHeader}>
+        <span className={styles.panelTitle}>Properties</span>
+        <Button
+          small
+          minimal
+          icon="chevron-right"
+          title="Hide Properties"
+          aria-label="Hide Properties"
+          onClick={onClose}
+        />
+      </div>
+
       <div className={styles.propertyRow}>
         <span className={styles.propertyLabel}>Text</span>
         <InputGroup
@@ -457,17 +471,16 @@ export default observer(function FontProperties({
 
       <div className={styles.propertyRow}>
         <span className={styles.propertyLabel}>Size</span>
-        <NumericInput
+        <NumberInput
           small
           value={fontStore.fontSize}
-          onValueChange={(value) => {
+          onChange={(value) => {
             fontStore.setRootProperty('fontSize', value, 'Font size');
           }}
           min={1}
           max={2048}
-          clampValueOnBlur
+          allowFloat
           fill
-          buttonPosition="none"
         />
       </div>
 

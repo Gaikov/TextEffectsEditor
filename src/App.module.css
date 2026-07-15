@@ -25,7 +25,32 @@
   background: #2d72d2;
 }
 
-.resizingPropertiesPanel {
+.galleryResizeHandle {
+  width: 6px;
+  flex: 0 0 6px;
+  cursor: col-resize;
+  background: #1c2127;
+  border-left: 1px solid #252a31;
+  border-right: 1px solid #383e47;
+}
+
+.galleryResizeHandle:hover,
+.galleryResizeHandleActive {
+  background: #2d72d2;
+}
+
+.propertiesRail {
+  width: 34px;
+  flex: 0 0 34px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  background: #252a31;
+  border-left: 1px solid #383e47;
+}
+
+.resizingPanel {
   cursor: col-resize;
   user-select: none;
 }

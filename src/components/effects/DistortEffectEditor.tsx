@@ -69,6 +69,7 @@ export const DistortEffectEditor = observer(function DistortEffectEditor({
           value={effect.seed}
           stepSize={1}
           minorStepSize={1}
+          allowFloat={false}
           onChange={(value) => {
             fontStore.setEffectProperty(
               effect,
@@ -173,6 +174,7 @@ export const DistortEffectEditor = observer(function DistortEffectEditor({
           max={8}
           stepSize={1}
           minorStepSize={1}
+          allowFloat={false}
           onChange={(value) => {
             fontStore.setEffectProperty(
               effect,

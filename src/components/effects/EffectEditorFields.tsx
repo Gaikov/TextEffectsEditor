@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from 'react';
-import { Button, ControlGroup, InputGroup, NumericInput, Popover } from '@blueprintjs/core';
+import { Button, ControlGroup, InputGroup, Popover } from '@blueprintjs/core';
+import NumberInput from '../NumberInput';
 import styles from '../FontProperties.module.css';
 
 export function parseLineDash(value: string) {
@@ -94,6 +95,7 @@ export function EffectNumberInput({
   max,
   stepSize,
   minorStepSize,
+  allowFloat = true,
 }: {
   value: number;
   onChange: (value: number) => void;
@@ -101,18 +103,18 @@ export function EffectNumberInput({
   max?: number;
   stepSize?: number;
   minorStepSize?: number;
+  allowFloat?: boolean;
 }) {
   return (
-    <NumericInput
+    <NumberInput
       small
       value={value}
-      onValueChange={onChange}
+      onChange={onChange}
       min={min}
       max={max}
-      stepSize={stepSize}
-      minorStepSize={minorStepSize}
+      step={minorStepSize ?? stepSize}
+      allowFloat={allowFloat}
       fill
-      buttonPosition="none"
     />
   );
 }
@@ -128,19 +130,15 @@ export function EffectOpacityRow({
 }) {
   return (
     <EffectRow label={label}>
-      <input
-        className="bp6-input bp6-small"
-        type="number"
+      <NumberInput
         min={0}
         max={1}
         step={0.01}
-        value={String(value)}
-        onChange={(e) => {
-          const nextValue = Number(e.target.value);
-          if (Number.isFinite(nextValue)) {
-            onChange(Math.max(0, Math.min(1, nextValue)));
-          }
-        }}
+        value={value}
+        onChange={onChange}
+        small
+        fill
+        allowFloat
       />
     </EffectRow>
   );

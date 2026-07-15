@@ -26,7 +26,7 @@ Text Effects Editor is developed by Roman Gaikov.
 - Import/export JSON presets.
 - Export the current result as a PNG file.
 - Copy the current transparent PNG image to the system clipboard.
-- Save reusable effect stacks in local and Cloudflare-backed global galleries.
+- Save reusable effect stacks in a left Gallery panel with local and Cloudflare-backed global tabs.
 - Pan, zoom, center view, reset zoom, and resizable properties panel.
 - Two-row top bar with a hover menu and compact canvas toolbar.
 - Light or dark checkerboard preview background stored as an app preference.
@@ -61,11 +61,13 @@ The build output is written to `dist/`.
 9. Use `File -> Export JSON` to save a reusable preset, or `File -> Export PNG` to save the rendered image.
 10. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
 11. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
-12. Use `Gallery -> Show Local Gallery` or `Gallery -> Show Global Gallery` to search and apply saved stacks.
+12. Use the left Gallery panel to switch between `Global` and `Local`, search saved stacks, preview them, and apply or delete items.
 13. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
 14. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
 15. Use `View -> Checkerboard` or the Gallery switch to choose dark or light transparency backgrounds.
 16. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+
+Numeric fields accept comma or dot decimals. While typing, dot is shown as comma; exported JSON still stores normal numeric values.
 
 ## Effect Model
 
@@ -258,13 +260,13 @@ Use Composite / Blend after one or more visible effects to darken, lighten, inte
 - `Export PNG`: saves the current canvas result as a transparent PNG.
 - `Copy to Clipboard`: copies the current canvas result as a transparent PNG image.
 - `Add To Local Gallery`: asks for an optional name and saves the current root effect stack to local storage.
-- `Show Local Gallery`: opens private browser-local effect stacks with dynamic previews and case-insensitive name search.
+- `Show Local Gallery`: opens the left Gallery panel on private browser-local effect stacks with dynamic previews and case-insensitive name search.
 - `Add To Global Gallery`: submits the current root effect stack to the Cloudflare global gallery for moderation. Sign-in is required.
-- `Show Global Gallery`: opens approved global effect stacks. Viewing is public; applying an item requires sign-in.
+- `Show Global Gallery`: opens the left Gallery panel on approved global effect stacks. Viewing is public; applying an item requires sign-in.
 
 File actions show non-blocking toast feedback after successful operations or recoverable errors.
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
-Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
+The left Gallery panel is open by default, starts on `Global`, and can be hidden or reopened from its narrow rail; the open/closed state is saved in local storage. Each tab keeps its own search query. Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
 
 ## Cloudflare Global Gallery
 
@@ -298,7 +300,7 @@ The top bar has a classic menu row above the canvas toolbar. Hover over `File`, 
 
 `Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 
-`View -> Checkerboard` switches the preview background between light and dark squares. The Gallery dialog has the same switch for preview cards. This application preference defaults to dark, is saved in local storage, and does not affect PNG export or JSON presets.
+`View -> Checkerboard` switches the preview background between light and dark squares. The Gallery panel has the same switch for preview cards. This application preference defaults to dark, is saved in local storage, and does not affect PNG export or JSON presets.
 
 | Command | Shortcut |
 |---|---|

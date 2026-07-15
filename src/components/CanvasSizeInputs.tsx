@@ -9,11 +9,11 @@ import {
   Menu,
   MenuDivider,
   MenuItem,
-  NumericInput,
   Popover,
   PopoverInteractionKind,
 } from '@blueprintjs/core';
 import type { AuthUser } from '../auth/authClient';
+import NumberInput from './NumberInput';
 import { fontStore } from '../store/fontStore';
 import { undoService } from '../undo';
 import type { CheckerboardTheme } from '../viewPreferences';
@@ -398,30 +398,28 @@ export default observer(function CanvasSizeInputs({
       <div style={TOOLBAR_STYLE}>
         <div style={FIELD_STYLE}>
           <span style={LABEL_STYLE}>Width</span>
-          <NumericInput
+          <NumberInput
             small
             style={INPUT_STYLE}
             value={fontStore.canvasWidth}
-            onValueChange={fontStore.setCanvasWidth}
+            onChange={fontStore.setCanvasWidth}
             min={1}
             max={4096}
-            clampValueOnBlur
+            allowFloat={false}
             fill
-            buttonPosition="none"
           />
         </div>
         <div style={FIELD_STYLE}>
           <span style={LABEL_STYLE}>Height</span>
-          <NumericInput
+          <NumberInput
             small
             style={INPUT_STYLE}
             value={fontStore.canvasHeight}
-            onValueChange={fontStore.setCanvasHeight}
+            onChange={fontStore.setCanvasHeight}
             min={1}
             max={4096}
-            clampValueOnBlur
+            allowFloat={false}
             fill
-            buttonPosition="none"
           />
         </div>
         <Button
