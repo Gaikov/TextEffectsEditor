@@ -15,6 +15,14 @@ Text Effects Editor is developed by Roman Gaikov.
 - Website: [grom-games.com](https://grom-games.com)
 - Donations: [PayPal: grom.games@gmail.com](https://www.paypal.com/donate/?business=grom.games%40gmail.com&currency_code=USD)
 
+## License
+
+The hosted Text Effects Editor application is free for everyone to use. Images and JSON presets created with the application belong to their creators.
+
+The source code is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE). Personal, educational, hobby, and other non-commercial use of the source code is allowed with attribution to Roman Gaikov / GROm Games.
+
+Commercial use of the source code, modified versions, forks, hosted copies, or integration into paid products or services requires a separate commercial license agreement. Contact: [grom.games@gmail.com](mailto:grom.games@gmail.com).
+
 ## Features
 
 - Live text preview on a transparent checkerboard canvas.
@@ -66,6 +74,7 @@ The build output is written to `dist/`.
 14. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
 15. Use `View -> Checkerboard` or the Gallery switch to choose dark or light transparency backgrounds.
 16. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+17. Use `Help -> License` to view application usage and source-code licensing terms.
 
 Numeric fields accept comma or dot decimals. While typing, dot is shown as comma; exported JSON still stores normal numeric values.
 
@@ -301,6 +310,8 @@ The top bar has a classic menu row above the canvas toolbar. Hover over `File`, 
 `Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 
 `View -> Checkerboard` switches the preview background between light and dark squares. The Gallery panel has the same switch for preview cards. This application preference defaults to dark, is saved in local storage, and does not affect PNG export or JSON presets.
+
+`Help -> License` explains that the hosted application is free to use, while the source code is non-commercial unless a separate commercial agreement is made.
 
 | Command | Shortcut |
 |---|---|

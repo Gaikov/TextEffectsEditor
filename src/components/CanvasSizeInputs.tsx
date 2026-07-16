@@ -97,6 +97,10 @@ const ABOUT_LINK_STYLE: React.CSSProperties = {
   color: '#8ABBFF',
 };
 
+const LICENSE_PARAGRAPH_STYLE: React.CSSProperties = {
+  marginTop: 0,
+};
+
 const DEVELOPER_SITE_URL = 'https://grom-games.com';
 const DONATION_EMAIL = 'grom.games@gmail.com';
 const PAYPAL_DONATE_URL =
@@ -194,6 +198,7 @@ export default observer(function CanvasSizeInputs({
 }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [licenseOpen, setLicenseOpen] = useState(false);
 
   return (
     <div style={ROOT_STYLE}>
@@ -387,6 +392,11 @@ export default observer(function CanvasSizeInputs({
           content={
             <Menu>
               <MenuItem
+                icon="endorsed"
+                text="License"
+                onClick={() => setLicenseOpen(true)}
+              />
+              <MenuItem
                 icon="info-sign"
                 text="About"
                 onClick={() => setAboutOpen(true)}
@@ -441,6 +451,52 @@ export default observer(function CanvasSizeInputs({
           onClick={onResetZoom}
         />
       </div>
+      <Dialog
+        isOpen={licenseOpen}
+        onClose={() => setLicenseOpen(false)}
+        title="License"
+      >
+        <DialogBody>
+          <p style={LICENSE_PARAGRAPH_STYLE}>
+            The hosted Text Effects Editor application is free for everyone to
+            use. Images and JSON presets created with the application belong to
+            their creators.
+          </p>
+          <p>
+            The source code is licensed under the PolyForm Noncommercial License
+            1.0.0. Personal, educational, hobby, and other non-commercial use of
+            the source code is allowed with attribution to Roman Gaikov / GROm
+            Games.
+          </p>
+          <p>
+            Commercial use of the source code, modified versions, forks, hosted
+            copies, or integration into paid products or services requires a
+            separate commercial license agreement.
+          </p>
+          <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Contact</span>
+            <a
+              href={`mailto:${DONATION_EMAIL}`}
+              style={ABOUT_LINK_STYLE}
+            >
+              {DONATION_EMAIL}
+            </a>
+          </div>
+        </DialogBody>
+        <DialogFooter
+          actions={
+            <>
+              <AnchorButton
+                href="https://polyformproject.org/licenses/noncommercial/1.0.0"
+                rel="noreferrer"
+                target="_blank"
+                text="PolyForm License"
+              />
+              <Button text="Close" onClick={() => setLicenseOpen(false)} />
+            </>
+          }
+        />
+      </Dialog>
       <Dialog
         isOpen={aboutOpen}
         onClose={() => setAboutOpen(false)}
