@@ -504,6 +504,10 @@ export default observer(function CanvasSizeInputs({
       >
         <DialogBody>
           <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Version</span>
+            <span>v{__APP_VERSION__}</span>
+          </div>
+          <div style={ABOUT_ROW_STYLE}>
             <span style={ABOUT_LABEL_STYLE}>Developer</span>
             <span>Roman Gaikov</span>
           </div>

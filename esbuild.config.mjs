@@ -10,6 +10,7 @@ const TSC_OUTDIR = '.cache/tsc';
 const TSC_ENTRY = path.join(TSC_OUTDIR, 'index.js');
 const PORT = Number(process.env.PORT ?? 3001);
 const isDev = process.argv.includes('--dev');
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 const SSE_CLIENTS = new Set();
 
@@ -159,6 +160,7 @@ const buildConfig = {
   },
   minify: !isDev,
   define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
     'process.env.NODE_ENV': JSON.stringify(
       isDev ? 'development' : 'production'
     ),

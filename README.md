@@ -56,6 +56,18 @@ npm run build
 
 The build output is written to `dist/`.
 
+## Versioning
+
+The application version follows SemVer and uses the `version` field in `package.json` as the single source of truth. The build injects this value into the browser bundle, and `Help -> About` shows the current version.
+
+Use standard npm version commands when preparing a release:
+
+```bash
+npm version patch
+npm version minor
+npm version major
+```
+
 ## Basic Workflow
 
 1. On startup, choose whether to load system fonts if permission has not already been granted. Supported browsers will ask for local font permission.
