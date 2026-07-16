@@ -12,6 +12,7 @@ import type { GalleryItem } from '../../gallery/GalleryProvider';
 import { drawTextEffects } from '../../render/renderFontEffects';
 import { fontStore } from '../../store/fontStore';
 import type { CheckerboardTheme } from '../../viewPreferences';
+import { enqueueGalleryPreviewRender } from './galleryPreviewScheduler';
 
 const PREVIEW_WIDTH = 960;
 const PREVIEW_HEIGHT = 508;
@@ -116,6 +117,8 @@ const ACTIONS_STYLE: React.CSSProperties = {
   justifyContent: 'flex-end',
 };
 
+type PreviewRenderStatus = 'idle' | 'queued' | 'rendering' | 'rendered';
+
 export interface GalleryContentProps {
   canModerate?: boolean;
   checkerboardTheme: CheckerboardTheme;
@@ -171,7 +174,10 @@ const GalleryPreview = observer(function GalleryPreview({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const renderKeyRef = useRef('');
   const [shouldRender, setShouldRender] = useState(false);
+  const [renderStatus, setRenderStatus] =
+    useState<PreviewRenderStatus>('idle');
   const text = fontStore.text;
   const fontFamily = fontStore.fontFamily;
   const fontSize = fontStore.fontSize;
@@ -186,6 +192,33 @@ const GalleryPreview = observer(function GalleryPreview({
       .map(deserializeFontEffect)
       .filter((effect): effect is IFontEffect => effect !== null);
   }, [item.effects, shouldRender]);
+  const renderKey = useMemo(
+    () =>
+      JSON.stringify({
+        boldWeight,
+        canvasHeight,
+        canvasWidth,
+        effects: item.effects,
+        fontFamily,
+        fontSize,
+        id: item.id,
+        italic,
+        text,
+      }),
+    [
+      boldWeight,
+      canvasHeight,
+      canvasWidth,
+      fontFamily,
+      fontSize,
+      item.effects,
+      item.id,
+      italic,
+      text,
+    ],
+  );
+
+  renderKeyRef.current = renderKey;
 
   useEffect(() => {
     if (shouldRender) return;
@@ -214,43 +247,71 @@ const GalleryPreview = observer(function GalleryPreview({
   useEffect(() => {
     if (!shouldRender) return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const activeRenderKey = renderKey;
+    setRenderStatus('queued');
 
-    canvas.width = PREVIEW_WIDTH;
-    canvas.height = PREVIEW_HEIGHT;
+    return enqueueGalleryPreviewRender((done) => {
+      if (renderKeyRef.current !== activeRenderKey) {
+        done();
+        return;
+      }
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      setRenderStatus('rendering');
 
-    const sourceCanvas = document.createElement('canvas');
-    sourceCanvas.width = canvasWidth;
-    sourceCanvas.height = canvasHeight;
-    const sourceContext = sourceCanvas.getContext('2d');
-    if (!sourceContext) return;
+      window.requestAnimationFrame(() => {
+        try {
+          if (renderKeyRef.current !== activeRenderKey) return;
 
-    drawTextEffects(sourceContext, canvasWidth, canvasHeight, {
-      boldWeight,
-      effects,
-      fontFamily,
-      fontSize,
-      italic,
-      text,
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+
+          canvas.width = PREVIEW_WIDTH;
+          canvas.height = PREVIEW_HEIGHT;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          ctx.clearRect(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+
+          const sourceCanvas = document.createElement('canvas');
+          sourceCanvas.width = canvasWidth;
+          sourceCanvas.height = canvasHeight;
+          const sourceContext = sourceCanvas.getContext('2d');
+          if (!sourceContext) return;
+
+          drawTextEffects(sourceContext, canvasWidth, canvasHeight, {
+            boldWeight,
+            effects,
+            fontFamily,
+            fontSize,
+            italic,
+            text,
+          });
+
+          if (renderKeyRef.current !== activeRenderKey) return;
+
+          const scale = Math.min(
+            PREVIEW_WIDTH / canvasWidth,
+            PREVIEW_HEIGHT / canvasHeight,
+          );
+          const w = canvasWidth * scale;
+          const h = canvasHeight * scale;
+          ctx.drawImage(
+            sourceCanvas,
+            (PREVIEW_WIDTH - w) / 2,
+            (PREVIEW_HEIGHT - h) / 2,
+            w,
+            h,
+          );
+
+          if (renderKeyRef.current === activeRenderKey) {
+            setRenderStatus('rendered');
+          }
+        } finally {
+          done();
+        }
+      });
     });
-
-    const scale = Math.min(
-      PREVIEW_WIDTH / canvasWidth,
-      PREVIEW_HEIGHT / canvasHeight,
-    );
-    const w = canvasWidth * scale;
-    const h = canvasHeight * scale;
-    ctx.drawImage(
-      sourceCanvas,
-      (PREVIEW_WIDTH - w) / 2,
-      (PREVIEW_HEIGHT - h) / 2,
-      w,
-      h,
-    );
   }, [
     boldWeight,
     canvasHeight,
@@ -259,6 +320,7 @@ const GalleryPreview = observer(function GalleryPreview({
     fontFamily,
     fontSize,
     italic,
+    renderKey,
     shouldRender,
     text,
   ]);
@@ -274,10 +336,16 @@ const GalleryPreview = observer(function GalleryPreview({
       <canvas
         ref={canvasRef}
         aria-label={`${getGalleryDisplayName(item)} preview`}
-        style={shouldRender ? PREVIEW_STYLE : { display: 'none' }}
+        style={renderStatus === 'rendered' ? PREVIEW_STYLE : { display: 'none' }}
       />
-      {!shouldRender && (
-        <div style={PREVIEW_PLACEHOLDER_STYLE}>Preview loads on scroll</div>
+      {renderStatus !== 'rendered' && (
+        <div style={PREVIEW_PLACEHOLDER_STYLE}>
+          {renderStatus === 'rendering'
+            ? 'Rendering preview...'
+            : renderStatus === 'queued'
+              ? 'Preview queued...'
+              : 'Preview loads on scroll'}
+        </div>
       )}
     </div>
   );

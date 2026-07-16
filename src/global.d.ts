@@ -19,8 +19,23 @@ interface FontData {
 
 interface Window {
   queryLocalFonts?: () => Promise<FontData[]>;
+  requestIdleCallback?: (
+    callback: IdleRequestCallback,
+    options?: IdleRequestOptions,
+  ) => number;
   showOpenFilePicker?: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[]>;
   showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
+}
+
+interface IdleDeadline {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+}
+
+type IdleRequestCallback = (deadline: IdleDeadline) => void;
+
+interface IdleRequestOptions {
+  timeout?: number;
 }
 
 interface FilePickerAcceptType {
