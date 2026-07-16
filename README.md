@@ -6,6 +6,8 @@ The app uses a canvas preview with a tree of effects. Effects can be grouped, re
 
 Live app: [https://text-effects-editor.pages.dev/](https://text-effects-editor.pages.dev/)
 
+![Text effects examples](docs/text-effects.jpg)
+
 ![Text Effects Editor screenshot](docs/app-screenshot.png)
 
 ## Developer And Support
