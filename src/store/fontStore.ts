@@ -156,6 +156,30 @@ class FontStore {
     );
   };
 
+  duplicateEffect = (id: string) => {
+    const location = this.findEffectLocation(this.effects, id, null);
+    if (!location) return;
+
+    const serializedEffect = serializeFontEffect(location.effect);
+    if (!serializedEffect) return;
+
+    const duplicate = deserializeFontEffect(serializedEffect);
+    if (!duplicate) return;
+
+    duplicate.collapsed = false;
+    if (duplicate instanceof GroupEffect) {
+      duplicate.name = `${duplicate.name.trim() || 'Group'} copy`;
+    }
+
+    const nextEffects = [...location.effects];
+    nextEffects.splice(location.index + 1, 0, duplicate);
+    this.applyEffectsArrayChange(
+      location.effects,
+      nextEffects,
+      'Duplicate effect',
+    );
+  };
+
   moveEffect = (id: string, direction: FontEffectMoveDirection) => {
     const location = this.findEffectLocation(this.effects, id, null);
     if (!location) return;

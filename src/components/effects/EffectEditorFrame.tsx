@@ -89,6 +89,14 @@ export function EffectEditorFrame({
           <Button
             small
             minimal
+            icon="duplicate"
+            aria-label="Duplicate effect"
+            style={ICON_BUTTON_STYLE}
+            onClick={() => fontStore.duplicateEffect(effect.id)}
+          />
+          <Button
+            small
+            minimal
             icon="arrow-up"
             aria-label="Move effect up"
             disabled={index === 0}
