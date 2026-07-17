@@ -37,6 +37,7 @@ Commercial use of the source code, modified versions, forks, hosted copies, or i
 - Export the current result as a PNG file.
 - Copy the current transparent PNG image to the system clipboard.
 - Save reusable effect stacks in a left Gallery panel with local and Cloudflare-backed global tabs.
+- Generate editable effect stacks from a text description with AI after signing in.
 - Pan, zoom, center view, reset zoom, and resizable properties panel.
 - Two-row top bar with a hover menu and compact canvas toolbar.
 - Light or dark checkerboard preview background stored as an app preference.
@@ -84,11 +85,12 @@ npm version major
 10. Use `File -> Copy to Clipboard` to copy the current transparent PNG without saving a file.
 11. Use `Gallery -> Add To Local Gallery` to save a private effect stack in this browser.
 12. Use the left Gallery panel to switch between `Global` and `Local`, search saved stacks, preview them, and apply or delete items.
-13. Use `Account -> Sign in` to register with OAuth, view account email/role, or sign out.
-14. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
-15. Use `View -> Checkerboard` or the Gallery switch to choose dark or light transparency backgrounds.
-16. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
-17. Use `Help -> License` to view application usage and source-code licensing terms.
+13. Use `AI -> Generate Effects` to describe a style, preview the generated effect stack, and apply it when you like the result.
+14. Use `Account -> Sign in` to register with Google or Yandex, view account email/role, or sign out.
+15. Use `Gallery -> Add To Global Gallery` to submit an effect stack for moderation after signing in.
+16. Use `View -> Checkerboard` or the Gallery switch to choose dark or light transparency backgrounds.
+17. Use `Edit` and `View` menu commands, or the matching shortcuts, for undo/redo and canvas navigation.
+18. Use `Help -> License` to view application usage and source-code licensing terms.
 
 Numeric fields accept comma or dot decimals. While typing, dot is shown as comma; exported JSON still stores normal numeric values.
 
@@ -286,6 +288,7 @@ Use Composite / Blend after one or more visible effects to darken, lighten, inte
 - `Show Local Gallery`: opens the left Gallery panel on private browser-local effect stacks with dynamic previews and case-insensitive name search.
 - `Add To Global Gallery`: submits the current root effect stack to the Cloudflare global gallery for moderation. Sign-in is required.
 - `Show Global Gallery`: opens the left Gallery panel on approved global effect stacks. Viewing is public; applying an item requires sign-in.
+- `AI Generate Effects`: creates an editable effect stack from a written description. Sign-in is required, and the generated stack is previewed before it replaces the current effects.
 
 File actions show non-blocking toast feedback after successful operations or recoverable errors.
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
@@ -305,7 +308,7 @@ from scratch.
 
 ## Menus And Shortcuts
 
-The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, `Account`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
+The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `AI`, `View`, `Account`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.
 
 `Account` shows the current user email and role after sign-in. Use it to sign in for global gallery actions or sign out.
 

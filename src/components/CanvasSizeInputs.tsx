@@ -119,6 +119,7 @@ interface Props {
   onNewDocument: () => void;
   onOpenGlobalGallery: () => void;
   onOpenLocalGallery: () => void;
+  onOpenAiGenerate: () => void;
   onOpenLogin: () => void;
   onResetZoom: () => void;
   onSaveSettings: () => void;
@@ -190,6 +191,7 @@ export default observer(function CanvasSizeInputs({
   onNewDocument,
   onOpenGlobalGallery,
   onOpenLocalGallery,
+  onOpenAiGenerate,
   onOpenLogin,
   onResetZoom,
   onSaveSettings,
@@ -307,6 +309,20 @@ export default observer(function CanvasSizeInputs({
                 icon="cloud-download"
                 text="Show Global Gallery"
                 onClick={onOpenGlobalGallery}
+              />
+            </Menu>
+          }
+        />
+        <MenuBarItem
+          activeMenu={activeMenu}
+          setActiveMenu={setActiveMenu}
+          text="AI"
+          content={
+            <Menu>
+              <MenuItem
+                icon="predictive-analysis"
+                text="Generate Effects"
+                onClick={onOpenAiGenerate}
               />
             </Menu>
           }

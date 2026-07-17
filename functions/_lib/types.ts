@@ -1,6 +1,7 @@
 export interface Env {
   ADMIN_EMAILS?: string;
   APP_ORIGIN?: string;
+  AI?: Ai;
   DB: D1Database;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;

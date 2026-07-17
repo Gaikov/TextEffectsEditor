@@ -69,6 +69,8 @@ Global gallery submissions from registered users are stored as `pending`; public
 
 When the editor is embedded in an iframe, Google and Yandex sign-in must open in a new top-level tab because provider OAuth pages cannot be displayed inside an iframe. The callback tab posts an auth result back to the embedded editor and attempts to close itself. Production session cookies use `SameSite=None; Secure` so the `pages.dev` iframe can send them when the browser allows third-party cookies. Full third-party-cookie blocking cannot be solved reliably on `pages.dev`; a same-site custom domain such as `text-effects.grom-games.com` is the preferred long-term embed option for `grom-games.com`.
 
+AI effect generation uses the Cloudflare Workers AI binding `AI` from Pages Functions. The endpoint `POST /api/ai/effects/generate` must require an authenticated session, accept the current prompt/text/font/canvas context, and return only `SerializedFontEffect[]` data. The model must generate existing effect JSON only; never introduce AI-only effect types or runtime drawing code. Always validate AI output by deserializing through the effect registry and serializing it back before returning it to the browser. The browser must preview generated effects without mutating `fontStore.effects`; applying the result must go through `fontStore.replaceEffectsFromSerialized()` so undo/redo works.
+
 ## Testing Guidelines
 
 No automated test framework is currently configured. Before submitting changes, run:

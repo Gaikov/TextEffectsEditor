@@ -7,7 +7,9 @@ import {
   type AuthProvider,
   type AuthUser,
 } from './auth/authClient';
+import { generateEffectsWithAI } from './ai/aiEffectGenerator';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
+import AiEffectsDialog from './components/ai/AiEffectsDialog';
 import LoginDialog from './components/auth/LoginDialog';
 import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
 import GalleryPanel from './components/gallery/GalleryPanel';
@@ -18,6 +20,7 @@ import type { GalleryItem, GalleryProviderId } from './gallery/GalleryProvider';
 import { GlobalGalleryProvider } from './gallery/providers/GlobalGalleryProvider';
 import { LocalGalleryProvider } from './gallery/providers/LocalGalleryProvider';
 import { fontStore } from './store/fontStore';
+import type { SerializedFontEffect } from './effects';
 import {
   loadSettingsFromLocalStorage,
   saveSettingsToLocalStorage,
@@ -135,6 +138,12 @@ export default function App() {
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [galleryPanelOpen, setGalleryPanelOpen] = useState(loadGalleryPanelOpen);
   const [addToGalleryOpen, setAddToGalleryOpen] = useState(false);
+  const [aiEffectsOpen, setAiEffectsOpen] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiGeneratedEffects, setAiGeneratedEffects] = useState<
+    SerializedFontEffect[]
+  >([]);
+  const [aiError, setAiError] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [authTabInProgress, setAuthTabInProgress] = useState(false);
   const [activeGalleryId, setActiveGalleryId] =
@@ -255,6 +264,59 @@ export default function App() {
     fontStore.newDocument();
     showSuccessToast('New document created');
   }, []);
+
+  const openAiEffects = useCallback(() => {
+    if (!authUser) {
+      setLoginOpen(true);
+      return;
+    }
+
+    setAiError(null);
+    setAiGeneratedEffects([]);
+    setAiEffectsOpen(true);
+  }, [authUser]);
+
+  const generateAiEffects = useCallback(async (prompt: string) => {
+    setAiGenerating(true);
+    setAiError(null);
+    try {
+      const result = await generateEffectsWithAI({
+        canvasHeight: fontStore.canvasHeight,
+        canvasWidth: fontStore.canvasWidth,
+        fontSize: fontStore.fontSize,
+        prompt,
+        text: fontStore.text,
+      });
+      setAiGeneratedEffects(result.effects);
+      showSuccessToast('AI effects generated');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to generate effects';
+      console.warn('Unable to generate AI effects.', error);
+      setAiGeneratedEffects([]);
+      setAiError(message);
+      if (message === 'Authentication required.') {
+        setLoginOpen(true);
+      }
+      showFailureToast(message);
+    } finally {
+      setAiGenerating(false);
+    }
+  }, []);
+
+  const applyAiEffects = useCallback(() => {
+    if (aiGeneratedEffects.length === 0) return;
+
+    if (fontStore.replaceEffectsFromSerialized(
+      aiGeneratedEffects,
+      'Apply AI generated effects',
+    )) {
+      setAiEffectsOpen(false);
+      showSuccessToast('AI effects applied');
+    } else {
+      showFailureToast('Unable to apply AI effects');
+    }
+  }, [aiGeneratedEffects]);
 
   const exportJsonWithFeedback = useCallback(async () => {
     const result = await exportSettingsJson();
@@ -794,6 +856,7 @@ export default function App() {
           void importJsonWithFeedback();
         }}
         onNewDocument={newDocument}
+        onOpenAiGenerate={openAiEffects}
         onOpenGlobalGallery={() => openGallery('global')}
         onOpenLocalGallery={() => openGallery('local')}
         onOpenLogin={() => setLoginOpen(true)}
@@ -813,6 +876,23 @@ export default function App() {
           addGalleryProvider.id === 'global' ? 'Submit' : 'Save'
         }
         title={`Add To ${addGalleryProvider.label}`}
+      />
+      <AiEffectsDialog
+        boldWeight={fontStore.boldWeight}
+        canvasHeight={fontStore.canvasHeight}
+        canvasWidth={fontStore.canvasWidth}
+        effects={aiGeneratedEffects}
+        error={aiError}
+        fontFamily={fontStore.fontFamily}
+        fontSize={fontStore.fontSize}
+        generated={aiGeneratedEffects.length > 0}
+        isGenerating={aiGenerating}
+        isOpen={aiEffectsOpen}
+        italic={fontStore.italic}
+        text={fontStore.text}
+        onApply={applyAiEffects}
+        onClose={() => setAiEffectsOpen(false)}
+        onGenerate={generateAiEffects}
       />
       <input
         ref={jsonImportInputRef}

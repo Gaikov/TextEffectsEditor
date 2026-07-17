@@ -4,12 +4,19 @@ import { getUser, requireUser } from '../../_lib/session';
 import type { Env } from '../../_lib/types';
 
 const KNOWN_EFFECT_TYPES = new Set([
+  'blur',
+  'compositeBlend',
+  'distort',
   'fill',
   'glow',
   'gradientFill',
   'group',
+  'innerShadow',
+  'noise',
+  'patternFill',
   'shadow',
   'stroke',
+  'wave',
 ]);
 
 function readEffects(value: unknown) {
