@@ -11,7 +11,7 @@ import {
 const MODEL = '@cf/meta/llama-3.1-8b-instruct-fp8';
 const MAX_PROMPT_LENGTH = 600;
 const MAX_EFFECTS = 18;
-const MAX_GENERATION_ATTEMPTS = 2;
+const MAX_GENERATION_ATTEMPTS = 3;
 
 const DRAW_EFFECT_TYPES = new Set([
   'fill',
@@ -30,6 +30,23 @@ const BUFFER_EFFECT_TYPES = new Set([
   'noise',
   'compositeBlend',
 ]);
+
+const COLOR_WORDS = [
+  'black',
+  'blue',
+  'cyan',
+  'gold',
+  'green',
+  'orange',
+  'pink',
+  'purple',
+  'red',
+  'teal',
+  'white',
+  'yellow',
+];
+
+const WHITE_COLORS = new Set(['#fff', '#ffffff']);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -76,6 +93,153 @@ function validateEffects(value: unknown): SerializedFontEffect[] {
   return effects;
 }
 
+function readChildren(effect: SerializedFontEffect) {
+  return Array.isArray(effect.children)
+    ? (effect.children.filter(isRecord) as SerializedFontEffect[])
+    : [];
+}
+
+function walkEffects(
+  effects: SerializedFontEffect[],
+  callback: (effect: SerializedFontEffect) => void,
+) {
+  effects.forEach((effect) => {
+    callback(effect);
+    if (effect.type === 'group') {
+      walkEffects(readChildren(effect), callback);
+    }
+  });
+}
+
+function isVisible(effect: SerializedFontEffect) {
+  return effect.visible !== false;
+}
+
+function isLogoPrompt(prompt: string) {
+  const normalized = prompt.toLowerCase();
+  return /\b(cartoon|game|gaming|logo|sticker|mascot)\b/.test(normalized);
+}
+
+function promptMentionsSpecificColor(prompt: string) {
+  const normalized = prompt.toLowerCase();
+  return COLOR_WORDS.some((color) => new RegExp(`\\b${color}\\b`).test(normalized));
+}
+
+function isWhiteColor(value: unknown) {
+  return typeof value === 'string' && WHITE_COLORS.has(value.toLowerCase());
+}
+
+function drawSignature(effect: SerializedFontEffect) {
+  if (effect.type === 'fill') {
+    return `fill:${String(effect.color ?? '').toLowerCase()}`;
+  }
+  if (effect.type === 'stroke') {
+    return `stroke:${String(effect.color ?? '').toLowerCase()}:${String(
+      effect.lineWidth ?? '',
+    )}`;
+  }
+  if (effect.type === 'gradientFill') {
+    return `gradient:${Array.isArray(effect.colors) ? effect.colors.join(',') : ''}`;
+  }
+  if (effect.type === 'patternFill') {
+    return `pattern:${String(effect.patternType ?? '')}`;
+  }
+  return effect.type;
+}
+
+function visibleDrawSignatures(effects: SerializedFontEffect[]) {
+  return effects
+    .filter(isVisible)
+    .filter((effect) => DRAW_EFFECT_TYPES.has(effect.type))
+    .map(drawSignature);
+}
+
+function maxStrokeWidth(effects: SerializedFontEffect[]) {
+  let maxWidth = 0;
+  walkEffects(effects, (effect) => {
+    if (isVisible(effect) && effect.type === 'stroke') {
+      maxWidth = Math.max(maxWidth, readNumber(effect.lineWidth, 0));
+    }
+  });
+  return maxWidth;
+}
+
+function hasVisibleType(effects: SerializedFontEffect[], type: string) {
+  let found = false;
+  walkEffects(effects, (effect) => {
+    if (isVisible(effect) && effect.type === type) found = true;
+  });
+  return found;
+}
+
+function inspectEffectQuality(
+  effects: SerializedFontEffect[],
+  prompt: string,
+): string[] {
+  const issues: string[] = [];
+  const wantsLogo = isLogoPrompt(prompt);
+
+  walkEffects(effects, (effect) => {
+    if (
+      isVisible(effect) &&
+      effect.type === 'compositeBlend' &&
+      effect.operation === 'source-over'
+    ) {
+      issues.push('compositeBlend with operation source-over is a no-op.');
+    }
+  });
+
+  if (wantsLogo) {
+    if (!hasVisibleType(effects, 'gradientFill') && !hasVisibleType(effects, 'patternFill')) {
+      issues.push(
+        'Cartoon/game logo prompts should use gradientFill or patternFill instead of only plain fill.',
+      );
+    }
+
+    if (maxStrokeWidth(effects) < 12) {
+      issues.push('Cartoon/game logo prompts need at least one thick outline stroke, lineWidth >= 12.');
+    }
+
+    const visibleRootGroups = effects.filter(
+      (effect) => isVisible(effect) && effect.type === 'group',
+    );
+    if (visibleRootGroups.length > 1) {
+      const signatures = visibleRootGroups.map((group) =>
+        visibleDrawSignatures(readChildren(group)).slice(0, 2).join('|'),
+      );
+      const uniqueSignatures = new Set(signatures.filter(Boolean));
+      if (uniqueSignatures.size < signatures.filter(Boolean).length) {
+        issues.push(
+          'Avoid multiple root groups that redraw the same fill/stroke stack; use one main logo group.',
+        );
+      }
+    }
+
+    const lastVisibleRoot = effects.filter(isVisible).at(-1);
+    if (
+      promptMentionsSpecificColor(prompt) &&
+      lastVisibleRoot?.type === 'group'
+    ) {
+      const childEffects = readChildren(lastVisibleRoot).filter(isVisible);
+      const firstChild = childEffects[0];
+      if (
+        firstChild?.type === 'fill' &&
+        isWhiteColor(firstChild.color) &&
+        childEffects.every((effect) =>
+          effect.type === 'fill' ||
+          (effect.type === 'compositeBlend' && effect.operation === 'source-over'),
+        )
+      ) {
+        issues.push(
+          'Do not add a final white fill group over a colored logo; it covers the requested color.',
+        );
+      }
+    }
+  }
+
+  return issues;
+}
+
 function inspectEffectOrder(
   effects: SerializedFontEffect[],
   path = 'effects',
@@ -88,9 +252,7 @@ function inspectEffectOrder(
 
     const effectPath = `${path}[${index}] ${effect.type}`;
     if (effect.type === 'group') {
-      const children = Array.isArray(effect.children)
-        ? (effect.children.filter(isRecord) as SerializedFontEffect[])
-        : [];
+      const children = readChildren(effect);
       const childResult = inspectEffectOrder(children, `${effectPath}.children`);
       issues.push(...childResult.issues);
       if (childResult.producesPixels) {
@@ -129,6 +291,16 @@ function validateEffectSemantics(effects: SerializedFontEffect[]) {
   return result.issues;
 }
 
+function validateGeneratedEffects(
+  effects: SerializedFontEffect[],
+  prompt: string,
+) {
+  return [
+    ...validateEffectSemantics(effects),
+    ...inspectEffectQuality(effects, prompt),
+  ];
+}
+
 function buildSystemPrompt() {
   return `You generate JSON presets for Text Effects Editor.
 Return JSON only: {"effects":[...]}.
@@ -144,6 +316,13 @@ Rendering is ordered and groups start with an empty buffer:
 - To make text with shadow/glow, use a group like [fill or gradientFill, stroke if needed, shadow or glow]. Do not create an empty "Shadow Layer" containing only shadow.
 - If a root fill exists outside a group, buffer effects inside a separate group cannot see that root fill.
 
+Quality rules:
+- For cartoon/game/logo prompts, prefer one main root group with a rich stack, not multiple similar root groups.
+- For cartoon/game/logo prompts, prefer gradientFill or patternFill over a single flat fill.
+- For cartoon/game/logo prompts, use thick outline strokes: usually 14-36 px.
+- Do not use compositeBlend with operation "source-over"; it has no visible effect.
+- Do not add a final white fill over a colored logo unless the user asked for white text.
+
 Useful shapes:
 fill: { "type":"fill", "color":"#00B050", "opacity":1, "xOffset":0, "yOffset":0 }
 stroke: { "type":"stroke", "color":"#FFFFFF", "opacity":1, "lineWidth":18, "xOffset":0, "yOffset":0, "lineCap":"round", "lineJoin":"round", "miterLimit":10, "lineDash":[], "lineDashOffset":0 }
@@ -156,7 +335,7 @@ noise: { "type":"noise", "opacity":0.25, "noiseType":"fractal", "foregroundColor
 blur: { "type":"blur", "opacity":1, "radius":3, "iterations":1 }
 wave: { "type":"wave", "opacity":1, "direction":"horizontal", "amplitude":8, "wavelength":120, "phase":0 }
 distort: { "type":"distort", "opacity":1, "noiseType":"fractal", "strength":8, "grainSize":80, "scale":1, "xAmount":1, "yAmount":1, "rotation":0, "octaves":4, "persistence":0.5, "lacunarity":2, "seed":1 }
-compositeBlend: { "type":"compositeBlend", "opacity":1, "operation":"source-over" }
+compositeBlend: { "type":"compositeBlend", "opacity":0.35, "operation":"overlay" }
 group: { "type":"group", "name":"Layer", "visible":true, "collapsed":false, "opacity":1, "children":[...] }`;
 }
 
@@ -228,7 +407,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ env, request }) => {
         continue;
       }
 
-      const semanticIssues = validateEffectSemantics(effects);
+      const semanticIssues = validateGeneratedEffects(effects, input.prompt);
       if (semanticIssues.length === 0) {
         return json({ effects });
       }
