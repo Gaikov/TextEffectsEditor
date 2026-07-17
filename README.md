@@ -291,39 +291,17 @@ File actions show non-blocking toast feedback after successful operations or rec
 Malformed JSON imports are ignored safely. Exported PNG files do not include the checkerboard preview background.
 The left Gallery panel is open by default, starts on `Global`, and can be hidden or reopened from its narrow rail; the open/closed state is saved in local storage. Each tab keeps its own search query. Gallery items store only effect JSON and the optional name, not preview images. Empty names are shown as `Untitled`. Preview canvases are rendered dynamically from the saved effects and the current text/font settings.
 
-## Cloudflare Global Gallery
+## Gallery
 
-The app can run as a Cloudflare Pages project with Pages Functions and D1 for a shared global gallery.
+The left Gallery panel lets you reuse effect stacks without rebuilding them
+from scratch.
 
-```bash
-npm run cf:d1:migrate:local
-npm run cf:dev
-```
-
-Production setup:
-
-1. Create a Cloudflare D1 database named `font-effects-gallery`.
-2. Replace `database_id` in `wrangler.toml`.
-3. Configure Pages build command `npm run build` and output directory `dist`.
-4. Set OAuth secrets for `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`.
-5. Set `ADMIN_EMAILS=grom.games@gmail.com` or another comma-separated allowlist for moderation.
-6. Apply remote migrations with `npm run cf:d1:migrate -- --remote`.
-
-For local Cloudflare dev, copy `.dev.vars.example` to `.dev.vars` and fill OAuth credentials. Configure provider redirect URLs to match the environment:
-
-- Local Google callback: `http://localhost:8789/api/auth/callback/google`
-- Local Yandex callback: `http://localhost:8789/api/auth/callback/yandex`
-- Production callbacks use your Pages domain with the same paths.
-
-Global gallery submissions from registered users are stored as `pending`. Public users see only `approved` items. Admin users can approve or reject pending items.
-
-When the editor is embedded in an iframe, Google and Yandex sign-in opens in a
-new browser tab because OAuth provider pages cannot be displayed inside an
-iframe. After sign-in, the tab notifies the embedded editor and closes itself
-when the browser allows it. Embedded sessions on the `pages.dev` domain depend
-on the browser allowing third-party cookies; a same-site custom domain such as
-`text-effects.grom-games.com` is the most reliable long-term option for embeds
-on `grom-games.com`.
+- `Local` stores private presets in the current browser.
+- `Global` shows approved presets shared by the community.
+- Sign in with Google or Yandex to apply global presets or submit your own.
+- Submitted global presets are reviewed before they become public.
+- If the editor is opened inside another site, sign-in may open in a new tab
+  and return you to the editor after completion.
 
 ## Menus And Shortcuts
 

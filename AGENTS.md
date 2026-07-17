@@ -36,13 +36,38 @@ Gallery backends follow the same rule. New local, remote, or cloud-backed galler
 
 For font effects, keep each `IFontEffect` implementation in its own `src/effects/` file and its editor in `src/components/effects/`. Every effect must expose `visible` and every visual effect must expose `opacity`, apply it with `globalAlpha` inside `draw()`, serialize/deserialize both fields, and register both model and editor through the effect registries. Use the composite pattern: `GroupEffect` is an `IFontEffect`, renders child effects into an offscreen buffer, and draws that buffer into its parent; group UI state such as `name` and `collapsed` must also serialize. Effects like `ShadowText` transform the current buffer by composing shadow first and original content above it. Do not add `instanceof` editor branching to `FontProperties.tsx` or canvas rendering.
 
-When adding, removing, or changing user-facing functionality, especially font effects and effect parameters, update `README.md` in the same change. The README is the user contract for what the editor does, how to use it, and what each effect parameter means; do not leave it stale after feature work.
+When adding, removing, or changing user-facing functionality, especially font effects and effect parameters, update `README.md` in the same change. The README is the user-facing contract for what the editor does, how to use it, and what each effect parameter means; keep it free of implementation details, deployment steps, internal API paths, environment variable names, or architecture notes. Put those technical details in `AGENTS.md` or a dedicated developer document instead.
 
 Effect editor cards should keep their header visible and support manual collapse. Non-group effects default to collapsed; groups default to expanded so their children are visible. Put common actions such as drag, expand/collapse, visibility, reorder, and delete in the header; keep editable fields in the card body with consistent compact rows.
 
 All user-facing state edits must go through the undo-aware APIs. Use `fontStore.setRootProperty()`, `fontStore.setEffectProperty()`, `fontStore.setArrayValue()`, or store methods such as `addEffectToGroup()` instead of direct assignment in UI components. New structural operations should create `IUndoOperation` implementations or compose existing ones with `UndoBatch`.
 
 Undo operations must never enqueue other undo operations. `IUndoOperation.undo()` and `IUndoOperation.redo()` must not call `undoService.execute()`, `undoService.record()`, or undo-aware store setters. Operation implementations should mutate their target state directly and call any required refresh callback. When one user action needs multiple state changes, wrap those direct operations in `UndoBatch`; do not add recording suppression paths to `UndoService`.
+
+## Cloudflare, Auth & Gallery Notes
+
+The app can run as a Cloudflare Pages project with Pages Functions and D1 for the shared global gallery. Local Cloudflare development uses:
+
+```bash
+npm run cf:d1:migrate:local
+npm run cf:dev
+```
+
+Production setup requires a D1 database named `font-effects-gallery`, the matching `database_id` in `wrangler.toml`, Pages build command `npm run build`, output directory `dist`, OAuth secrets (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`), and `ADMIN_EMAILS` for moderation. Apply remote migrations with:
+
+```bash
+npm run cf:d1:migrate -- --remote
+```
+
+For local Cloudflare dev, copy `.dev.vars.example` to `.dev.vars` and fill OAuth credentials. Configure provider redirect URLs for the active environment:
+
+- Local Google callback: `http://localhost:8789/api/auth/callback/google`
+- Local Yandex callback: `http://localhost:8789/api/auth/callback/yandex`
+- Production callbacks use the deployed Pages domain with the same paths.
+
+Global gallery submissions from registered users are stored as `pending`; public users see only `approved` items. Admin users can approve or reject pending items.
+
+When the editor is embedded in an iframe, Google and Yandex sign-in must open in a new top-level tab because provider OAuth pages cannot be displayed inside an iframe. The callback tab posts an auth result back to the embedded editor and attempts to close itself. Production session cookies use `SameSite=None; Secure` so the `pages.dev` iframe can send them when the browser allows third-party cookies. Full third-party-cookie blocking cannot be solved reliably on `pages.dev`; a same-site custom domain such as `text-effects.grom-games.com` is the preferred long-term embed option for `grom-games.com`.
 
 ## Testing Guidelines
 
