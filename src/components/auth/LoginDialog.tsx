@@ -5,14 +5,21 @@ import {
   DialogFooter,
   NonIdealState,
 } from '@blueprintjs/core';
-import { loginWithProvider } from '../../auth/authClient';
+import type { AuthProvider } from '../../auth/authClient';
 
 interface LoginDialogProps {
+  authInProgress: boolean;
   isOpen: boolean;
+  onLogin: (provider: AuthProvider) => void;
   onClose: () => void;
 }
 
-export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
+export default function LoginDialog({
+  authInProgress,
+  isOpen,
+  onClose,
+  onLogin,
+}: LoginDialogProps) {
   return (
     <Dialog isOpen={isOpen} onClose={onClose} title="Sign in required">
       <DialogBody>
@@ -21,6 +28,11 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
           title="Sign in to use global effects"
           description="Global gallery effects are visible to everyone, but publishing and applying them requires a registered account."
         />
+        {authInProgress ? (
+          <p>
+            Complete sign-in in the opened tab, then return here.
+          </p>
+        ) : null}
       </DialogBody>
       <DialogFooter
         actions={
@@ -29,12 +41,12 @@ export default function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             <Button
               icon="endorsed"
               text="Continue with Google"
-              onClick={() => loginWithProvider('google')}
+              onClick={() => onLogin('google')}
             />
             <Button
               icon="endorsed"
               text="Continue with Yandex"
-              onClick={() => loginWithProvider('yandex')}
+              onClick={() => onLogin('yandex')}
             />
           </>
         }

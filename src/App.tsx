@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Dialog, DialogBody, DialogFooter } from '@blueprintjs/core';
-import { loadAuthState, logout, type AuthUser } from './auth/authClient';
+import {
+  loginWithProvider,
+  loadAuthState,
+  logout,
+  type AuthProvider,
+  type AuthUser,
+} from './auth/authClient';
 import CanvasSizeInputs from './components/CanvasSizeInputs';
 import LoginDialog from './components/auth/LoginDialog';
 import AddToGalleryDialog from './components/gallery/AddToGalleryDialog';
@@ -118,6 +124,8 @@ export default function App() {
   });
 
   const canvasRef = useRef<FontCanvasHandle>(null);
+  const authTabRef = useRef<Window | null>(null);
+  const authTabCheckRef = useRef<number | undefined>(undefined);
   const jsonImportInputRef = useRef<HTMLInputElement>(null);
   const [fontList, setFontList] = useState<string[]>(getCuratedFonts);
   const [fontsLoaded, setFontsLoaded] = useState(true);
@@ -128,6 +136,7 @@ export default function App() {
   const [galleryPanelOpen, setGalleryPanelOpen] = useState(loadGalleryPanelOpen);
   const [addToGalleryOpen, setAddToGalleryOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [authTabInProgress, setAuthTabInProgress] = useState(false);
   const [activeGalleryId, setActiveGalleryId] =
     useState<GalleryProviderId>('global');
   const [addGalleryId, setAddGalleryId] =
@@ -310,6 +319,78 @@ export default function App() {
       setGalleryLoading(false);
     }
   }, [activeGalleryProvider, galleryQuery]);
+
+  const stopAuthTabWait = useCallback(() => {
+    if (authTabCheckRef.current != null) {
+      window.clearInterval(authTabCheckRef.current);
+      authTabCheckRef.current = undefined;
+    }
+    authTabRef.current = null;
+    setAuthTabInProgress(false);
+  }, []);
+
+  const completeAuthTab = useCallback(async (status: 'success' | 'failed') => {
+    stopAuthTabWait();
+
+    if (status !== 'success') {
+      showFailureToast('Unable to sign in');
+      return;
+    }
+
+    const user = await refreshAuthState();
+    if (!user) {
+      showFailureToast(
+        'Signed in, but the browser blocked the embedded session cookie',
+      );
+      return;
+    }
+
+    setLoginOpen(false);
+    showSuccessToast('Signed in');
+    if (galleryPanelOpen && activeGalleryId === 'global') {
+      void reloadGallery();
+    }
+  }, [
+    activeGalleryId,
+    galleryPanelOpen,
+    refreshAuthState,
+    reloadGallery,
+    stopAuthTabWait,
+  ]);
+
+  const startProviderLogin = useCallback((provider: AuthProvider) => {
+    const authTab = loginWithProvider(provider, 'tab');
+    if (!authTab) {
+      showFailureToast(
+        'Browser blocked the sign-in tab. Open the editor directly to sign in.',
+      );
+      return;
+    }
+
+    stopAuthTabWait();
+    authTabRef.current = authTab;
+    setAuthTabInProgress(true);
+    authTabCheckRef.current = window.setInterval(() => {
+      if (!authTabRef.current?.closed) return;
+
+      stopAuthTabWait();
+      void refreshAuthState().then((user) => {
+        if (!user) return;
+
+        setLoginOpen(false);
+        showSuccessToast('Signed in');
+        if (galleryPanelOpen && activeGalleryId === 'global') {
+          void reloadGallery();
+        }
+      });
+    }, 1000);
+  }, [
+    activeGalleryId,
+    galleryPanelOpen,
+    refreshAuthState,
+    reloadGallery,
+    stopAuthTabWait,
+  ]);
 
   const addToGallery = useCallback(async (name: string) => {
     if (addGalleryProvider.addRequiresAuth && !authUser) {
@@ -496,7 +577,37 @@ export default function App() {
   }, [refreshAuthState]);
 
   useEffect(() => {
-    if (authUser) setLoginOpen(false);
+    function onAuthMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (
+        typeof event.data !== 'object' ||
+        event.data == null ||
+        event.data.type !== 'font-effects-auth'
+      ) {
+        return;
+      }
+
+      const status = event.data.status === 'success' ? 'success' : 'failed';
+      void completeAuthTab(status);
+    }
+
+    window.addEventListener('message', onAuthMessage);
+    return () => {
+      window.removeEventListener('message', onAuthMessage);
+    };
+  }, [completeAuthTab]);
+
+  useEffect(() => {
+    return () => {
+      stopAuthTabWait();
+    };
+  }, [stopAuthTabWait]);
+
+  useEffect(() => {
+    if (authUser) {
+      setLoginOpen(false);
+      setAuthTabInProgress(false);
+    }
   }, [authUser]);
 
   useEffect(() => {
@@ -810,8 +921,13 @@ export default function App() {
         )}
       </div>
       <LoginDialog
+        authInProgress={authTabInProgress}
         isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
+        onClose={() => {
+          setLoginOpen(false);
+          setAuthTabInProgress(false);
+        }}
+        onLogin={startProviderLogin}
       />
       <Dialog
         isOpen={systemFontsDialogOpen}

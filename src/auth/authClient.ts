@@ -1,3 +1,5 @@
+export type AuthProvider = 'google' | 'yandex';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -28,8 +30,15 @@ export async function loadAuthState(): Promise<AuthState> {
   }
 }
 
-export function loginWithProvider(provider: 'google' | 'yandex') {
-  window.location.href = `/api/auth/login/${provider}`;
+export function loginWithProvider(
+  provider: AuthProvider,
+  mode: 'redirect' | 'tab' = 'redirect',
+) {
+  const url = `/api/auth/login/${provider}${mode === 'tab' ? '?mode=tab' : ''}`;
+  if (mode === 'tab') return window.open(url, '_blank');
+
+  window.location.href = url;
+  return null;
 }
 
 export async function logout() {

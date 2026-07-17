@@ -2,6 +2,7 @@ import { cookie, getCookie, isLocalHttpRequest } from './http';
 import type { Env, ProviderProfile } from './types';
 
 export type OAuthProvider = 'google' | 'yandex';
+export type OAuthMode = 'redirect' | 'tab';
 
 export const OAUTH_STATE_COOKIE = 'font_effects_oauth_state';
 
@@ -24,6 +25,15 @@ export function isOAuthProvider(value: string): value is OAuthProvider {
   return value === 'google' || value === 'yandex';
 }
 
+export function readOAuthMode(request: Request): OAuthMode {
+  const mode = new URL(request.url).searchParams.get('mode');
+  return mode === 'tab' ? 'tab' : 'redirect';
+}
+
+export function oauthModeFromState(state: string | null): OAuthMode {
+  return state?.startsWith('tab:') ? 'tab' : 'redirect';
+}
+
 function clientId(env: Env, provider: OAuthProvider) {
   return provider === 'google' ? env.GOOGLE_CLIENT_ID : env.YANDEX_CLIENT_ID;
 }
@@ -39,11 +49,16 @@ export function redirectUri(request: Request, provider: OAuthProvider) {
   return `${url.origin}/api/auth/callback/${provider}`;
 }
 
-export function createOAuthRedirect(env: Env, request: Request, provider: OAuthProvider) {
+export function createOAuthRedirect(
+  env: Env,
+  request: Request,
+  provider: OAuthProvider,
+  mode: OAuthMode = 'redirect',
+) {
   const id = clientId(env, provider);
   if (!id) return null;
 
-  const state = crypto.randomUUID();
+  const state = `${mode}:${crypto.randomUUID()}`;
   const config = providerConfig[provider];
   const url = new URL(config.authUrl);
   url.searchParams.set('client_id', id);

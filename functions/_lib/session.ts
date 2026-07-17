@@ -1,9 +1,17 @@
-import { clearCookie, cookie, getCookie, isLocalHttpRequest } from './http';
+import { cookie, getCookie, isLocalHttpRequest } from './http';
 import { ensureSchema } from './schema';
 import type { Env, User } from './types';
 
 export const SESSION_COOKIE = 'font_effects_session';
 const SESSION_DAYS = 30;
+
+function sessionCookieOptions(request: Request) {
+  const isLocal = isLocalHttpRequest(request);
+  return {
+    sameSite: isLocal ? 'Lax' : 'None',
+    secure: !isLocal,
+  } as const;
+}
 
 function base64Url(buffer: ArrayBuffer) {
   const bytes = new Uint8Array(buffer);
@@ -50,7 +58,7 @@ export async function createSession(env: Env, request: Request, userId: string) 
   ).bind(crypto.randomUUID(), userId, tokenHash, expiresAt, now.toISOString()).run();
   return cookie(SESSION_COOKIE, token, {
     maxAge: SESSION_DAYS * 24 * 60 * 60,
-    secure: !isLocalHttpRequest(request),
+    ...sessionCookieOptions(request),
   });
 }
 
@@ -82,7 +90,10 @@ export async function deleteSession(env: Env, request: Request) {
       .bind(await sha256(token))
       .run();
   }
-  return clearCookie(SESSION_COOKIE, !isLocalHttpRequest(request));
+  return cookie(SESSION_COOKIE, '', {
+    maxAge: 0,
+    ...sessionCookieOptions(request),
+  });
 }
 
 export async function upsertUser(

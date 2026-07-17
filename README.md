@@ -317,6 +317,14 @@ For local Cloudflare dev, copy `.dev.vars.example` to `.dev.vars` and fill OAuth
 
 Global gallery submissions from registered users are stored as `pending`. Public users see only `approved` items. Admin users can approve or reject pending items.
 
+When the editor is embedded in an iframe, Google and Yandex sign-in opens in a
+new browser tab because OAuth provider pages cannot be displayed inside an
+iframe. After sign-in, the tab notifies the embedded editor and closes itself
+when the browser allows it. Embedded sessions on the `pages.dev` domain depend
+on the browser allowing third-party cookies; a same-site custom domain such as
+`text-effects.grom-games.com` is the most reliable long-term option for embeds
+on `grom-games.com`.
+
 ## Menus And Shortcuts
 
 The top bar has a classic menu row above the canvas toolbar. Hover over `File`, `Edit`, `Gallery`, `View`, `Account`, or `Help` to open commands; menu items show their keyboard shortcuts. The toolbar below the menu keeps canvas size controls plus `Center` and `Reset` view buttons.

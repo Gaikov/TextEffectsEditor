@@ -30,7 +30,7 @@ export function cookie(
   options: {
     maxAge?: number;
     path?: string;
-    sameSite?: 'Lax' | 'Strict';
+    sameSite?: 'Lax' | 'Strict' | 'None';
     secure?: boolean;
   } = {},
 ) {
