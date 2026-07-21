@@ -6,6 +6,10 @@ The app uses a canvas preview with a tree of effects. Effects can be grouped, re
 
 Live app: [https://text-effects-editor.pages.dev/](https://text-effects-editor.pages.dev/)
 
+Text rendering is powered by the open-source `grom-font-effects` module:
+[npm](https://www.npmjs.com/package/grom-font-effects) ·
+[GitHub](https://github.com/Gaikov/GROmTextEffects)
+
 ![Text effects examples](docs/text-effects.jpg)
 
 ![Text Effects Editor screenshot](docs/app-screenshot.png)
@@ -337,6 +341,6 @@ npm run dev    # TypeScript build, esbuild watch, local server
 npm run build  # TypeScript build and minified production bundle
 ```
 
-Source code lives in `src/`. Font effect models are in `src/effects/`; effect editors are in `src/components/effects/`. New effects should follow the existing polymorphic pattern: model file, editor component, registry entries, JSON serialization, opacity support, and no effect-specific branching in `FontProperties`.
+Source code lives in `src/`. Font effect models and canvas rendering come from the public [`grom-font-effects`](https://www.npmjs.com/package/grom-font-effects) package, with source at [`Gaikov/GROmTextEffects`](https://github.com/Gaikov/GROmTextEffects). The editor keeps effect UI components in `src/components/effects/` and a small adapter in `src/effects/`.
 
 Gallery backends use the same pattern: add a `GalleryProvider` implementation and keep shared gallery UI provider-driven instead of branching directly on local/global behavior.
