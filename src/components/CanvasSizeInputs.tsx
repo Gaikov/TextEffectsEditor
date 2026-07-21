@@ -57,6 +57,18 @@ const ACTIVE_MENU_TARGET_STYLE: React.CSSProperties = {
   background: 'rgba(255, 255, 255, 0.12)',
 };
 
+const MENU_SPACER_STYLE: React.CSSProperties = {
+  flex: 1,
+};
+
+const DONATE_LINK_STYLE: React.CSSProperties = {
+  ...MENU_TARGET_STYLE,
+  color: '#FBB360',
+  cursor: 'pointer',
+  fontWeight: 600,
+  textDecoration: 'none',
+};
+
 const FIELD_STYLE: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
@@ -406,6 +418,15 @@ export default observer(function CanvasSizeInputs({
             </Menu>
           }
         />
+        <div style={MENU_SPACER_STYLE} />
+        <a
+          href={PAYPAL_DONATE_URL}
+          rel="noreferrer"
+          style={DONATE_LINK_STYLE}
+          target="_blank"
+        >
+          Donate
+        </a>
       </div>
       <div style={TOOLBAR_STYLE}>
         <div style={FIELD_STYLE}>
