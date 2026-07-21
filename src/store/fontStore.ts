@@ -3,17 +3,15 @@ import {
   createFontEffect,
   deserializeFontEffect,
   GroupEffect,
+  isRecord,
+  readBoolean,
+  readNumber,
+  readString,
   serializeFontEffect,
   type SerializedFontEffect,
   type FontEffectType,
   type IFontEffect,
 } from '../effects';
-import {
-  isRecord,
-  readBoolean,
-  readNumber,
-  readString,
-} from '../effects/effectSnapshot';
 import { isValidFont } from '../fonts';
 import {
   UndoArrayChange,

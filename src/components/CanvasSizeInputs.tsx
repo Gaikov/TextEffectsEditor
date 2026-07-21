@@ -84,13 +84,14 @@ const SHORTCUT_STYLE: React.CSSProperties = {
 
 const ABOUT_ROW_STYLE: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: '96px minmax(0, 1fr)',
+  gridTemplateColumns: '110px minmax(0, 1fr)',
   gap: 10,
   lineHeight: '24px',
 };
 
 const ABOUT_LABEL_STYLE: React.CSSProperties = {
   color: '#A7B6C2',
+  whiteSpace: 'nowrap',
 };
 
 const ABOUT_LINK_STYLE: React.CSSProperties = {
@@ -102,6 +103,7 @@ const LICENSE_PARAGRAPH_STYLE: React.CSSProperties = {
 };
 
 const DEVELOPER_SITE_URL = 'https://grom-games.com';
+const FONT_EFFECTS_MODULE_URL = 'https://www.npmjs.com/package/grom-font-effects';
 const DONATION_EMAIL = 'grom.games@gmail.com';
 const PAYPAL_DONATE_URL =
   'https://www.paypal.com/donate/?business=grom.games%40gmail.com&currency_code=USD';
@@ -523,6 +525,20 @@ export default observer(function CanvasSizeInputs({
             </a>
           </div>
           <div style={ABOUT_ROW_STYLE}>
+            <span style={ABOUT_LABEL_STYLE}>Effects</span>
+            <span>
+              Text rendering by{' '}
+              <a
+                href={FONT_EFFECTS_MODULE_URL}
+                rel="noreferrer"
+                style={ABOUT_LINK_STYLE}
+                target="_blank"
+              >
+                grom-font-effects
+              </a>
+            </span>
+          </div>
+          <div style={ABOUT_ROW_STYLE}>
             <span style={ABOUT_LABEL_STYLE}>Donations</span>
             <a
               href={PAYPAL_DONATE_URL}
@@ -542,6 +558,12 @@ export default observer(function CanvasSizeInputs({
                 rel="noreferrer"
                 target="_blank"
                 text="Website"
+              />
+              <AnchorButton
+                href={FONT_EFFECTS_MODULE_URL}
+                rel="noreferrer"
+                target="_blank"
+                text="Module"
               />
               <AnchorButton
                 href={PAYPAL_DONATE_URL}

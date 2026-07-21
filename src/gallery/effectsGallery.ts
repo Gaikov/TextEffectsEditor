@@ -1,9 +1,9 @@
 import {
   getFontEffectDefinition,
+  isRecord,
   type FontEffectType,
   type SerializedFontEffect,
 } from '../effects';
-import { isRecord } from '../effects/effectSnapshot';
 
 export const EFFECTS_GALLERY_STORAGE_KEY = 'fontEffects.gallery';
 
