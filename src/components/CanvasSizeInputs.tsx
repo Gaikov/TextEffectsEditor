@@ -115,6 +115,8 @@ const LICENSE_PARAGRAPH_STYLE: React.CSSProperties = {
 };
 
 const DEVELOPER_SITE_URL = 'https://grom-games.com';
+const EFFECT_GUIDE_URL =
+  'https://github.com/Gaikov/TextEffectsEditor#effects-and-parameters';
 const FONT_EFFECTS_MODULE_URL = 'https://www.npmjs.com/package/grom-font-effects';
 const DONATION_EMAIL = 'grom.games@gmail.com';
 const PAYPAL_DONATE_URL =
@@ -405,6 +407,13 @@ export default observer(function CanvasSizeInputs({
           text="Help"
           content={
             <Menu>
+              <MenuItem
+                icon="manual"
+                text="Effect Guide"
+                onClick={() => {
+                  window.open(EFFECT_GUIDE_URL, '_blank', 'noopener,noreferrer');
+                }}
+              />
               <MenuItem
                 icon="endorsed"
                 text="License"

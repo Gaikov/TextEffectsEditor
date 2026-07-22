@@ -315,6 +315,8 @@ The top bar has a classic menu row above the canvas toolbar. Hover over `File`, 
 
 `View -> Checkerboard` switches the preview background between light and dark squares. The Gallery panel has the same switch for preview cards. This application preference defaults to dark, is saved in local storage, and does not affect PNG export or JSON presets.
 
+`Help -> Effect Guide` opens documentation for creating and tuning effect stacks.
+
 `Help -> License` explains that the hosted application is free to use, while the source code is non-commercial unless a separate commercial agreement is made.
 
 | Command | Shortcut |
